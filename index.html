@@ -826,21 +826,28 @@
     function placeAllArt() {
       // Artwork spots per wing
       var spots = [
-        // North wing (4): paintings[0-3]
-        { x: -9.7, z: -25, ry: Math.PI / 2 },
-        { x: 9.7, z: -35, ry: -Math.PI / 2 },
-        { x: -9.7, z: -48, ry: Math.PI / 2 },
-        { x: 9.7, z: -60, ry: -Math.PI / 2 },
-        // East wing (4): paintings[4-7]
-        { x: 22, z: -9.7, ry: Math.PI },
-        { x: 36, z: 9.7, ry: 0 },
-        { x: 50, z: -9.7, ry: Math.PI },
-        { x: 62, z: 9.7, ry: 0 },
-        // West wing (4): paintings[8-11]
-        { x: -22, z: 9.7, ry: 0 },
-        { x: -36, z: -9.7, ry: Math.PI },
-        { x: -50, z: 9.7, ry: 0 },
-        { x: -62, z: -9.7, ry: Math.PI }
+        // North wing
+        { x: -9.7, z: -15, ry: Math.PI / 2 }, { x: 9.7, z: -15, ry: -Math.PI / 2 },
+        { x: -9.7, z: -25, ry: Math.PI / 2 }, { x: 9.7, z: -25, ry: -Math.PI / 2 },
+        { x: -9.7, z: -35, ry: Math.PI / 2 }, { x: 9.7, z: -35, ry: -Math.PI / 2 },
+        { x: -9.7, z: -48, ry: Math.PI / 2 }, { x: 9.7, z: -48, ry: -Math.PI / 2 },
+        { x: -9.7, z: -60, ry: Math.PI / 2 }, { x: 9.7, z: -60, ry: -Math.PI / 2 },
+        // East wing
+        { x: 15, z: -9.7, ry: Math.PI }, { x: 15, z: 9.7, ry: 0 },
+        { x: 25, z: -9.7, ry: Math.PI }, { x: 25, z: 9.7, ry: 0 },
+        { x: 36, z: -9.7, ry: Math.PI }, { x: 36, z: 9.7, ry: 0 },
+        { x: 48, z: -9.7, ry: Math.PI }, { x: 48, z: 9.7, ry: 0 },
+        { x: 62, z: -9.7, ry: Math.PI }, { x: 62, z: 9.7, ry: 0 },
+        // West wing
+        { x: -15, z: -9.7, ry: Math.PI }, { x: -15, z: 9.7, ry: 0 },
+        { x: -25, z: -9.7, ry: Math.PI }, { x: -25, z: 9.7, ry: 0 },
+        { x: -36, z: -9.7, ry: Math.PI }, { x: -36, z: 9.7, ry: 0 },
+        { x: -48, z: -9.7, ry: Math.PI }, { x: -48, z: 9.7, ry: 0 },
+        { x: -62, z: -9.7, ry: Math.PI }, { x: -62, z: 9.7, ry: 0 },
+        // South wing (alongside sculptures)
+        { x: -9.7, z: 15, ry: Math.PI / 2 }, { x: 9.7, z: 15, ry: -Math.PI / 2 },
+        { x: -9.7, z: 35, ry: Math.PI / 2 }, { x: 9.7, z: 35, ry: -Math.PI / 2 },
+        { x: -9.7, z: 55, ry: Math.PI / 2 }, { x: 9.7, z: 55, ry: -Math.PI / 2 }
       ];
 
       var frameMat = new THREE.MeshStandardMaterial({ color: 0xaa8833, roughness: 0.4, metalness: 0.5 });
@@ -849,8 +856,8 @@
       var ropeMat = new THREE.MeshStandardMaterial({ color: 0x8a1111, roughness: 0.4, metalness: 0.2 });
       var poleMat = new THREE.MeshStandardMaterial({ color: 0xccaa44, roughness: 0.3, metalness: 0.7 });
 
-      for (var i = 0; i < paintings.length && i < spots.length; i++) {
-        var art = paintings[i], sp = spots[i];
+      for (var i = 0; i < spots.length; i++) {
+        var art = paintings[i % paintings.length], sp = spots[i];
 
         // Texture
         var tmp = document.createElement('canvas'); tmp.width = art.pw; tmp.height = art.ph;
