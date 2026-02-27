@@ -324,7 +324,16 @@
     #art-viewer.show {
       opacity: 1;
       pointer-events: auto;
-      backdrop-filter: blur(8px)
+      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(8px);
+    }
+
+    #art-viewer.show.sculpture-mode {
+      background: linear-gradient(to top, rgba(10, 5, 0, 0.9) 0%, rgba(10, 5, 0, 0) 40%);
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+      justify-content: flex-end;
+      padding-bottom: 50px;
     }
 
     #art-canvas-container {
@@ -1241,10 +1250,17 @@
     document.getElementById('startBtn').addEventListener('touchend', function (e) { e.preventDefault(); startMuseum(); });
 
     document.getElementById('fs-btn').addEventListener('click', function () {
-      if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch(function () { });
+      var elem = document.documentElement;
+      if (!document.fullscreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
+        if (elem.requestFullscreen) { elem.requestFullscreen(); }
+        else if (elem.msRequestFullscreen) { elem.msRequestFullscreen(); }
+        else if (elem.mozRequestFullScreen) { elem.mozRequestFullScreen(); }
+        else if (elem.webkitRequestFullscreen) { elem.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT); }
       } else {
-        document.exitFullscreen();
+        if (document.exitFullscreen) { document.exitFullscreen(); }
+        else if (document.msExitFullscreen) { document.msExitFullscreen(); }
+        else if (document.mozCancelFullScreen) { document.mozCancelFullScreen(); }
+        else if (document.webkitExitFullscreen) { document.webkitExitFullscreen(); }
       }
     });
 
@@ -1262,13 +1278,16 @@
       var zc = document.getElementById('art-canvas-zoom');
       activeSculpture = null;
 
+      var viewer = document.getElementById('art-viewer');
       if (ud.isSculpture) {
         activeSculpture = obj;
         document.getElementById('art-desc').innerHTML = "Készítette: " + ud.artist + "<p>Ez a voxel újraalkotás a klasszikus szobrászat előtt tiszteleg.</p><p style='font-size:0.7em;color:#aaa'>(Húzd az egeret vagy az ujjad az ablakon a forgatáshoz)</p>";
         zc.style.display = 'none';
+        viewer.classList.add('sculpture-mode');
       } else {
         document.getElementById('art-desc').innerHTML = "Festette: " + ud.artist + "<p>Ez a pixel art reprodukció tisztelgés a világ egyik legcsodálatosabb alkotása előtt.</p>";
         zc.style.display = 'block';
+        viewer.classList.remove('sculpture-mode');
         // Find painting data to redraw on big canvas
         var artData = paintings.find(function (p) { return p.name === ud.name; });
         if (artData) {
@@ -1284,7 +1303,7 @@
           zx.drawImage(tmp, 0, 0, zc.width, zc.height);
         }
       }
-      document.getElementById('art-viewer').classList.add('show');
+      viewer.classList.add('show');
     }
 
     setup();
