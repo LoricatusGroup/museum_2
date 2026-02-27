@@ -998,434 +998,427 @@
           var rope = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 3, 6), ropeMat); rope.rotation.z = Math.PI / 2; rope.position.set(sp.x, 0.78, pz); scene.add(rope);
         }
 
-        // ── SKETCHFAB 3D MODELS (VITRINEK) ──
-        var sfSpots = [
-          { x: -7.5, z: 35, ry: Math.PI / 2 },
-          { x: 7.5, z: 35, ry: -Math.PI / 2 },
-          { x: 0, z: 55, ry: 0 } // Center back of South wing
-        ];
-        var sfPedMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.9 });
-        var sfHoloMat = new THREE.MeshStandardMaterial({ color: 0x4488ff, transparent: true, opacity: 0.4, wireframe: true });
-        var sfPlaqueMat = new THREE.MeshStandardMaterial({ color: 0xccaa44, roughness: 0.3, metalness: 0.6 });
+      } // Correctly close the paintings loop
 
-        for (var i = 0; i < sketchfabModels.length && i < sfSpots.length; i++) {
-          var sf = sketchfabModels[i], sp = sfSpots[i];
-          var sfGrp = new THREE.Group();
+      // ── SKETCHFAB 3D MODELS (VITRINEK) ──
+      var sfSpots = [
+        { x: -7.5, z: 35, ry: Math.PI / 2 },
+        { x: 7.5, z: 35, ry: -Math.PI / 2 },
+        { x: 0, z: 55, ry: 0 }
+      ];
+      var sfPedMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.9 });
+      var sfHoloMat = new THREE.MeshStandardMaterial({ color: 0x4488ff, transparent: true, opacity: 0.4, wireframe: true });
+      var sfPlaqueMat = new THREE.MeshStandardMaterial({ color: 0xccaa44, roughness: 0.3, metalness: 0.6 });
 
-          // Pedestal
-          var hOff = 1.3;
-          var sfPed = new THREE.Mesh(new THREE.BoxGeometry(1.2, hOff, 1.2), sfPedMat);
-          sfPed.position.y = -hOff / 2 + 0.1;
-          sfGrp.add(sfPed);
+      for (var i = 0; i < sketchfabModels.length && i < sfSpots.length; i++) {
+        var sf = sketchfabModels[i], sp = sfSpots[i];
+        var sfGrp = new THREE.Group();
+        var hOff = 1.3;
+        var sfPed = new THREE.Mesh(new THREE.BoxGeometry(1.2, hOff, 1.2), sfPedMat);
+        sfPed.position.y = -hOff / 2 + 0.1;
+        sfGrp.add(sfPed);
+        var sfHolo = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.1, 0.8), sfHoloMat);
+        sfGrp.add(sfHolo);
+        sfGrp.position.set(sp.x, hOff, sp.z);
+        sfGrp.rotation.y = sp.ry;
+        sfGrp.userData = sf;
+        var sfPlaque = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.2, 0.03), sfPlaqueMat);
+        sfPlaque.position.set(sp.x, hOff * 0.7, sp.z + (sp.ry === 0 ? 0.62 : (sp.ry > 0 ? -0.62 : 0.62)));
+        if (sp.ry !== 0) sfPlaque.position.set(sp.x + (sp.ry > 0 ? 0.62 : -0.62), hOff * 0.7, sp.z);
+        sfPlaque.rotation.y = sp.ry;
+        scene.add(sfPlaque);
+        var sfSpotl = new THREE.SpotLight(0xffffff, 1.5, 10, Math.PI / 6, 0.3, 1);
+        sfSpotl.position.set(sp.x, 5, sp.z); sfSpotl.target = sfGrp; sfSpotl.castShadow = true; scene.add(sfSpotl);
+        scene.add(sfGrp); artMeshes.push(sfGrp);
+      }
+    } // End of placeAllArt
 
-          // Holographic placeholder
-          var sfHolo = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.1, 0.8), sfHoloMat);
-          sfGrp.add(sfHolo);
+    function addLights() {
+      scene.add(new THREE.AmbientLight(0xfff8f0, 0.95));
 
-          sfGrp.position.set(sp.x, hOff, sp.z);
-          sfGrp.rotation.y = sp.ry;
-          sfGrp.userData = sf; // Contains sketchfabId!
-
-          var sfPlaque = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.2, 0.03), sfPlaqueMat);
-          sfPlaque.position.set(sp.x, hOff * 0.7, sp.z + (sp.ry === 0 ? 0.62 : (sp.ry > 0 ? -0.62 : 0.62)));
-          if (sp.ry !== 0) sfPlaque.position.set(sp.x + (sp.ry > 0 ? 0.62 : -0.62), hOff * 0.7, sp.z);
-          sfPlaque.rotation.y = sp.ry;
-          scene.add(sfPlaque);
-
-          var sfSpotl = new THREE.SpotLight(0xffffff, 1.5, 10, Math.PI / 6, 0.3, 1);
-          sfSpotl.position.set(sp.x, 5, sp.z); sfSpotl.target = sfGrp; sfSpotl.castShadow = true; scene.add(sfSpotl);
-
-          scene.add(sfGrp); artMeshes.push(sfGrp);
-        }
+      // Hub lights
+      for (var x = -5; x <= 5; x += 10)for (var z = -5; z <= 5; z += 10) {
+        var l = new THREE.PointLight(0xffffff, 0.5, 15); l.position.set(x, 4.8, z); scene.add(l);
       }
 
-      function addLights() {
-        scene.add(new THREE.AmbientLight(0xfff8f0, 0.95));
-
-        // Hub lights
-        for (var x = -5; x <= 5; x += 10)for (var z = -5; z <= 5; z += 10) {
-          var l = new THREE.PointLight(0xffffff, 0.5, 15); l.position.set(x, 4.8, z); scene.add(l);
-        }
-
-        // North wing lights
-        for (var z = -15; z >= -65; z -= 8) {
-          var l = new THREE.PointLight(0xffffff, 0.5, 16); l.position.set(0, 4.8, z); scene.add(l);
-          var l2 = new THREE.PointLight(0xfff8f0, 0.2, 10); l2.position.set(-5, 4.5, z); scene.add(l2);
-          var l3 = new THREE.PointLight(0xfff8f0, 0.2, 10); l3.position.set(5, 4.5, z); scene.add(l3);
-        }
-
-        // East wing lights
-        for (var x = 15; x <= 65; x += 8) {
-          var l = new THREE.PointLight(0xffffff, 0.5, 16); l.position.set(x, 4.8, 0); scene.add(l);
-          var l2 = new THREE.PointLight(0xfff8f0, 0.2, 10); l2.position.set(x, 4.5, -5); scene.add(l2);
-          var l3 = new THREE.PointLight(0xfff8f0, 0.2, 10); l3.position.set(x, 4.5, 5); scene.add(l3);
-        }
-
-        // West wing lights
-        for (var x = -15; x >= -65; x -= 8) {
-          var l = new THREE.PointLight(0xffffff, 0.5, 16); l.position.set(x, 4.8, 0); scene.add(l);
-          var l2 = new THREE.PointLight(0xfff8f0, 0.2, 10); l2.position.set(x, 4.5, -5); scene.add(l2);
-          var l3 = new THREE.PointLight(0xfff8f0, 0.2, 10); l3.position.set(x, 4.5, 5); scene.add(l3);
-        }
-
-
-        // South wing lights
-        for (var z = 15; z <= 65; z += 8) {
-          var l = new THREE.PointLight(0xffffff, 0.5, 16); l.position.set(0, 4.8, z); scene.add(l);
-          var l2 = new THREE.PointLight(0xfff8f0, 0.2, 10); l2.position.set(-5, 4.5, z); scene.add(l2);
-          var l3 = new THREE.PointLight(0xfff8f0, 0.2, 10); l3.position.set(5, 4.5, z); scene.add(l3);
-        }
-
-        // Spotlights on artworks
-        for (var i = 0; i < artMeshes.length; i++) {
-          var a = artMeshes[i];
-          if (a.userData.isBench) continue; // Don't add spotlights for benches
-
-          var sl = new THREE.SpotLight(0xffffff, 1.8, 12, Math.PI / 5, 0.4, 1);
-          // Position spotlight in front of painting
-          var dir = new THREE.Vector3(0, 0, 1);
-          dir.applyAxisAngle(new THREE.Vector3(0, 1, 0), a.rotation.y);
-          sl.position.set(a.position.x + dir.x * 3, 4.5, a.position.z + dir.z * 3);
-          sl.target = a;
-          sl.castShadow = false; // Disabled to prevent WebGL MAX_TEXTURE_IMAGE_UNITS crash with 30+ lights
-          scene.add(sl);
-        }
+      // North wing lights
+      for (var z = -15; z >= -65; z -= 8) {
+        var l = new THREE.PointLight(0xffffff, 0.5, 16); l.position.set(0, 4.8, z); scene.add(l);
+        var l2 = new THREE.PointLight(0xfff8f0, 0.2, 10); l2.position.set(-5, 4.5, z); scene.add(l2);
+        var l3 = new THREE.PointLight(0xfff8f0, 0.2, 10); l3.position.set(5, 4.5, z); scene.add(l3);
       }
 
-      // ── INPUT ──
-      function setupInput() {
-        document.addEventListener('keydown', function (e) {
-          if (e.code === 'ArrowUp' || e.code === 'KeyW') mF = true;
-          if (e.code === 'ArrowDown' || e.code === 'KeyS') mB = true;
-          if (e.code === 'ArrowLeft' || e.code === 'KeyA') mL = true;
-          if (e.code === 'ArrowRight' || e.code === 'KeyD') mR = true;
-        });
-        document.addEventListener('keyup', function (e) {
-          if (e.code === 'ArrowUp' || e.code === 'KeyW') mF = false;
-          if (e.code === 'ArrowDown' || e.code === 'KeyS') mB = false;
-          if (e.code === 'ArrowLeft' || e.code === 'KeyA') mL = false;
-          if (e.code === 'ArrowRight' || e.code === 'KeyD') mR = false;
-        });
-        if (mobile) setupTouch(); else setupMouse();
+      // East wing lights
+      for (var x = 15; x <= 65; x += 8) {
+        var l = new THREE.PointLight(0xffffff, 0.5, 16); l.position.set(x, 4.8, 0); scene.add(l);
+        var l2 = new THREE.PointLight(0xfff8f0, 0.2, 10); l2.position.set(x, 4.5, -5); scene.add(l2);
+        var l3 = new THREE.PointLight(0xfff8f0, 0.2, 10); l3.position.set(x, 4.5, 5); scene.add(l3);
       }
 
-      function setupMouse() {
-        var cv = renderer.domElement; cv.style.cursor = 'grab';
-        cv.addEventListener('mousedown', function (e) { dragging = true; dragX = e.clientX; dragY = e.clientY; cv.style.cursor = 'grabbing'; });
-        addEventListener('mousemove', function (e) { if (!dragging) return; yaw -= (e.clientX - dragX) * .003; pitch -= (e.clientY - dragY) * .003; pitch = Math.max(-1, Math.min(1, pitch)); dragX = e.clientX; dragY = e.clientY; });
-        addEventListener('mouseup', function () { dragging = false; renderer.domElement.style.cursor = 'grab'; });
-      }
-
-      function setupTouch() {
-        document.getElementById('touch-ui').style.display = 'block';
-        var jZ = document.getElementById('joy-area'), kn = document.getElementById('joy-knob'), lZ = document.getElementById('look-area');
-        var jCx = 0, jCy = 0, lTid = null, lx = 0, ly = 0;
-        function updK(cx, cy) { var dx = cx - jCx, dy = cy - jCy, d = Math.sqrt(dx * dx + dy * dy), mx = 35; if (d > mx) { dx = dx / d * mx; dy = dy / d * mx; } kn.style.left = (35 + dx) + 'px'; kn.style.top = (35 + dy) + 'px'; jVx = dx / mx; jVy = dy / mx; }
-        jZ.addEventListener('touchstart', function (e) { e.preventDefault(); var t = e.changedTouches[0]; jTid = t.identifier; jActive = true; var r = jZ.getBoundingClientRect(); jCx = r.left + r.width / 2; jCy = r.top + r.height / 2; updK(t.clientX, t.clientY); }, { passive: false });
-        jZ.addEventListener('touchmove', function (e) { e.preventDefault(); for (var i = 0; i < e.changedTouches.length; i++)if (e.changedTouches[i].identifier === jTid) updK(e.changedTouches[i].clientX, e.changedTouches[i].clientY); }, { passive: false });
-        function endJ(e) { for (var i = 0; i < e.changedTouches.length; i++)if (e.changedTouches[i].identifier === jTid) { jActive = false; jTid = null; jVx = 0; jVy = 0; kn.style.left = '35px'; kn.style.top = '35px'; } }
-        jZ.addEventListener('touchend', endJ, { passive: false }); jZ.addEventListener('touchcancel', endJ, { passive: false });
-        lZ.addEventListener('touchstart', function (e) { e.preventDefault(); var t = e.changedTouches[0]; lTid = t.identifier; lx = t.clientX; ly = t.clientY; }, { passive: false });
-        lZ.addEventListener('touchmove', function (e) { e.preventDefault(); for (var i = 0; i < e.changedTouches.length; i++) { var t = e.changedTouches[i]; if (t.identifier === lTid) { yaw -= (t.clientX - lx) * .005; pitch -= (t.clientY - ly) * .005; pitch = Math.max(-1, Math.min(1, pitch)); lx = t.clientX; ly = t.clientY; } } }, { passive: false });
-        function endL(e) { for (var i = 0; i < e.changedTouches.length; i++)if (e.changedTouches[i].identifier === lTid) lTid = null; }
-        lZ.addEventListener('touchend', endL, { passive: false }); lZ.addEventListener('touchcancel', endL, { passive: false });
-      }
-
-      // ── GAME LOOP ──
-      function loop() {
-        requestAnimationFrame(loop);
-        var dt = Math.min(clock.getDelta(), 0.05), speed = 6;
-        camera.quaternion.setFromEuler(new THREE.Euler(pitch, yaw, 0, 'YXZ'));
-
-        var dz = 0, dx = 0;
-        if (mF) dz += 1; if (mB) dz -= 1; if (mR) dx += 1; if (mL) dx -= 1;
-        if (jActive) { dx = jVx; dz = -jVy; }
-
-
-        if (pts) {
-          pts.rotation.y += 0.0005;
-          var p = pts.geometry.attributes.position.array;
-          for (var i = 1; i < p.length; i += 3) {
-            p[i] -= 0.01; if (p[i] < -2.5) p[i] = 5;
-          }
-          pts.geometry.attributes.position.needsUpdate = true;
-        }
-
-        if (isSitting && (dx !== 0 || dz !== 0)) {
-          isSitting = false;
-          camera.position.y = 2.5;
-          document.getElementById('hint').textContent = "";
-        }
-
-        if (dx !== 0 || dz !== 0) {
-          if (!isSitting && actx && actx.currentTime - lastStep > 0.45) { playStep(); lastStep = actx.currentTime; }
-        }
-
-        if ((dx !== 0 || dz !== 0) && !isSitting) {
-          var fw = new THREE.Vector3(0, 0, -1); fw.applyQuaternion(camera.quaternion); fw.y = 0; fw.normalize();
-          var st = new THREE.Vector3(1, 0, 0); st.applyQuaternion(camera.quaternion); st.y = 0; st.normalize();
-          var nx = camera.position.x + (fw.x * dz + st.x * dx) * speed * dt;
-          var nz = camera.position.z + (fw.z * dz + st.z * dx) * speed * dt;
-          if (inBounds(nx, nz)) { camera.position.x = nx; camera.position.z = nz; }
-          else if (inBounds(nx, camera.position.z)) { camera.position.x = nx; }
-          else if (inBounds(camera.position.x, nz)) { camera.position.z = nz; }
-        }
-        if (!isSitting) camera.position.y = 2.5;
-
-        // Info panel
-        var panel = document.getElementById('info-panel');
-        var closest = null, closestD = 999;
-        for (var i = 0; i < artMeshes.length; i++) { var d = camera.position.distanceTo(artMeshes[i].position); if (d < closestD) { closestD = d; closest = artMeshes[i]; } }
-        if (closest && closestD < 6) { panel.classList.add('visible'); document.getElementById('iT').textContent = closest.userData.name; document.getElementById('iA').textContent = closest.userData.artist; document.getElementById('iY').textContent = closest.userData.year; }
-        else panel.classList.remove('visible');
-
-        // Wing label
-        var wl = document.getElementById('wing-label');
-        wl.textContent = getWing(camera.position.x, camera.position.z);
-        wl.classList.add('visible');
-
-        // Minimap
-        var mc = document.getElementById('minimap');
-        if (mc.style.display !== 'none') {
-          var w = mc.clientWidth, h = mc.clientHeight; mc.width = w; mc.height = h;
-          var mx = mc.getContext('2d');
-          mx.fillStyle = '#f0e8d8'; mx.fillRect(0, 0, w, h);
-          var s = w / 160, ox = w / 2, oy = h / 2;
-          mx.fillStyle = '#e0d8c8';
-          // Draw wing shapes
-          mx.fillRect(ox - 10 * s, oy - 70 * s, 20 * s, 60 * s); // North
-          mx.fillRect(ox + 10 * s, oy - 10 * s, 60 * s, 20 * s); // East
-          mx.fillRect(ox - 70 * s, oy - 10 * s, 60 * s, 20 * s); // West
-          mx.fillRect(ox - 10 * s, oy - 10 * s, 20 * s, 20 * s); // Hub
-
-          mx.fillRect(ox - 10 * s, oy + 10 * s, 20 * s, 60 * s); // South
-          mx.strokeRect(ox - 10 * s, oy + 10 * s, 20 * s, 60 * s);
-
-          mx.strokeStyle = '#aa9060'; mx.lineWidth = 1;
-          mx.strokeRect(ox - 10 * s, oy - 70 * s, 20 * s, 60 * s);
-          mx.strokeRect(ox + 10 * s, oy - 10 * s, 60 * s, 20 * s);
-          mx.strokeRect(ox - 70 * s, oy - 10 * s, 60 * s, 20 * s);
-          mx.strokeRect(ox - 10 * s, oy - 10 * s, 20 * s, 20 * s);
-          // Paintings
-          mx.fillStyle = '#cc8822';
-          for (var i = 0; i < artMeshes.length; i++) { mx.fillRect(ox + artMeshes[i].position.x * s - 1, oy + artMeshes[i].position.z * s - 1, 2, 2); }
-          // Player
-          var px = ox + camera.position.x * s, pz = oy + camera.position.z * s;
-          mx.fillStyle = '#dd3333'; mx.beginPath(); mx.arc(px, pz, 2.5, 0, Math.PI * 2); mx.fill();
-          mx.strokeStyle = '#dd5555'; mx.lineWidth = 1; mx.beginPath(); mx.moveTo(px, pz);
-          mx.lineTo(px + Math.sin(yaw) * -5, pz + Math.cos(yaw) * -5); mx.stroke();
-        }
-
-        renderer.render(scene, camera);
+      // West wing lights
+      for (var x = -15; x >= -65; x -= 8) {
+        var l = new THREE.PointLight(0xffffff, 0.5, 16); l.position.set(x, 4.8, 0); scene.add(l);
+        var l2 = new THREE.PointLight(0xfff8f0, 0.2, 10); l2.position.set(x, 4.5, -5); scene.add(l2);
+        var l3 = new THREE.PointLight(0xfff8f0, 0.2, 10); l3.position.set(x, 4.5, 5); scene.add(l3);
       }
 
 
-      // ── AMBIENT & AUDIO ──
-      var actx = null, pGain = null, ambOsc = null, ambGain = null;
-      var lastStep = 0, stepFlip = false;
-      function initAudio() {
-        if (actx) return;
-        var AudioContext = window.AudioContext || window.webkitAudioContext;
-        actx = new AudioContext();
-        pGain = actx.createGain(); pGain.gain.value = 0.15; pGain.connect(actx.destination);
-
-        // Ambient rumble
-        var bufSize = actx.sampleRate * 2;
-        var buf = actx.createBuffer(1, bufSize, actx.sampleRate);
-        var out = buf.getChannelData(0);
-        for (var i = 0; i < bufSize; i++) out[i] = Math.random() * 2 - 1;
-        var noise = actx.createBufferSource();
-        noise.buffer = buf; noise.loop = true;
-        var filter = actx.createBiquadFilter();
-        filter.type = 'lowpass'; filter.frequency.value = 400;
-        ambGain = actx.createGain(); ambGain.gain.value = 0.05;
-        noise.connect(filter); filter.connect(ambGain); ambGain.connect(actx.destination);
-        noise.start(0);
+      // South wing lights
+      for (var z = 15; z <= 65; z += 8) {
+        var l = new THREE.PointLight(0xffffff, 0.5, 16); l.position.set(0, 4.8, z); scene.add(l);
+        var l2 = new THREE.PointLight(0xfff8f0, 0.2, 10); l2.position.set(-5, 4.5, z); scene.add(l2);
+        var l3 = new THREE.PointLight(0xfff8f0, 0.2, 10); l3.position.set(5, 4.5, z); scene.add(l3);
       }
 
-      function playStep() {
-        if (!actx) return;
-        var o = actx.createOscillator();
-        var gn = actx.createGain();
-        o.type = 'sine'; o.frequency.setValueAtTime(stepFlip ? 200 : 240, actx.currentTime);
-        o.frequency.exponentialRampToValueAtTime(40, actx.currentTime + 0.05);
-        gn.gain.setValueAtTime(1, actx.currentTime);
-        gn.gain.exponentialRampToValueAtTime(0.01, actx.currentTime + 0.08);
-        o.connect(gn); gn.connect(pGain);
-        o.start(); o.stop(actx.currentTime + 0.1);
-        stepFlip = !stepFlip;
+      // Spotlights on artworks
+      for (var i = 0; i < artMeshes.length; i++) {
+        var a = artMeshes[i];
+        if (a.userData.isBench) continue; // Don't add spotlights for benches
+
+        var sl = new THREE.SpotLight(0xffffff, 1.8, 12, Math.PI / 5, 0.4, 1);
+        // Position spotlight in front of painting
+        var dir = new THREE.Vector3(0, 0, 1);
+        dir.applyAxisAngle(new THREE.Vector3(0, 1, 0), a.rotation.y);
+        sl.position.set(a.position.x + dir.x * 3, 4.5, a.position.z + dir.z * 3);
+        sl.target = a;
+        sl.castShadow = false; // Disabled to prevent WebGL MAX_TEXTURE_IMAGE_UNITS crash with 30+ lights
+        scene.add(sl);
+      }
+    }
+
+    // ── INPUT ──
+    function setupInput() {
+      document.addEventListener('keydown', function (e) {
+        if (e.code === 'ArrowUp' || e.code === 'KeyW') mF = true;
+        if (e.code === 'ArrowDown' || e.code === 'KeyS') mB = true;
+        if (e.code === 'ArrowLeft' || e.code === 'KeyA') mL = true;
+        if (e.code === 'ArrowRight' || e.code === 'KeyD') mR = true;
+      });
+      document.addEventListener('keyup', function (e) {
+        if (e.code === 'ArrowUp' || e.code === 'KeyW') mF = false;
+        if (e.code === 'ArrowDown' || e.code === 'KeyS') mB = false;
+        if (e.code === 'ArrowLeft' || e.code === 'KeyA') mL = false;
+        if (e.code === 'ArrowRight' || e.code === 'KeyD') mR = false;
+      });
+      if (mobile) setupTouch(); else setupMouse();
+    }
+
+    function setupMouse() {
+      var cv = renderer.domElement; cv.style.cursor = 'grab';
+      cv.addEventListener('mousedown', function (e) { dragging = true; dragX = e.clientX; dragY = e.clientY; cv.style.cursor = 'grabbing'; });
+      addEventListener('mousemove', function (e) { if (!dragging) return; yaw -= (e.clientX - dragX) * .003; pitch -= (e.clientY - dragY) * .003; pitch = Math.max(-1, Math.min(1, pitch)); dragX = e.clientX; dragY = e.clientY; });
+      addEventListener('mouseup', function () { dragging = false; renderer.domElement.style.cursor = 'grab'; });
+    }
+
+    function setupTouch() {
+      document.getElementById('touch-ui').style.display = 'block';
+      var jZ = document.getElementById('joy-area'), kn = document.getElementById('joy-knob'), lZ = document.getElementById('look-area');
+      var jCx = 0, jCy = 0, lTid = null, lx = 0, ly = 0;
+      function updK(cx, cy) { var dx = cx - jCx, dy = cy - jCy, d = Math.sqrt(dx * dx + dy * dy), mx = 35; if (d > mx) { dx = dx / d * mx; dy = dy / d * mx; } kn.style.left = (35 + dx) + 'px'; kn.style.top = (35 + dy) + 'px'; jVx = dx / mx; jVy = dy / mx; }
+      jZ.addEventListener('touchstart', function (e) { e.preventDefault(); var t = e.changedTouches[0]; jTid = t.identifier; jActive = true; var r = jZ.getBoundingClientRect(); jCx = r.left + r.width / 2; jCy = r.top + r.height / 2; updK(t.clientX, t.clientY); }, { passive: false });
+      jZ.addEventListener('touchmove', function (e) { e.preventDefault(); for (var i = 0; i < e.changedTouches.length; i++)if (e.changedTouches[i].identifier === jTid) updK(e.changedTouches[i].clientX, e.changedTouches[i].clientY); }, { passive: false });
+      function endJ(e) { for (var i = 0; i < e.changedTouches.length; i++)if (e.changedTouches[i].identifier === jTid) { jActive = false; jTid = null; jVx = 0; jVy = 0; kn.style.left = '35px'; kn.style.top = '35px'; } }
+      jZ.addEventListener('touchend', endJ, { passive: false }); jZ.addEventListener('touchcancel', endJ, { passive: false });
+      lZ.addEventListener('touchstart', function (e) { e.preventDefault(); var t = e.changedTouches[0]; lTid = t.identifier; lx = t.clientX; ly = t.clientY; }, { passive: false });
+      lZ.addEventListener('touchmove', function (e) { e.preventDefault(); for (var i = 0; i < e.changedTouches.length; i++) { var t = e.changedTouches[i]; if (t.identifier === lTid) { yaw -= (t.clientX - lx) * .005; pitch -= (t.clientY - ly) * .005; pitch = Math.max(-1, Math.min(1, pitch)); lx = t.clientX; ly = t.clientY; } } }, { passive: false });
+      function endL(e) { for (var i = 0; i < e.changedTouches.length; i++)if (e.changedTouches[i].identifier === lTid) lTid = null; }
+      lZ.addEventListener('touchend', endL, { passive: false }); lZ.addEventListener('touchcancel', endL, { passive: false });
+    }
+
+    // ── GAME LOOP ──
+    function loop() {
+      requestAnimationFrame(loop);
+      var dt = Math.min(clock.getDelta(), 0.05), speed = 6;
+      camera.quaternion.setFromEuler(new THREE.Euler(pitch, yaw, 0, 'YXZ'));
+
+      var dz = 0, dx = 0;
+      if (mF) dz += 1; if (mB) dz -= 1; if (mR) dx += 1; if (mL) dx -= 1;
+      if (jActive) { dx = jVx; dz = -jVy; }
+
+
+      if (pts) {
+        pts.rotation.y += 0.0005;
+        var p = pts.geometry.attributes.position.array;
+        for (var i = 1; i < p.length; i += 3) {
+          p[i] -= 0.01; if (p[i] < -2.5) p[i] = 5;
+        }
+        pts.geometry.attributes.position.needsUpdate = true;
       }
 
-      // ── SCULPTURES (VOXEL) ──
-      function buildVoxelSculpture(x, z, ry, name, artist, year, stringLayers, hOff) {
-        var voxels = stringLayers.map(function (layer) { return layer.map(function (row) { return row.split('').map(function (c) { return c === '1' ? 1 : 0; }); }); });
-        var grp = new THREE.Group();
-        var mat = new THREE.MeshStandardMaterial({ color: 0xddeeee, roughness: 0.2, metalness: 0.1 });
-        var vs = 0.12; // Adjusted voxel size for higher resolution (12 layers = 1.44h)
-        for (var i = 0; i < voxels.length; i++) {
-          for (var j = 0; j < voxels[i].length; j++) {
-            var row = voxels[i][j];
-            for (var k = 0; k < row.length; k++) {
-              if (row[k]) {
-                var m = new THREE.Mesh(new THREE.BoxGeometry(vs, vs, vs), mat);
-                m.position.set(k * vs - row.length / 2 * vs, (voxels.length - i) * vs, j * vs - voxels[i].length / 2 * vs);
-                m.castShadow = true; m.receiveShadow = true; grp.add(m);
-              }
+      if (isSitting && (dx !== 0 || dz !== 0)) {
+        isSitting = false;
+        camera.position.y = 2.5;
+        document.getElementById('hint').textContent = "";
+      }
+
+      if (dx !== 0 || dz !== 0) {
+        if (!isSitting && actx && actx.currentTime - lastStep > 0.45) { playStep(); lastStep = actx.currentTime; }
+      }
+
+      if ((dx !== 0 || dz !== 0) && !isSitting) {
+        var fw = new THREE.Vector3(0, 0, -1); fw.applyQuaternion(camera.quaternion); fw.y = 0; fw.normalize();
+        var st = new THREE.Vector3(1, 0, 0); st.applyQuaternion(camera.quaternion); st.y = 0; st.normalize();
+        var nx = camera.position.x + (fw.x * dz + st.x * dx) * speed * dt;
+        var nz = camera.position.z + (fw.z * dz + st.z * dx) * speed * dt;
+        if (inBounds(nx, nz)) { camera.position.x = nx; camera.position.z = nz; }
+        else if (inBounds(nx, camera.position.z)) { camera.position.x = nx; }
+        else if (inBounds(camera.position.x, nz)) { camera.position.z = nz; }
+      }
+      if (!isSitting) camera.position.y = 2.5;
+
+      // Info panel
+      var panel = document.getElementById('info-panel');
+      var closest = null, closestD = 999;
+      for (var i = 0; i < artMeshes.length; i++) { var d = camera.position.distanceTo(artMeshes[i].position); if (d < closestD) { closestD = d; closest = artMeshes[i]; } }
+      if (closest && closestD < 6) { panel.classList.add('visible'); document.getElementById('iT').textContent = closest.userData.name; document.getElementById('iA').textContent = closest.userData.artist; document.getElementById('iY').textContent = closest.userData.year; }
+      else panel.classList.remove('visible');
+
+      // Wing label
+      var wl = document.getElementById('wing-label');
+      wl.textContent = getWing(camera.position.x, camera.position.z);
+      wl.classList.add('visible');
+
+      // Minimap
+      var mc = document.getElementById('minimap');
+      if (mc.style.display !== 'none') {
+        var w = mc.clientWidth, h = mc.clientHeight; mc.width = w; mc.height = h;
+        var mx = mc.getContext('2d');
+        mx.fillStyle = '#f0e8d8'; mx.fillRect(0, 0, w, h);
+        var s = w / 160, ox = w / 2, oy = h / 2;
+        mx.fillStyle = '#e0d8c8';
+        // Draw wing shapes
+        mx.fillRect(ox - 10 * s, oy - 70 * s, 20 * s, 60 * s); // North
+        mx.fillRect(ox + 10 * s, oy - 10 * s, 60 * s, 20 * s); // East
+        mx.fillRect(ox - 70 * s, oy - 10 * s, 60 * s, 20 * s); // West
+        mx.fillRect(ox - 10 * s, oy - 10 * s, 20 * s, 20 * s); // Hub
+
+        mx.fillRect(ox - 10 * s, oy + 10 * s, 20 * s, 60 * s); // South
+        mx.strokeRect(ox - 10 * s, oy + 10 * s, 20 * s, 60 * s);
+
+        mx.strokeStyle = '#aa9060'; mx.lineWidth = 1;
+        mx.strokeRect(ox - 10 * s, oy - 70 * s, 20 * s, 60 * s);
+        mx.strokeRect(ox + 10 * s, oy - 10 * s, 60 * s, 20 * s);
+        mx.strokeRect(ox - 70 * s, oy - 10 * s, 60 * s, 20 * s);
+        mx.strokeRect(ox - 10 * s, oy - 10 * s, 20 * s, 20 * s);
+        // Paintings
+        mx.fillStyle = '#cc8822';
+        for (var i = 0; i < artMeshes.length; i++) { mx.fillRect(ox + artMeshes[i].position.x * s - 1, oy + artMeshes[i].position.z * s - 1, 2, 2); }
+        // Player
+        var px = ox + camera.position.x * s, pz = oy + camera.position.z * s;
+        mx.fillStyle = '#dd3333'; mx.beginPath(); mx.arc(px, pz, 2.5, 0, Math.PI * 2); mx.fill();
+        mx.strokeStyle = '#dd5555'; mx.lineWidth = 1; mx.beginPath(); mx.moveTo(px, pz);
+        mx.lineTo(px + Math.sin(yaw) * -5, pz + Math.cos(yaw) * -5); mx.stroke();
+      }
+
+      renderer.render(scene, camera);
+    }
+
+
+    // ── AMBIENT & AUDIO ──
+    var actx = null, pGain = null, ambOsc = null, ambGain = null;
+    var lastStep = 0, stepFlip = false;
+    function initAudio() {
+      if (actx) return;
+      var AudioContext = window.AudioContext || window.webkitAudioContext;
+      actx = new AudioContext();
+      pGain = actx.createGain(); pGain.gain.value = 0.15; pGain.connect(actx.destination);
+
+      // Ambient rumble
+      var bufSize = actx.sampleRate * 2;
+      var buf = actx.createBuffer(1, bufSize, actx.sampleRate);
+      var out = buf.getChannelData(0);
+      for (var i = 0; i < bufSize; i++) out[i] = Math.random() * 2 - 1;
+      var noise = actx.createBufferSource();
+      noise.buffer = buf; noise.loop = true;
+      var filter = actx.createBiquadFilter();
+      filter.type = 'lowpass'; filter.frequency.value = 400;
+      ambGain = actx.createGain(); ambGain.gain.value = 0.05;
+      noise.connect(filter); filter.connect(ambGain); ambGain.connect(actx.destination);
+      noise.start(0);
+    }
+
+    function playStep() {
+      if (!actx) return;
+      var o = actx.createOscillator();
+      var gn = actx.createGain();
+      o.type = 'sine'; o.frequency.setValueAtTime(stepFlip ? 200 : 240, actx.currentTime);
+      o.frequency.exponentialRampToValueAtTime(40, actx.currentTime + 0.05);
+      gn.gain.setValueAtTime(1, actx.currentTime);
+      gn.gain.exponentialRampToValueAtTime(0.01, actx.currentTime + 0.08);
+      o.connect(gn); gn.connect(pGain);
+      o.start(); o.stop(actx.currentTime + 0.1);
+      stepFlip = !stepFlip;
+    }
+
+    // ── SCULPTURES (VOXEL) ──
+    function buildVoxelSculpture(x, z, ry, name, artist, year, stringLayers, hOff) {
+      var voxels = stringLayers.map(function (layer) { return layer.map(function (row) { return row.split('').map(function (c) { return c === '1' ? 1 : 0; }); }); });
+      var grp = new THREE.Group();
+      var mat = new THREE.MeshStandardMaterial({ color: 0xddeeee, roughness: 0.2, metalness: 0.1 });
+      var vs = 0.12; // Adjusted voxel size for higher resolution (12 layers = 1.44h)
+      for (var i = 0; i < voxels.length; i++) {
+        for (var j = 0; j < voxels[i].length; j++) {
+          var row = voxels[i][j];
+          for (var k = 0; k < row.length; k++) {
+            if (row[k]) {
+              var m = new THREE.Mesh(new THREE.BoxGeometry(vs, vs, vs), mat);
+              m.position.set(k * vs - row.length / 2 * vs, (voxels.length - i) * vs, j * vs - voxels[i].length / 2 * vs);
+              m.castShadow = true; m.receiveShadow = true; grp.add(m);
             }
           }
         }
-        // Pedestal
-        var pedMat = new THREE.MeshStandardMaterial({ color: 0x3a2a1a });
-        var ped = new THREE.Mesh(new THREE.BoxGeometry(1.2, hOff, 1.2), pedMat);
-        ped.position.y = -hOff / 2; grp.add(ped);
-
-        grp.position.set(x, hOff, z);
-        grp.rotation.y = ry;
-        grp.userData = { name: name, artist: artist, year: year, isSculpture: true };
-
-        var plaqueMat = new THREE.MeshStandardMaterial({ color: 0xccaa44, roughness: 0.3, metalness: 0.6 });
-        var plaque = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.2, 0.03), plaqueMat);
-        // Position plaque relative to the group so it rotates with the sculpture!
-        plaque.position.set(0, -hOff * 0.3, 0.62);
-        grp.add(plaque);
-
-        var sl = new THREE.SpotLight(0xffffff, 2, 10, Math.PI / 6, 0.3, 1);
-        sl.position.set(x, 5, z); sl.target = grp; sl.castShadow = true; scene.add(sl);
-
-        scene.add(grp); artMeshes.push(grp);
       }
+      // Pedestal
+      var pedMat = new THREE.MeshStandardMaterial({ color: 0x3a2a1a });
+      var ped = new THREE.Mesh(new THREE.BoxGeometry(1.2, hOff, 1.2), pedMat);
+      ped.position.y = -hOff / 2; grp.add(ped);
 
-      // ── PARTICLES ──
-      var pts;
-      function addDust() {
-        var geo = new THREE.BufferGeometry();
-        var pos = new Float32Array(1500 * 3);
-        for (var i = 0; i < 1500 * 3; i++) pos[i] = (Math.random() - 0.5) * 140;
-        geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-        var mat = new THREE.PointsMaterial({ color: 0xffeedd, size: 0.15, transparent: true, opacity: 0.4, blending: THREE.AdditiveBlending, depthWrite: false });
-        pts = new THREE.Points(geo, mat);
-        pts.position.y = 2.5; scene.add(pts);
+      grp.position.set(x, hOff, z);
+      grp.rotation.y = ry;
+      grp.userData = { name: name, artist: artist, year: year, isSculpture: true };
+
+      var plaqueMat = new THREE.MeshStandardMaterial({ color: 0xccaa44, roughness: 0.3, metalness: 0.6 });
+      var plaque = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.2, 0.03), plaqueMat);
+      // Position plaque relative to the group so it rotates with the sculpture!
+      plaque.position.set(0, -hOff * 0.3, 0.62);
+      grp.add(plaque);
+
+      var sl = new THREE.SpotLight(0xffffff, 2, 10, Math.PI / 6, 0.3, 1);
+      sl.position.set(x, 5, z); sl.target = grp; sl.castShadow = true; scene.add(sl);
+
+      scene.add(grp); artMeshes.push(grp);
+    }
+
+    // ── PARTICLES ──
+    var pts;
+    function addDust() {
+      var geo = new THREE.BufferGeometry();
+      var pos = new Float32Array(1500 * 3);
+      for (var i = 0; i < 1500 * 3; i++) pos[i] = (Math.random() - 0.5) * 140;
+      geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+      var mat = new THREE.PointsMaterial({ color: 0xffeedd, size: 0.15, transparent: true, opacity: 0.4, blending: THREE.AdditiveBlending, depthWrite: false });
+      pts = new THREE.Points(geo, mat);
+      pts.position.y = 2.5; scene.add(pts);
+    }
+
+    function startMuseum() {
+      document.getElementById('overlay').classList.add('hidden');
+      document.getElementById('vignette').style.display = 'block';
+      document.getElementById('crosshair').style.display = 'block';
+      initAudio();
+      document.getElementById('minimap').style.display = 'block';
+      document.getElementById('fs-btn').style.display = 'block';
+    }
+    document.getElementById('startBtn').addEventListener('click', startMuseum);
+    document.getElementById('startBtn').addEventListener('touchend', function (e) { e.preventDefault(); startMuseum(); });
+
+    document.getElementById('fs-btn').addEventListener('click', function () {
+      var elem = document.documentElement;
+      if (!document.fullscreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
+        if (elem.requestFullscreen) { elem.requestFullscreen(); }
+        else if (elem.msRequestFullscreen) { elem.msRequestFullscreen(); }
+        else if (elem.mozRequestFullScreen) { elem.mozRequestFullScreen(); }
+        else if (elem.webkitRequestFullscreen) { elem.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT); }
+      } else {
+        if (document.exitFullscreen) { document.exitFullscreen(); }
+        else if (document.msExitFullscreen) { document.msExitFullscreen(); }
+        else if (document.mozCancelFullScreen) { document.mozCancelFullScreen(); }
+        else if (document.webkitExitFullscreen) { document.webkitExitFullscreen(); }
       }
+    });
 
-      function startMuseum() {
-        document.getElementById('overlay').classList.add('hidden');
-        document.getElementById('vignette').style.display = 'block';
-        document.getElementById('crosshair').style.display = 'block';
-        initAudio();
-        document.getElementById('minimap').style.display = 'block';
-        document.getElementById('fs-btn').style.display = 'block';
-      }
-      document.getElementById('startBtn').addEventListener('click', startMuseum);
-      document.getElementById('startBtn').addEventListener('touchend', function (e) { e.preventDefault(); startMuseum(); });
+    var targetArt = null;
+    var raycaster = new THREE.Raycaster();
+    var pointer = new THREE.Vector2(0, 0);
+    // Listener will be attached in setup
+    document.getElementById('art-close').addEventListener('click', function () {
+      document.getElementById('art-viewer').classList.remove('show');
+      document.getElementById('sketchfab-viewer').src = ""; // Állítsuk le a 3D modellt, ha bezárja
+    });
+    function openArt(obj) {
+      var ud = obj.userData;
+      document.getElementById('art-title').innerHTML = ud.name + " <br><span style='font-size:0.6em;color:#da0'>" + ud.year + "</span>";
 
-      document.getElementById('fs-btn').addEventListener('click', function () {
-        var elem = document.documentElement;
-        if (!document.fullscreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
-          if (elem.requestFullscreen) { elem.requestFullscreen(); }
-          else if (elem.msRequestFullscreen) { elem.msRequestFullscreen(); }
-          else if (elem.mozRequestFullScreen) { elem.mozRequestFullScreen(); }
-          else if (elem.webkitRequestFullscreen) { elem.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT); }
-        } else {
-          if (document.exitFullscreen) { document.exitFullscreen(); }
-          else if (document.msExitFullscreen) { document.msExitFullscreen(); }
-          else if (document.mozCancelFullScreen) { document.mozCancelFullScreen(); }
-          else if (document.webkitExitFullscreen) { document.webkitExitFullscreen(); }
-        }
-      });
-
-      var targetArt = null;
-      var raycaster = new THREE.Raycaster();
-      var pointer = new THREE.Vector2(0, 0);
-      // Listener will be attached in setup
-      document.getElementById('art-close').addEventListener('click', function () {
-        document.getElementById('art-viewer').classList.remove('show');
-        document.getElementById('sketchfab-viewer').src = ""; // Állítsuk le a 3D modellt, ha bezárja
-      });
-      function openArt(obj) {
-        var ud = obj.userData;
-        document.getElementById('art-title').innerHTML = ud.name + " <br><span style='font-size:0.6em;color:#da0'>" + ud.year + "</span>";
-
-        var zc = document.getElementById('art-canvas-zoom');
-        activeSculpture = null;
-
-        var viewer = document.getElementById('art-viewer');
-        var sfViewer = document.getElementById('sketchfab-viewer');
-
-        if (ud.sketchfabId) {
-          document.getElementById('art-desc').innerHTML = "Készítette: " + ud.artist + "<br><span style='font-size:0.75em'>" + ud.year + "</span><p>Forgasd a 3D modellt az egérrel (vagy érintéssel)! A görgővel nagyíthatsz.</p>";
-          zc.style.display = 'none';
-          sfViewer.src = "https://sketchfab.com/models/" + ud.sketchfabId + "/embed?autostart=1&ui_theme=dark&ui_infos=0&ui_watermark=0&ui_annotations=0";
-          sfViewer.style.display = 'block';
-          viewer.classList.add('sculpture-mode'); // Use same transparent style
-        } else if (ud.isSculpture) {
-          document.getElementById('art-desc').innerHTML = "Készítette: " + ud.artist + "<p>Ez a voxel újraalkotás a klasszikus szobrászat előtt tiszteleg.</p><p style='font-size:0.7em;color:#aaa'>(Húzd az egeret vagy az ujjad az ablakon a forgatáshoz)</p>";
-          zc.style.display = 'none';
-          sfViewer.style.display = 'none';
-          sfViewer.src = "";
-          viewer.classList.add('sculpture-mode');
-        } else {
-          document.getElementById('art-desc').innerHTML = "Festette: " + ud.artist + "<p>Ez a pixel art reprodukció tisztelgés a világ egyik legcsodálatosabb alkotása előtt.</p>";
-          zc.style.display = 'block';
-          sfViewer.style.display = 'none';
-          sfViewer.src = "";
-          viewer.classList.remove('sculpture-mode');
-          // Find painting data to redraw on big canvas
-          var artData = paintings.find(function (p) { return p.name === ud.name; });
-          if (artData) {
-            var tmp = document.createElement('canvas'); tmp.width = artData.pw; tmp.height = artData.ph;
-            artData.paint(tmp.getContext('2d'));
-            var maxW = Math.min(window.innerWidth * 0.8, 600);
-            var sc = Math.floor(maxW / artData.pw);
-            if (sc < 1) sc = 1;
-            zc.width = artData.pw * sc; zc.height = artData.ph * sc;
-            var zx = zc.getContext('2d');
-            zx.imageSmoothingEnabled = false;
-            zx.fillRect(0, 0, zc.width, zc.height);
-            zx.drawImage(tmp, 0, 0, zc.width, zc.height);
-          }
-        }
-        viewer.classList.add('show');
-      }
-
-      setup();
+      var zc = document.getElementById('art-canvas-zoom');
+      activeSculpture = null;
 
       var viewer = document.getElementById('art-viewer');
-      function startDrag(e) { if (!activeSculpture) return; viewerDragging = true; vDragX = (e.touches ? e.touches[0].clientX : e.clientX); }
-      function onDrag(e) { if (viewerDragging && activeSculpture) { activeSculpture.rotation.y += ((e.touches ? e.touches[0].clientX : e.clientX) - vDragX) * 0.01; vDragX = (e.touches ? e.touches[0].clientX : e.clientX); } }
-      function endDrag() { viewerDragging = false; }
+      var sfViewer = document.getElementById('sketchfab-viewer');
 
-      viewer.addEventListener('mousedown', startDrag);
-      viewer.addEventListener('mousemove', onDrag);
-      viewer.addEventListener('mouseup', endDrag);
-      viewer.addEventListener('mouseleave', endDrag);
-      viewer.addEventListener('touchstart', startDrag);
-      viewer.addEventListener('touchmove', onDrag);
-      viewer.addEventListener('touchend', endDrag);
-
-      renderer.domElement.addEventListener('click', function (e) {
-        if (dragging && Math.abs(e.clientX - dragX) > 5) return;
-        raycaster.setFromCamera(pointer, camera);
-        var intersects = raycaster.intersectObjects(artMeshes, true);
-        if (intersects.length > 0) {
-          var obj = intersects[0].object;
-          while (obj.parent && obj.parent.type === 'Group') obj = obj.parent;
-
-          if (obj.userData.isBench) {
-            if (isSitting) return;
-            var pos = new THREE.Vector3();
-            obj.getWorldPosition(pos);
-            camera.position.set(pos.x, pos.y + 0.8, pos.z);
-            isSitting = true;
-            document.getElementById('hint').textContent = "[ Nyomj meg egy mozgás gombot a felálláshoz ]";
-            return;
-          }
-
-          if (obj.userData.name) {
-            openArt(obj);
-          }
+      if (ud.sketchfabId) {
+        document.getElementById('art-desc').innerHTML = "Készítette: " + ud.artist + "<br><span style='font-size:0.75em'>" + ud.year + "</span><p>Forgasd a 3D modellt az egérrel (vagy érintéssel)! A görgővel nagyíthatsz.</p>";
+        zc.style.display = 'none';
+        sfViewer.src = "https://sketchfab.com/models/" + ud.sketchfabId + "/embed?autostart=1&ui_theme=dark&ui_infos=0&ui_watermark=0&ui_annotations=0";
+        sfViewer.style.display = 'block';
+        viewer.classList.add('sculpture-mode'); // Use same transparent style
+      } else if (ud.isSculpture) {
+        document.getElementById('art-desc').innerHTML = "Készítette: " + ud.artist + "<p>Ez a voxel újraalkotás a klasszikus szobrászat előtt tiszteleg.</p><p style='font-size:0.7em;color:#aaa'>(Húzd az egeret vagy az ujjad az ablakon a forgatáshoz)</p>";
+        zc.style.display = 'none';
+        sfViewer.style.display = 'none';
+        sfViewer.src = "";
+        viewer.classList.add('sculpture-mode');
+      } else {
+        document.getElementById('art-desc').innerHTML = "Festette: " + ud.artist + "<p>Ez a pixel art reprodukció tisztelgés a világ egyik legcsodálatosabb alkotása előtt.</p>";
+        zc.style.display = 'block';
+        sfViewer.style.display = 'none';
+        sfViewer.src = "";
+        viewer.classList.remove('sculpture-mode');
+        // Find painting data to redraw on big canvas
+        var artData = paintings.find(function (p) { return p.name === ud.name; });
+        if (artData) {
+          var tmp = document.createElement('canvas'); tmp.width = artData.pw; tmp.height = artData.ph;
+          artData.paint(tmp.getContext('2d'));
+          var maxW = Math.min(window.innerWidth * 0.8, 600);
+          var sc = Math.floor(maxW / artData.pw);
+          if (sc < 1) sc = 1;
+          zc.width = artData.pw * sc; zc.height = artData.ph * sc;
+          var zx = zc.getContext('2d');
+          zx.imageSmoothingEnabled = false;
+          zx.fillRect(0, 0, zc.width, zc.height);
+          zx.drawImage(tmp, 0, 0, zc.width, zc.height);
         }
-      });
+      }
+      viewer.classList.add('show');
     }
+
+    setup();
+
+    var viewer = document.getElementById('art-viewer');
+    function startDrag(e) { if (!activeSculpture) return; viewerDragging = true; vDragX = (e.touches ? e.touches[0].clientX : e.clientX); }
+    function onDrag(e) { if (viewerDragging && activeSculpture) { activeSculpture.rotation.y += ((e.touches ? e.touches[0].clientX : e.clientX) - vDragX) * 0.01; vDragX = (e.touches ? e.touches[0].clientX : e.clientX); } }
+    function endDrag() { viewerDragging = false; }
+
+    viewer.addEventListener('mousedown', startDrag);
+    viewer.addEventListener('mousemove', onDrag);
+    viewer.addEventListener('mouseup', endDrag);
+    viewer.addEventListener('mouseleave', endDrag);
+    viewer.addEventListener('touchstart', startDrag);
+    viewer.addEventListener('touchmove', onDrag);
+    viewer.addEventListener('touchend', endDrag);
+
+    renderer.domElement.addEventListener('click', function (e) {
+      if (dragging && Math.abs(e.clientX - dragX) > 5) return;
+      raycaster.setFromCamera(pointer, camera);
+      var intersects = raycaster.intersectObjects(artMeshes, true);
+      if (intersects.length > 0) {
+        var obj = intersects[0].object;
+        while (obj.parent && obj.parent.type === 'Group') obj = obj.parent;
+
+        if (obj.userData.isBench) {
+          if (isSitting) return;
+          var pos = new THREE.Vector3();
+          obj.getWorldPosition(pos);
+          camera.position.set(pos.x, pos.y + 0.8, pos.z);
+          isSitting = true;
+          document.getElementById('hint').textContent = "[ Nyomj meg egy mozgás gombot a felálláshoz ]";
+          return;
+        }
+
+        if (obj.userData.name) {
+          openArt(obj);
+        }
+      }
+    });
   </script>
 </body>
 
