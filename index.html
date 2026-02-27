@@ -613,6 +613,8 @@
     var yaw = 0, pitch = 0;
     var artMeshes = [];
     var dragging = false, dragX = 0, dragY = 0;
+    var isSitting = false;
+    var activeSculpture = null, viewerDragging = false, vDragX = 0;
     var jActive = false, jVx = 0, jVy = 0, jTid = null;
 
     // Layout: Hub center + 3 wings
@@ -714,6 +716,8 @@
       var accentMat = new THREE.MeshStandardMaterial({ color: 0xaa9060, roughness: 0.5, metalness: 0.2 });
 
 
+      var benchMat = new THREE.MeshStandardMaterial({ color: 0x7a6a50, roughness: 0.6 });
+
       // Floors & Ceilings
       addFloor(20, 60, 0, 40, floorMat);        // South
       addCeil(20, 60, 0, 40);
@@ -724,8 +728,8 @@
       addBox(20.3, 5, 0.3, wallMat, 0, 2.5, 70);
 
       // South baseboards
-      addBox(0.1, 0.25, 60, baseMat2, -9.7, 0.125, 40);
-      addBox(0.1, 0.25, 60, baseMat2, 9.7, 0.125, 40);
+      addBox(0.1, 0.25, 60, baseMat, -9.7, 0.125, 40);
+      addBox(0.1, 0.25, 60, baseMat, 9.7, 0.125, 40);
 
       // South ceiling beams
       for (var z = 15; z <= 65; z += 10) { addBox(20, 0.12, 0.3, new THREE.MeshStandardMaterial({ color: 0xc8b898 }), 0, 4.93, z); }
@@ -734,7 +738,7 @@
       addBox(1, 0.2, 0.3, accentMat, 0, 4.6, 10);
 
       // South bench
-      [30, 50].forEach(function (z) { addBox(3, 0.12, 1, benchMat, 0, 0.6, z); });
+      [30, 50].forEach(function (z) { var b = addBox(3, 0.12, 1, benchMat, 0, 0.6, z); b.userData.isBench = true; artMeshes.push(b); });
 
       // -- Glass Dome in Central Hub --
       var domeMat = new THREE.MeshStandardMaterial({ color: 0x88aacc, transparent: true, opacity: 0.3, metalness: 0.2, roughness: 0.1, side: THREE.DoubleSide });
@@ -816,11 +820,10 @@
       addBox(0.3, 0.2, 1, accentMat, 10, 4.6, 0);     // East entrance
       addBox(0.3, 0.2, 1, accentMat, -10, 4.6, 0);    // West entrance
 
-      // Benches in each wing
-      var benchMat = new THREE.MeshStandardMaterial({ color: 0x7a6a50, roughness: 0.6 });
-      [-30, -50].forEach(function (z) { addBox(3, 0.12, 1, benchMat, 0, 0.6, z); });
-      [30, 50].forEach(function (x) { addBox(1, 0.12, 3, benchMat, x, 0.6, 0); });
-      [-30, -50].forEach(function (x) { addBox(1, 0.12, 3, benchMat, x, 0.6, 0); });
+      // Benches in each wing (already have benchMat)
+      [-30, -50].forEach(function (z) { var b = addBox(3, 0.12, 1, benchMat, 0, 0.6, z); b.userData.isBench = true; artMeshes.push(b); });
+      [30, 50].forEach(function (x) { var b = addBox(1, 0.12, 3, benchMat, x, 0.6, 0); b.userData.isBench = true; artMeshes.push(b); });
+      [-30, -50].forEach(function (x) { var b = addBox(1, 0.12, 3, benchMat, x, 0.6, 0); b.userData.isBench = true; artMeshes.push(b); });
     }
 
     function placeAllArt() {
@@ -1022,11 +1025,17 @@
         pts.geometry.attributes.position.needsUpdate = true;
       }
 
-      if (dx !== 0 || dz !== 0) {
-        if (actx && actx.currentTime - lastStep > 0.45) { playStep(); lastStep = actx.currentTime; }
+      if (isSitting && (dx !== 0 || dz !== 0)) {
+        isSitting = false;
+        camera.position.y = 2.5;
+        document.getElementById('hint').textContent = "";
       }
 
       if (dx !== 0 || dz !== 0) {
+        if (!isSitting && actx && actx.currentTime - lastStep > 0.45) { playStep(); lastStep = actx.currentTime; }
+      }
+
+      if ((dx !== 0 || dz !== 0) && !isSitting) {
         var fw = new THREE.Vector3(0, 0, -1); fw.applyQuaternion(camera.quaternion); fw.y = 0; fw.normalize();
         var st = new THREE.Vector3(1, 0, 0); st.applyQuaternion(camera.quaternion); st.y = 0; st.normalize();
         var nx = camera.position.x + (fw.x * dz + st.x * dx) * speed * dt;
@@ -1035,7 +1044,7 @@
         else if (inBounds(nx, camera.position.z)) { camera.position.x = nx; }
         else if (inBounds(camera.position.x, nz)) { camera.position.z = nz; }
       }
-      camera.position.y = 2.5;
+      if (!isSitting) camera.position.y = 2.5;
 
       // Info panel
       var panel = document.getElementById('info-panel');
@@ -1192,8 +1201,11 @@
       document.getElementById('art-title').innerHTML = ud.name + " <br><span style='font-size:0.6em;color:#da0'>" + ud.year + "</span>";
 
       var zc = document.getElementById('art-canvas-zoom');
+      activeSculpture = null;
+
       if (ud.isSculpture) {
-        document.getElementById('art-desc').innerHTML = "Készítette: " + ud.artist + "<p>Ez a voxel újraalkotás a klasszikus szobrászat előtt tiszteleg.</p>";
+        activeSculpture = obj;
+        document.getElementById('art-desc').innerHTML = "Készítette: " + ud.artist + "<p>Ez a voxel újraalkotás a klasszikus szobrászat előtt tiszteleg.</p><p style='font-size:0.7em;color:#aaa'>(Húzd az egeret vagy az ujjad az ablakon a forgatáshoz)</p>";
         zc.style.display = 'none';
       } else {
         document.getElementById('art-desc').innerHTML = "Festette: " + ud.artist + "<p>Ez a pixel art reprodukció tisztelgés a világ egyik legcsodálatosabb alkotása előtt.</p>";
@@ -1218,6 +1230,19 @@
 
     setup();
 
+    var viewer = document.getElementById('art-viewer');
+    function startDrag(e) { if (!activeSculpture) return; viewerDragging = true; vDragX = (e.touches ? e.touches[0].clientX : e.clientX); }
+    function onDrag(e) { if (viewerDragging && activeSculpture) { activeSculpture.rotation.y += ((e.touches ? e.touches[0].clientX : e.clientX) - vDragX) * 0.01; vDragX = (e.touches ? e.touches[0].clientX : e.clientX); } }
+    function endDrag() { viewerDragging = false; }
+
+    viewer.addEventListener('mousedown', startDrag);
+    viewer.addEventListener('mousemove', onDrag);
+    viewer.addEventListener('mouseup', endDrag);
+    viewer.addEventListener('mouseleave', endDrag);
+    viewer.addEventListener('touchstart', startDrag);
+    viewer.addEventListener('touchmove', onDrag);
+    viewer.addEventListener('touchend', endDrag);
+
     renderer.domElement.addEventListener('click', function (e) {
       if (dragging && Math.abs(e.clientX - dragX) > 5) return;
       raycaster.setFromCamera(pointer, camera);
@@ -1225,6 +1250,17 @@
       if (intersects.length > 0) {
         var obj = intersects[0].object;
         while (obj.parent && obj.parent.type === 'Group') obj = obj.parent;
+
+        if (obj.userData.isBench) {
+          if (isSitting) return;
+          var pos = new THREE.Vector3();
+          obj.getWorldPosition(pos);
+          camera.position.set(pos.x, pos.y + 0.8, pos.z);
+          isSitting = true;
+          document.getElementById('hint').textContent = "[ Nyomj meg egy mozgás gombot a felálláshoz ]";
+          return;
+        }
+
         if (obj.userData.name) {
           openArt(obj);
         }
