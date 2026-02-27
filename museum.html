@@ -367,7 +367,7 @@ function buildMuseum(){
   [30,50].forEach(function(z){addBox(3,0.12,1,benchMat,0,0.6,z);});
   
   // -- Glass Dome in Central Hub --
-  var domeMat = new THREE.MeshPhysicalMaterial({color:0x88aacc,transmission:0.9,opacity:1,metalness:0,roughness:0,ior:1.5,thickness:0.5,side:THREE.DoubleSide});
+  var domeMat = new THREE.MeshStandardMaterial({color:0x88aacc,transparent:true,opacity:0.3,metalness:0.2,roughness:0.1,side:THREE.DoubleSide});
   var dome = new THREE.Mesh(new THREE.SphereGeometry(8,16,16,0,Math.PI*2,0,Math.PI/2), domeMat);
   dome.position.set(0,5,0);scene.add(dome);
   var domeFrameMat = new THREE.MeshStandardMaterial({color:0x334455,roughness:0.8,metalness:0.4});
