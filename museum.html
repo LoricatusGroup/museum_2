@@ -646,6 +646,12 @@
       }
     ];
 
+    var sketchfabModels = [
+      { name: "Rosette-i kő", artist: "Ismeretlen", year: "i.e. 196", sketchfabId: "3e46101919804791a547badfb7b46187" },
+      { name: "Nofertiti mellszobra", artist: "Thutmosz", year: "i.e. 1345", sketchfabId: "e90c68102d40445a80f08945625e5afb" },
+      { name: "Szamothrakéi Niké", artist: "Ismeretlen", year: "i.e. 190", sketchfabId: "95193d56396c4ddeb3650269f8d5f308" }
+    ];
+
     // ══════════════════════════════════════
     //  THREE.JS
     // ══════════════════════════════════════
@@ -1402,7 +1408,10 @@
       var intersects = raycaster.intersectObjects(artMeshes, true);
       if (intersects.length > 0) {
         var obj = intersects[0].object;
-        while (obj.parent && obj.parent.type === 'Group') obj = obj.parent;
+        while (obj.parent && (obj.userData.isBench === undefined && obj.userData.name === undefined)) {
+          obj = obj.parent;
+          if (obj === scene) break;
+        }
 
         if (obj.userData.isBench) {
           if (isSitting) return;
