@@ -143,6 +143,21 @@
       opacity: 1
     }
 
+    #fs-btn {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: rgba(0, 0, 0, .5);
+      color: #fff;
+      border: 1px solid #aa9060;
+      padding: 10px;
+      cursor: pointer;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 12px;
+      z-index: 100;
+      display: none;
+    }
+
     #info-panel .t {
       font-family: 'Press Start 2P', cursive;
       font-size: clamp(7px, 1.8vw, 10px);
@@ -407,6 +422,8 @@
   </div>
 
   <div id="wing-label" id="wL"></div>
+  <div id="fs-btn">
+    🔲 KIFESZÍT</div>
   <div id="info-panel">
     <div class="t" id="iT"></div>
     <div class="a" id="iA"></div>
@@ -709,14 +726,43 @@
       m.rotation.x = Math.PI / 2; m.position.set(x, 5, z); scene.add(m);
     }
 
+    function buildBench(w, d, x, z) {
+      var grp = new THREE.Group();
+      var seatMat = new THREE.MeshStandardMaterial({ color: 0x7a6a50, roughness: 0.6 });
+      var legMat = new THREE.MeshStandardMaterial({ color: 0x3a3a3a, roughness: 0.8 });
+      // Seat
+      var seat = new THREE.Mesh(new THREE.BoxGeometry(w, 0.15, d), seatMat);
+      seat.position.y = 0.6;
+      grp.add(seat);
+      // Legs
+      var legW = w > d ? w - 0.4 : 0.6;
+      var legD = d > w ? d - 0.4 : 0.6;
+      var leg1 = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.55, legD), legMat);
+      leg1.position.set(w > d ? -w / 2 + 0.3 : 0, 0.275, 0);
+      grp.add(leg1);
+      var leg2 = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.55, legD), legMat);
+      leg2.position.set(w > d ? w / 2 - 0.3 : 0, 0.275, 0);
+      grp.add(leg2);
+
+      if (d > w) { // vertical bench legs
+        leg1.rotation.y = Math.PI / 2;
+        leg2.rotation.y = Math.PI / 2;
+        leg1.position.set(0, 0.275, -d / 2 + 0.3);
+        leg2.position.set(0, 0.275, d / 2 - 0.3);
+      }
+
+      grp.position.set(x, 0, z);
+      grp.userData.isBench = true;
+      scene.add(grp);
+      artMeshes.push(grp);
+    }
+
     function buildMuseum() {
       var floorMat = new THREE.MeshStandardMaterial({ color: 0x8a7a68, roughness: 0.7 });
       var wallMat = new THREE.MeshStandardMaterial({ color: 0xe8e0d4, roughness: 0.85 });
       var baseMat = new THREE.MeshStandardMaterial({ color: 0x6a5a48 });
       var accentMat = new THREE.MeshStandardMaterial({ color: 0xaa9060, roughness: 0.5, metalness: 0.2 });
 
-
-      var benchMat = new THREE.MeshStandardMaterial({ color: 0x7a6a50, roughness: 0.6 });
 
       // Floors & Ceilings
       addFloor(20, 60, 0, 40, floorMat);        // South
@@ -738,7 +784,7 @@
       addBox(1, 0.2, 0.3, accentMat, 0, 4.6, 10);
 
       // South bench
-      [30, 50].forEach(function (z) { var b = addBox(3, 0.12, 1, benchMat, 0, 0.6, z); b.userData.isBench = true; artMeshes.push(b); });
+      [30, 50].forEach(function (z) { buildBench(3, 1, 0, z); });
 
       // -- Glass Dome in Central Hub --
       var domeMat = new THREE.MeshStandardMaterial({ color: 0x88aacc, transparent: true, opacity: 0.3, metalness: 0.2, roughness: 0.1, side: THREE.DoubleSide });
@@ -820,10 +866,10 @@
       addBox(0.3, 0.2, 1, accentMat, 10, 4.6, 0);     // East entrance
       addBox(0.3, 0.2, 1, accentMat, -10, 4.6, 0);    // West entrance
 
-      // Benches in each wing (already have benchMat)
-      [-30, -50].forEach(function (z) { var b = addBox(3, 0.12, 1, benchMat, 0, 0.6, z); b.userData.isBench = true; artMeshes.push(b); });
-      [30, 50].forEach(function (x) { var b = addBox(1, 0.12, 3, benchMat, x, 0.6, 0); b.userData.isBench = true; artMeshes.push(b); });
-      [-30, -50].forEach(function (x) { var b = addBox(1, 0.12, 3, benchMat, x, 0.6, 0); b.userData.isBench = true; artMeshes.push(b); });
+      // Benches in each wing
+      [-30, -50].forEach(function (z) { buildBench(3, 1, 0, z); });
+      [30, 50].forEach(function (x) { buildBench(1, 3, x, 0); });
+      [-30, -50].forEach(function (x) { buildBench(1, 3, x, 0); });
     }
 
     function placeAllArt() {
@@ -835,18 +881,18 @@
         { x: -9.7, z: -35, ry: Math.PI / 2 }, { x: 9.7, z: -35, ry: -Math.PI / 2 },
         { x: -9.7, z: -48, ry: Math.PI / 2 }, { x: 9.7, z: -48, ry: -Math.PI / 2 },
         { x: -9.7, z: -60, ry: Math.PI / 2 }, { x: 9.7, z: -60, ry: -Math.PI / 2 },
-        // East wing
-        { x: 15, z: -9.7, ry: Math.PI }, { x: 15, z: 9.7, ry: 0 },
-        { x: 25, z: -9.7, ry: Math.PI }, { x: 25, z: 9.7, ry: 0 },
-        { x: 36, z: -9.7, ry: Math.PI }, { x: 36, z: 9.7, ry: 0 },
-        { x: 48, z: -9.7, ry: Math.PI }, { x: 48, z: 9.7, ry: 0 },
-        { x: 62, z: -9.7, ry: Math.PI }, { x: 62, z: 9.7, ry: 0 },
-        // West wing
-        { x: -15, z: -9.7, ry: Math.PI }, { x: -15, z: 9.7, ry: 0 },
-        { x: -25, z: -9.7, ry: Math.PI }, { x: -25, z: 9.7, ry: 0 },
-        { x: -36, z: -9.7, ry: Math.PI }, { x: -36, z: 9.7, ry: 0 },
-        { x: -48, z: -9.7, ry: Math.PI }, { x: -48, z: 9.7, ry: 0 },
-        { x: -62, z: -9.7, ry: Math.PI }, { x: -62, z: 9.7, ry: 0 },
+        // East wing (Fixed orientations)
+        { x: 15, z: -9.7, ry: 0 }, { x: 15, z: 9.7, ry: Math.PI },
+        { x: 25, z: -9.7, ry: 0 }, { x: 25, z: 9.7, ry: Math.PI },
+        { x: 36, z: -9.7, ry: 0 }, { x: 36, z: 9.7, ry: Math.PI },
+        { x: 48, z: -9.7, ry: 0 }, { x: 48, z: 9.7, ry: Math.PI },
+        { x: 62, z: -9.7, ry: 0 }, { x: 62, z: 9.7, ry: Math.PI },
+        // West wing (Fixed orientations)
+        { x: -15, z: -9.7, ry: 0 }, { x: -15, z: 9.7, ry: Math.PI },
+        { x: -25, z: -9.7, ry: 0 }, { x: -25, z: 9.7, ry: Math.PI },
+        { x: -36, z: -9.7, ry: 0 }, { x: -36, z: 9.7, ry: Math.PI },
+        { x: -48, z: -9.7, ry: 0 }, { x: -48, z: 9.7, ry: Math.PI },
+        { x: -62, z: -9.7, ry: 0 }, { x: -62, z: 9.7, ry: Math.PI },
         // South wing (alongside sculptures)
         { x: -9.7, z: 15, ry: Math.PI / 2 }, { x: 9.7, z: 15, ry: -Math.PI / 2 },
         { x: -9.7, z: 35, ry: Math.PI / 2 }, { x: 9.7, z: 35, ry: -Math.PI / 2 },
@@ -1189,9 +1235,18 @@
       document.getElementById('crosshair').style.display = 'block';
       initAudio();
       document.getElementById('minimap').style.display = 'block';
+      document.getElementById('fs-btn').style.display = 'block';
     }
     document.getElementById('startBtn').addEventListener('click', startMuseum);
     document.getElementById('startBtn').addEventListener('touchend', function (e) { e.preventDefault(); startMuseum(); });
+
+    document.getElementById('fs-btn').addEventListener('click', function () {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(function () { });
+      } else {
+        document.exitFullscreen();
+      }
+    });
 
     var targetArt = null;
     var raycaster = new THREE.Raycaster();
