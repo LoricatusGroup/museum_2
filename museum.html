@@ -1190,22 +1190,28 @@
     function openArt(obj) {
       var ud = obj.userData;
       document.getElementById('art-title').innerHTML = ud.name + " <br><span style='font-size:0.6em;color:#da0'>" + ud.year + "</span>";
-      document.getElementById('art-desc').innerHTML = "Festette: " + ud.artist + "<p>Ez a pixel art reprodukció tisztelgés a világ egyik legcsodálatosabb alkotása előtt.</p>";
 
-      // Find painting data to redraw on big canvas
-      var artData = paintings.find(function (p) { return p.name === ud.name; });
-      if (artData) {
-        var tmp = document.createElement('canvas'); tmp.width = artData.pw; tmp.height = artData.ph;
-        artData.paint(tmp.getContext('2d'));
-        var zc = document.getElementById('art-canvas-zoom');
-        var maxW = Math.min(window.innerWidth * 0.8, 600);
-        var sc = Math.floor(maxW / artData.pw);
-        if (sc < 1) sc = 1;
-        zc.width = artData.pw * sc; zc.height = artData.ph * sc;
-        var zx = zc.getContext('2d');
-        zx.imageSmoothingEnabled = false;
-        zx.fillRect(0, 0, zc.width, zc.height);
-        zx.drawImage(tmp, 0, 0, zc.width, zc.height);
+      var zc = document.getElementById('art-canvas-zoom');
+      if (ud.isSculpture) {
+        document.getElementById('art-desc').innerHTML = "Készítette: " + ud.artist + "<p>Ez a voxel újraalkotás a klasszikus szobrászat előtt tiszteleg.</p>";
+        zc.style.display = 'none';
+      } else {
+        document.getElementById('art-desc').innerHTML = "Festette: " + ud.artist + "<p>Ez a pixel art reprodukció tisztelgés a világ egyik legcsodálatosabb alkotása előtt.</p>";
+        zc.style.display = 'block';
+        // Find painting data to redraw on big canvas
+        var artData = paintings.find(function (p) { return p.name === ud.name; });
+        if (artData) {
+          var tmp = document.createElement('canvas'); tmp.width = artData.pw; tmp.height = artData.ph;
+          artData.paint(tmp.getContext('2d'));
+          var maxW = Math.min(window.innerWidth * 0.8, 600);
+          var sc = Math.floor(maxW / artData.pw);
+          if (sc < 1) sc = 1;
+          zc.width = artData.pw * sc; zc.height = artData.ph * sc;
+          var zx = zc.getContext('2d');
+          zx.imageSmoothingEnabled = false;
+          zx.fillRect(0, 0, zc.width, zc.height);
+          zx.drawImage(tmp, 0, 0, zc.width, zc.height);
+        }
       }
       document.getElementById('art-viewer').classList.add('show');
     }
@@ -1219,7 +1225,7 @@
       if (intersects.length > 0) {
         var obj = intersects[0].object;
         while (obj.parent && obj.parent.type === 'Group') obj = obj.parent;
-        if (obj.userData.name && !obj.userData.isSculpture) {
+        if (obj.userData.name) {
           openArt(obj);
         }
       }
