@@ -6,7 +6,7 @@ const puppeteer = require('puppeteer');
     page.on('console', msg => console.log('PAGE LOG:', msg.text()));
     page.on('pageerror', err => console.log('PAGE ERROR:', err.toString()));
 
-    await page.goto('https://mayydayy99.github.io/museum_2/', { waitUntil: 'networkidle0' });
+    await page.goto('file:///' + 'v:/2025/VIbe-code/museum/index.html', { waitUntil: 'networkidle0' });
 
     await browser.close();
 })();
