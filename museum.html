@@ -957,12 +957,16 @@
       // Spotlights on artworks
       for (var i = 0; i < artMeshes.length; i++) {
         var a = artMeshes[i];
+        if (a.userData.isBench) continue; // Don't add spotlights for benches
+
         var sl = new THREE.SpotLight(0xffffff, 1.8, 12, Math.PI / 5, 0.4, 1);
         // Position spotlight in front of painting
         var dir = new THREE.Vector3(0, 0, 1);
         dir.applyAxisAngle(new THREE.Vector3(0, 1, 0), a.rotation.y);
         sl.position.set(a.position.x + dir.x * 3, 4.5, a.position.z + dir.z * 3);
-        sl.target = a; sl.castShadow = true; scene.add(sl);
+        sl.target = a;
+        sl.castShadow = false; // Disabled to prevent WebGL MAX_TEXTURE_IMAGE_UNITS crash with 30+ lights
+        scene.add(sl);
       }
     }
 
