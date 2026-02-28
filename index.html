@@ -463,6 +463,7 @@
     <div id="look-area"></div>
   </div>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
   <script>
     var mobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || ('ontouchstart' in window && innerWidth < 1024);
     document.getElementById('hint').innerHTML = mobile
@@ -651,6 +652,9 @@
       { name: "Nofertiti mellszobra", artist: "Thutmosz", year: "i.e. 1345", sketchfabId: "e90c68102d40445a80f08945625e5afb" },
       { name: "Szamothrakéi Niké", artist: "Ismeretlen", year: "i.e. 190", sketchfabId: "95193d56396c4ddeb3650269f8d5f308" }
     ];
+
+    // Globális GLTFLoader az új modellekhez
+    var gltfLoader = new THREE.GLTFLoader();
 
     // ══════════════════════════════════════
     //  THREE.JS
@@ -1006,12 +1010,14 @@
 
       } // Correctly close the paintings loop
 
-      // ── SKETCHFAB 3D MODELS (VITRINEK) ──
-      var sfSpots = [
-        { x: -7.5, z: 35, ry: Math.PI / 2 },
-        { x: 7.5, z: 35, ry: -Math.PI / 2 },
-        { x: 0, z: 55, ry: 0 }
-      ];
+      // ── SKETCHFAB 3D MODELS (VITRINEK / GLB) ──
+      var sfSpots = [];
+      // Generálunk 18 helyet a Déli szárnyban a GLB fájloknak
+      for (var z = 20; z <= 60; z += 5) {
+        sfSpots.push({ x: -7.5, z: z, ry: Math.PI / 2 }); // Bal oldal
+        sfSpots.push({ x: 7.5, z: z, ry: -Math.PI / 2 }); // Jobb oldal
+      }
+
       var sfPedMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.9 });
       var sfHoloMat = new THREE.MeshStandardMaterial({ color: 0x4488ff, transparent: true, opacity: 0.4, wireframe: true });
       var sfPlaqueMat = new THREE.MeshStandardMaterial({ color: 0xccaa44, roughness: 0.3, metalness: 0.6 });
@@ -1023,16 +1029,40 @@
         var sfPed = new THREE.Mesh(new THREE.BoxGeometry(1.2, hOff, 1.2), sfPedMat);
         sfPed.position.y = -hOff / 2 + 0.1;
         sfGrp.add(sfPed);
-        var sfHolo = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.1, 0.8), sfHoloMat);
-        sfGrp.add(sfHolo);
+
+        // Ha van glbUrl, megpróbáljuk betölteni a 3D fájlt, különben marad a drótváz!
+        if (sf.glbUrl) {
+          (function (group, url) {
+            gltfLoader.load(url, function (gltf) {
+              var model = gltf.scene;
+              // Méretezés, hogy kb 1.5 egység magas legyen
+              var box = new THREE.Box3().setFromObject(model);
+              var size = box.getSize(new THREE.Vector3()).length();
+              var scale = 1.8 / (size === 0 ? 1 : size);
+              model.scale.setScalar(scale);
+              box.setFromObject(model);
+              var center = box.getCenter(new THREE.Vector3());
+              model.position.sub(center); // Középre igazítás
+              model.position.y += 0.5; // Kicsit feljebb a talapzaton
+              group.add(model);
+            });
+          })(sfGrp, sf.glbUrl);
+        } else {
+          // Fallback holo wireframe, ha még nincs letöltve a fájl, vagy iframe mód van
+          var sfHolo = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.1, 0.8), sfHoloMat);
+          sfGrp.add(sfHolo);
+        }
+
         sfGrp.position.set(sp.x, hOff, sp.z);
         sfGrp.rotation.y = sp.ry;
         sfGrp.userData = sf;
+
         var sfPlaque = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.2, 0.03), sfPlaqueMat);
         sfPlaque.position.set(sp.x, hOff * 0.7, sp.z + (sp.ry === 0 ? 0.62 : (sp.ry > 0 ? -0.62 : 0.62)));
         if (sp.ry !== 0) sfPlaque.position.set(sp.x + (sp.ry > 0 ? 0.62 : -0.62), hOff * 0.7, sp.z);
         sfPlaque.rotation.y = sp.ry;
         scene.add(sfPlaque);
+
         var sfSpotl = new THREE.SpotLight(0xffffff, 1.5, 10, Math.PI / 6, 0.3, 1);
         sfSpotl.position.set(sp.x, 5, sp.z); sfSpotl.target = sfGrp; sfSpotl.castShadow = true; scene.add(sfSpotl);
         scene.add(sfGrp); artMeshes.push(sfGrp);
@@ -1387,7 +1417,22 @@
       viewer.classList.add('show');
     }
 
-    setup();
+    // Megpróbáljuk betölteni az assets/exhibits.json-t, ha létezik, és utána setup()
+    fetch('assets/exhibits.json')
+      .then(function (res) { return res.ok ? res.json() : Promise.reject('No custom models file.'); })
+      .then(function (data) {
+        if (data && data.length > 0) {
+          // Ha van generált adatunk, felülírjuk vele a beépített modellek listáját!
+          sketchfabModels = data.map(function (d) {
+            return { name: d.title, artist: d.author, year: "Sketchfab", glbUrl: d.modelUrl };
+          });
+        }
+        setup();
+      })
+      .catch(function (e) {
+        console.log("Using default Sketchfab models logic.", e);
+        setup();
+      });
 
     var viewer = document.getElementById('art-viewer');
     function startDrag(e) { if (!activeSculpture) return; viewerDragging = true; vDragX = (e.touches ? e.touches[0].clientX : e.clientX); }

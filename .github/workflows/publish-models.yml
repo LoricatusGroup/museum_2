@@ -1,0 +1,67 @@
+name: Publish Models
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'uploads/models/*.glb'
+      - 'uploads/meta.xlsx'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Install gltfpack
+        run: npm install -g gltfpack
+
+      - name: Optimize GLB Files
+        run: |
+          mkdir -p uploads/optimized
+          for file in uploads/models/*.glb; do
+            if [ -f "$file" ]; then
+              filename=$(basename "$file")
+              echo "Optimizing $filename..."
+              gltfpack -i "$file" -o "uploads/optimized/$filename" -cc -tc || cp "$file" "uploads/optimized/$filename"
+            fi
+          done
+
+      - name: Upload Models to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "models"
+          name: "Models Release"
+          files: uploads/optimized/*.glb
+          make_latest: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run Tooling Scripts
+        run: |
+          node tools/convert_xlsx_to_exhibits.mjs
+
+      - name: Commit and Push Updates
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          
+          # Remove original large binaries to keep repo size down
+          rm -f uploads/models/*.glb
+          
+          git add assets/exhibits.json CREDITS.html uploads/models/
+          git commit -m "Auto-update exhibits and remote raw models" || echo "No changes to commit"
+          git push
