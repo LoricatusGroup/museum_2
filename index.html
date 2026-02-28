@@ -1150,14 +1150,15 @@
       document.getElementById('touch-ui').style.display = 'block';
       var jZ = document.getElementById('joy-area'), kn = document.getElementById('joy-knob'), lZ = document.getElementById('look-area');
       var jCx = 0, jCy = 0, lTid = null, lx = 0, ly = 0;
+      var lookTap = false, lookX = 0, lookY = 0, lookTime = 0;
       function updK(cx, cy) { var dx = cx - jCx, dy = cy - jCy, d = Math.sqrt(dx * dx + dy * dy), mx = 35; if (d > mx) { dx = dx / d * mx; dy = dy / d * mx; } kn.style.left = (35 + dx) + 'px'; kn.style.top = (35 + dy) + 'px'; jVx = dx / mx; jVy = dy / mx; }
       jZ.addEventListener('touchstart', function (e) { e.preventDefault(); var t = e.changedTouches[0]; jTid = t.identifier; jActive = true; var r = jZ.getBoundingClientRect(); jCx = r.left + r.width / 2; jCy = r.top + r.height / 2; updK(t.clientX, t.clientY); }, { passive: false });
       jZ.addEventListener('touchmove', function (e) { e.preventDefault(); for (var i = 0; i < e.changedTouches.length; i++)if (e.changedTouches[i].identifier === jTid) updK(e.changedTouches[i].clientX, e.changedTouches[i].clientY); }, { passive: false });
       function endJ(e) { for (var i = 0; i < e.changedTouches.length; i++)if (e.changedTouches[i].identifier === jTid) { jActive = false; jTid = null; jVx = 0; jVy = 0; kn.style.left = '35px'; kn.style.top = '35px'; } }
       jZ.addEventListener('touchend', endJ, { passive: false }); jZ.addEventListener('touchcancel', endJ, { passive: false });
-      lZ.addEventListener('touchstart', function (e) { e.preventDefault(); var t = e.changedTouches[0]; lTid = t.identifier; lx = t.clientX; ly = t.clientY; }, { passive: false });
-      lZ.addEventListener('touchmove', function (e) { e.preventDefault(); for (var i = 0; i < e.changedTouches.length; i++) { var t = e.changedTouches[i]; if (t.identifier === lTid) { yaw -= (t.clientX - lx) * .005; pitch -= (t.clientY - ly) * .005; pitch = Math.max(-1, Math.min(1, pitch)); lx = t.clientX; ly = t.clientY; } } }, { passive: false });
-      function endL(e) { for (var i = 0; i < e.changedTouches.length; i++)if (e.changedTouches[i].identifier === lTid) lTid = null; }
+      lZ.addEventListener('touchstart', function (e) { e.preventDefault(); var t = e.changedTouches[0]; lTid = t.identifier; lx = t.clientX; ly = t.clientY; lookTap = true; lookX = lx; lookY = ly; lookTime = Date.now(); }, { passive: false });
+      lZ.addEventListener('touchmove', function (e) { e.preventDefault(); for (var i = 0; i < e.changedTouches.length; i++) { var t = e.changedTouches[i]; if (t.identifier === lTid) { if (Math.abs(t.clientX - lookX) > 10 || Math.abs(t.clientY - lookY) > 10) lookTap = false; yaw -= (t.clientX - lx) * .005; pitch -= (t.clientY - ly) * .005; pitch = Math.max(-1, Math.min(1, pitch)); lx = t.clientX; ly = t.clientY; } } }, { passive: false });
+      function endL(e) { for (var i = 0; i < e.changedTouches.length; i++)if (e.changedTouches[i].identifier === lTid) { lTid = null; if (lookTap && Date.now() - lookTime < 400 && typeof fireRaycast === 'function') fireRaycast(); } }
       lZ.addEventListener('touchend', endL, { passive: false }); lZ.addEventListener('touchcancel', endL, { passive: false });
     }
 
@@ -1373,6 +1374,8 @@
     });
     function openArt(obj) {
       var ud = obj.userData;
+      if (ud.glbUrl) return; // Return early for GLB models to avoid opening empty 2D canvas viewer
+
       document.getElementById('art-title').innerHTML = ud.name + " <br><span style='font-size:0.6em;color:#da0'>" + ud.year + "</span>";
 
       var zc = document.getElementById('art-canvas-zoom');
@@ -1447,8 +1450,7 @@
     viewer.addEventListener('touchmove', onDrag);
     viewer.addEventListener('touchend', endDrag);
 
-    renderer.domElement.addEventListener('click', function (e) {
-      if (dragging && Math.abs(e.clientX - dragX) > 5) return;
+    function fireRaycast() {
       raycaster.setFromCamera(pointer, camera);
       var intersects = raycaster.intersectObjects(artMeshes, true);
       if (intersects.length > 0) {
@@ -1472,6 +1474,11 @@
           openArt(obj);
         }
       }
+    }
+
+    renderer.domElement.addEventListener('click', function (e) {
+      if (dragging && Math.abs(e.clientX - dragX) > 5) return;
+      fireRaycast();
     });
   </script>
 </body>
