@@ -1,1 +1,9 @@
-[]
+[
+  {
+    "modelUrl": "releases/download/models/tree.glb",
+    "title": "Tree (1)",
+    "author": "Loricatus",
+    "license": "Unknown",
+    "sourceLink": "https://sketchfab.com/3d-models/tree-2c6382e780844bf3a1b95b095bd27a37"
+  }
+]
