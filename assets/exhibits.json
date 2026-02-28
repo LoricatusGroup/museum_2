@@ -1,0 +1,22 @@
+[
+  {
+    "id": "dummy_model",
+    "modelUrl": "releases/download/models/dummy_model.glb",
+    "title": "Test Exhibit",
+    "author": "John Doe",
+    "license": "CC-BY",
+    "sourceLink": "https://example.com",
+    "wing": "North",
+    "slotId": "slot_4"
+  },
+  {
+    "id": "another_model",
+    "modelUrl": "releases/download/models/another_model.glb",
+    "title": "Cool Statue",
+    "author": "Jane Smith",
+    "license": "CC0",
+    "sourceLink": "https://example.com/2",
+    "wing": "East",
+    "slotId": "slot_7"
+  }
+]

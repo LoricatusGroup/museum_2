@@ -1,0 +1,13 @@
+[
+  { "id": "slot_1", "wing": "West", "position": [-15, 0, 0], "rotation": [0, 1.5708, 0] },
+  { "id": "slot_2", "wing": "West", "position": [-15, 0, -10], "rotation": [0, 1.5708, 0] },
+  { "id": "slot_3", "wing": "West", "position": [-15, 0, 10], "rotation": [0, 1.5708, 0] },
+  
+  { "id": "slot_4", "wing": "North", "position": [0, 0, -15], "rotation": [0, 0, 0] },
+  { "id": "slot_5", "wing": "North", "position": [-10, 0, -15], "rotation": [0, 0, 0] },
+  { "id": "slot_6", "wing": "North", "position": [10, 0, -15], "rotation": [0, 0, 0] },
+  
+  { "id": "slot_7", "wing": "East", "position": [15, 0, 0], "rotation": [0, -1.5708, 0] },
+  { "id": "slot_8", "wing": "East", "position": [15, 0, -10], "rotation": [0, -1.5708, 0] },
+  { "id": "slot_9", "wing": "East", "position": [15, 0, 10], "rotation": [0, -1.5708, 0] }
+]
