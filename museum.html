@@ -324,11 +324,12 @@
 
       #fs-btn {
         top: auto;
-        bottom: 16px;
-        left: 50%;
-        transform: translateX(-50%);
-        font-size: 10px;
-        padding: 8px 14px;
+        bottom: 20px;
+        left: auto;
+        right: 10px;
+        transform: none;
+        font-size: 9px;
+        padding: 7px 10px;
         opacity: 0.7
       }
 
@@ -450,14 +451,25 @@
         top: calc(8px + env(safe-area-inset-top))
       }
 
-      #fs-btn {
-        top: calc(10px + env(safe-area-inset-top));
-        left: calc(10px + env(safe-area-inset-left))
-      }
-
       #art-close {
         top: calc(15px + env(safe-area-inset-top));
         right: calc(25px + env(safe-area-inset-right))
+      }
+    }
+
+    @supports(padding: env(safe-area-inset-bottom)) {
+      @media(max-width:767px) {
+        #fs-btn {
+          bottom: calc(20px + env(safe-area-inset-bottom));
+          right: calc(10px + env(safe-area-inset-right))
+        }
+      }
+
+      @media(min-width:768px) {
+        #fs-btn {
+          top: calc(10px + env(safe-area-inset-top));
+          left: calc(10px + env(safe-area-inset-left))
+        }
       }
     }
 
@@ -878,13 +890,13 @@
     function setup() {
       scene = new THREE.Scene();
       scene.background = new THREE.Color(0xf5f0e8);
-      scene.fog = new THREE.Fog(0xf5f0e8, mobile ? 20 : 30, mobile ? 60 : 80);
+      scene.fog = new THREE.Fog(0xf5f0e8, 30, 80);
       camera = new THREE.PerspectiveCamera(70, innerWidth / innerHeight, 0.1, 120);
       camera.position.set(0, 2.5, 5);
-      renderer = new THREE.WebGLRenderer({ antialias: !mobile });
+      renderer = new THREE.WebGLRenderer({ antialias: true });
       renderer.setSize(innerWidth, innerHeight);
-      renderer.setPixelRatio(Math.min(devicePixelRatio, mobile ? 1.5 : 2));
-      renderer.shadowMap.enabled = !mobile;
+      renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+      renderer.shadowMap.enabled = true;
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
       renderer.toneMappingExposure = 1.6;
       renderer.domElement.id = 'c';
