@@ -229,7 +229,8 @@
       width: 140px;
       height: 140px;
       pointer-events: auto;
-      -webkit-tap-highlight-color: transparent
+      -webkit-tap-highlight-color: transparent;
+      z-index: 2
     }
 
     #joy-bg {
@@ -253,12 +254,13 @@
 
     #look-area {
       position: absolute;
-      right: 0;
+      left: 0;
       top: 0;
-      width: 65%;
+      width: 100%;
       height: 100%;
       pointer-events: auto;
-      -webkit-tap-highlight-color: transparent
+      -webkit-tap-highlight-color: transparent;
+      z-index: 1
     }
 
     #minimap {
@@ -271,7 +273,8 @@
       border: 1px solid #aa9060;
       z-index: 50;
       display: none;
-      border-radius: 3px
+      border-radius: 3px;
+      pointer-events: none
     }
 
     @media(min-width:768px) {
@@ -294,7 +297,8 @@
         transform: translateX(-50%);
         max-width: 92vw;
         padding: 8px 14px;
-        font-size: 16px
+        font-size: 16px;
+        z-index: 70
       }
 
       #info-panel .t {
@@ -312,23 +316,26 @@
       #wing-label {
         top: 6px;
         padding: 5px 12px;
-        font-size: clamp(6px, 2vw, 9px)
+        font-size: clamp(6px, 2vw, 9px);
+        z-index: 65
       }
 
       #minimap {
         width: 60px;
         height: 60px;
         top: 6px;
-        right: 6px
+        right: 6px;
+        z-index: 65
       }
 
       #fs-btn {
         top: auto;
-        bottom: 16px;
-        left: 50%;
-        transform: translateX(-50%);
-        font-size: 10px;
-        padding: 8px 14px;
+        bottom: 20px;
+        left: auto;
+        right: 10px;
+        transform: none;
+        font-size: 9px;
+        padding: 7px 10px;
         opacity: 0.7
       }
 
@@ -404,7 +411,8 @@
         top: 6px;
         max-width: 50vw;
         padding: 6px 12px;
-        font-size: 14px
+        font-size: 14px;
+        z-index: 70
       }
 
       #wing-label {
@@ -415,7 +423,8 @@
         width: 50px;
         height: 50px;
         top: 4px;
-        right: 4px
+        right: 4px;
+        z-index: 65
       }
 
       #art-canvas-container {
@@ -450,14 +459,25 @@
         top: calc(8px + env(safe-area-inset-top))
       }
 
-      #fs-btn {
-        top: calc(10px + env(safe-area-inset-top));
-        left: calc(10px + env(safe-area-inset-left))
-      }
-
       #art-close {
         top: calc(15px + env(safe-area-inset-top));
         right: calc(25px + env(safe-area-inset-right))
+      }
+    }
+
+    @supports(padding: env(safe-area-inset-bottom)) {
+      @media(max-width:767px) {
+        #fs-btn {
+          bottom: calc(20px + env(safe-area-inset-bottom));
+          right: calc(10px + env(safe-area-inset-right))
+        }
+      }
+
+      @media(min-width:768px) {
+        #fs-btn {
+          top: calc(10px + env(safe-area-inset-top));
+          left: calc(10px + env(safe-area-inset-left))
+        }
       }
     }
 
@@ -839,6 +859,7 @@
     var isSitting = false;
     var activeSculpture = null, viewerDragging = false, vDragX = 0;
     var jActive = false, jVx = 0, jVy = 0, jTid = null;
+    var jSize = 140, knSize = 56, knOff = 42, jMax = 35, jKnob = null;
 
     // Layout: Hub center + 3 wings
     // Hub: x[-10,10] z[-10,10]
@@ -878,13 +899,13 @@
     function setup() {
       scene = new THREE.Scene();
       scene.background = new THREE.Color(0xf5f0e8);
-      scene.fog = new THREE.Fog(0xf5f0e8, mobile ? 20 : 30, mobile ? 60 : 80);
+      scene.fog = new THREE.Fog(0xf5f0e8, 30, 80);
       camera = new THREE.PerspectiveCamera(70, innerWidth / innerHeight, 0.1, 120);
       camera.position.set(0, 2.5, 5);
-      renderer = new THREE.WebGLRenderer({ antialias: !mobile });
+      renderer = new THREE.WebGLRenderer({ antialias: true });
       renderer.setSize(innerWidth, innerHeight);
-      renderer.setPixelRatio(Math.min(devicePixelRatio, mobile ? 1.5 : 2));
-      renderer.shadowMap.enabled = !mobile;
+      renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+      renderer.shadowMap.enabled = true;
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
       renderer.toneMappingExposure = 1.6;
       renderer.domElement.id = 'c';
@@ -931,6 +952,7 @@
         camera.aspect = innerWidth / innerHeight;
         camera.updateProjectionMatrix();
         renderer.setSize(innerWidth, innerHeight);
+        if (mobile) updateJoystickLayout();
       });
       if (mobile) {
         addEventListener('orientationchange', function () {
@@ -938,6 +960,7 @@
             camera.aspect = innerWidth / innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(innerWidth, innerHeight);
+            updateJoystickLayout();
           }, 200);
         });
       }
@@ -1305,18 +1328,29 @@
       addEventListener('mouseup', function () { dragging = false; renderer.domElement.style.cursor = 'grab'; });
     }
 
+    function updateJoystickLayout() {
+      var isLandscape = innerHeight <= 500 && innerWidth > innerHeight;
+      jSize = isLandscape ? 100 : 140;
+      knSize = isLandscape ? 42 : 56;
+      knOff = (jSize - knSize) / 2;
+      jMax = jSize / 4;
+      if (!jActive && jKnob) {
+        jKnob.style.left = knOff + 'px';
+        jKnob.style.top = knOff + 'px';
+      }
+    }
+
     function setupTouch() {
       document.getElementById('touch-ui').style.display = 'block';
-      var jZ = document.getElementById('joy-area'), kn = document.getElementById('joy-knob'), lZ = document.getElementById('look-area');
+      var jZ = document.getElementById('joy-area');
+      jKnob = document.getElementById('joy-knob');
+      var lZ = document.getElementById('look-area');
       var jCx = 0, jCy = 0, lTid = null, lx = 0, ly = 0;
-      var jSize = (innerHeight <= 500 && innerWidth > innerHeight) ? 100 : 140;
-      var knSize = (innerHeight <= 500 && innerWidth > innerHeight) ? 42 : 56;
-      var knOff = (jSize - knSize) / 2;
-      var jMax = jSize / 4;
-      function updK(cx, cy) { var dx = cx - jCx, dy = cy - jCy, d = Math.sqrt(dx * dx + dy * dy), mx = jMax; if (d > mx) { dx = dx / d * mx; dy = dy / d * mx; } kn.style.left = (knOff + dx) + 'px'; kn.style.top = (knOff + dy) + 'px'; jVx = dx / mx; jVy = dy / mx; }
+      updateJoystickLayout();
+      function updK(cx, cy) { var dx = cx - jCx, dy = cy - jCy, d = Math.sqrt(dx * dx + dy * dy), mx = jMax; if (d > mx) { dx = dx / d * mx; dy = dy / d * mx; } jKnob.style.left = (knOff + dx) + 'px'; jKnob.style.top = (knOff + dy) + 'px'; jVx = dx / mx; jVy = dy / mx; }
       jZ.addEventListener('touchstart', function (e) { e.preventDefault(); var t = e.changedTouches[0]; jTid = t.identifier; jActive = true; var r = jZ.getBoundingClientRect(); jCx = r.left + r.width / 2; jCy = r.top + r.height / 2; updK(t.clientX, t.clientY); }, { passive: false });
       jZ.addEventListener('touchmove', function (e) { e.preventDefault(); for (var i = 0; i < e.changedTouches.length; i++)if (e.changedTouches[i].identifier === jTid) updK(e.changedTouches[i].clientX, e.changedTouches[i].clientY); }, { passive: false });
-      function endJ(e) { for (var i = 0; i < e.changedTouches.length; i++)if (e.changedTouches[i].identifier === jTid) { jActive = false; jTid = null; jVx = 0; jVy = 0; kn.style.left = knOff + 'px'; kn.style.top = knOff + 'px'; } }
+      function endJ(e) { for (var i = 0; i < e.changedTouches.length; i++)if (e.changedTouches[i].identifier === jTid) { jActive = false; jTid = null; jVx = 0; jVy = 0; jKnob.style.left = knOff + 'px'; jKnob.style.top = knOff + 'px'; } }
       jZ.addEventListener('touchend', endJ, { passive: false }); jZ.addEventListener('touchcancel', endJ, { passive: false });
       lZ.addEventListener('touchstart', function (e) { e.preventDefault(); var t = e.changedTouches[0]; lTid = t.identifier; lx = t.clientX; ly = t.clientY; }, { passive: false });
       lZ.addEventListener('touchmove', function (e) { e.preventDefault(); for (var i = 0; i < e.changedTouches.length; i++) { var t = e.changedTouches[i]; if (t.identifier === lTid) { yaw -= (t.clientX - lx) * .005; pitch -= (t.clientY - ly) * .005; pitch = Math.max(-1, Math.min(1, pitch)); lx = t.clientX; ly = t.clientY; } } }, { passive: false });
