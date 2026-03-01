@@ -224,38 +224,38 @@
 
     #joy-area {
       position: absolute;
-      left: 14px;
-      bottom: 14px;
-      width: 120px;
-      height: 120px;
+      left: 16px;
+      bottom: 16px;
+      width: 140px;
+      height: 140px;
       pointer-events: auto;
       -webkit-tap-highlight-color: transparent
     }
 
     #joy-bg {
-      width: 120px;
-      height: 120px;
+      width: 140px;
+      height: 140px;
       border-radius: 50%;
-      background: rgba(100, 80, 50, .1);
-      border: 2px solid rgba(100, 80, 50, .25)
+      background: rgba(100, 80, 50, .15);
+      border: 2px solid rgba(100, 80, 50, .3)
     }
 
     #joy-knob {
       position: absolute;
-      width: 50px;
-      height: 50px;
+      width: 56px;
+      height: 56px;
       border-radius: 50%;
-      background: rgba(100, 80, 50, .25);
-      border: 2px solid rgba(100, 80, 50, .4);
-      top: 35px;
-      left: 35px
+      background: rgba(100, 80, 50, .3);
+      border: 2px solid rgba(100, 80, 50, .5);
+      top: 42px;
+      left: 42px
     }
 
     #look-area {
       position: absolute;
       right: 0;
       top: 0;
-      width: 60%;
+      width: 65%;
       height: 100%;
       pointer-events: auto;
       -webkit-tap-highlight-color: transparent
@@ -282,6 +282,182 @@
 
       #info-panel {
         bottom: 30px
+      }
+    }
+
+    /* Mobile portrait optimizations */
+    @media(max-width:767px) {
+      #info-panel {
+        bottom: auto;
+        top: 40px;
+        left: 50%;
+        transform: translateX(-50%);
+        max-width: 92vw;
+        padding: 8px 14px;
+        font-size: 16px
+      }
+
+      #info-panel .t {
+        font-size: clamp(7px, 2.5vw, 10px)
+      }
+
+      #info-panel .a {
+        font-size: 14px
+      }
+
+      #info-panel .y {
+        font-size: 13px
+      }
+
+      #wing-label {
+        top: 6px;
+        padding: 5px 12px;
+        font-size: clamp(6px, 2vw, 9px)
+      }
+
+      #minimap {
+        width: 60px;
+        height: 60px;
+        top: 6px;
+        right: 6px
+      }
+
+      #fs-btn {
+        top: auto;
+        bottom: 16px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 10px;
+        padding: 8px 14px;
+        opacity: 0.7
+      }
+
+      #art-close {
+        top: 10px;
+        right: 10px;
+        width: 48px;
+        height: 48px;
+        font-size: 40px;
+        line-height: 42px
+      }
+
+      #art-canvas-container {
+        width: 95%;
+        max-height: 70vh;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch
+      }
+
+      #art-title {
+        font-size: clamp(8px, 3vw, 14px);
+        margin-top: 12px;
+        padding: 0 10px
+      }
+
+      #art-desc {
+        font-size: clamp(14px, 3.5vw, 20px);
+        padding: 0 10px
+      }
+
+      #art-desc p {
+        font-size: clamp(13px, 3vw, 18px)
+      }
+
+      #sketchfab-viewer {
+        height: 40vh;
+        min-height: 220px
+      }
+
+      #art-viewer.show.sculpture-mode {
+        padding-bottom: 30px
+      }
+
+      .controls-info {
+        font-size: clamp(12px, 3vw, 16px);
+        padding: 0 16px
+      }
+    }
+
+    /* Mobile landscape optimizations */
+    @media(max-height:500px) and (orientation:landscape) {
+      #joy-area {
+        left: 10px;
+        bottom: 10px;
+        width: 100px;
+        height: 100px
+      }
+
+      #joy-bg {
+        width: 100px;
+        height: 100px
+      }
+
+      #joy-knob {
+        width: 42px;
+        height: 42px;
+        top: 29px;
+        left: 29px
+      }
+
+      #info-panel {
+        bottom: auto;
+        top: 6px;
+        max-width: 50vw;
+        padding: 6px 12px;
+        font-size: 14px
+      }
+
+      #wing-label {
+        display: none
+      }
+
+      #minimap {
+        width: 50px;
+        height: 50px;
+        top: 4px;
+        right: 4px
+      }
+
+      #art-canvas-container {
+        width: 60%;
+        max-height: 85vh
+      }
+
+      #art-close {
+        top: 8px;
+        right: 8px
+      }
+
+      #sketchfab-viewer {
+        height: 70vh;
+        min-height: 180px
+      }
+    }
+
+    /* Safe area support for notched phones */
+    @supports(padding: env(safe-area-inset-bottom)) {
+      #joy-area {
+        bottom: calc(16px + env(safe-area-inset-bottom));
+        left: calc(16px + env(safe-area-inset-left))
+      }
+
+      #minimap {
+        top: calc(8px + env(safe-area-inset-top));
+        right: calc(8px + env(safe-area-inset-right))
+      }
+
+      #wing-label {
+        top: calc(8px + env(safe-area-inset-top))
+      }
+
+      #fs-btn {
+        top: calc(10px + env(safe-area-inset-top));
+        left: calc(10px + env(safe-area-inset-left))
+      }
+
+      #art-close {
+        top: calc(15px + env(safe-area-inset-top));
+        right: calc(25px + env(safe-area-inset-right))
       }
     }
 
@@ -702,13 +878,13 @@
     function setup() {
       scene = new THREE.Scene();
       scene.background = new THREE.Color(0xf5f0e8);
-      scene.fog = new THREE.Fog(0xf5f0e8, 30, 80);
+      scene.fog = new THREE.Fog(0xf5f0e8, mobile ? 20 : 30, mobile ? 60 : 80);
       camera = new THREE.PerspectiveCamera(70, innerWidth / innerHeight, 0.1, 120);
       camera.position.set(0, 2.5, 5);
-      renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer = new THREE.WebGLRenderer({ antialias: !mobile });
       renderer.setSize(innerWidth, innerHeight);
-      renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-      renderer.shadowMap.enabled = true;
+      renderer.setPixelRatio(Math.min(devicePixelRatio, mobile ? 1.5 : 2));
+      renderer.shadowMap.enabled = !mobile;
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
       renderer.toneMappingExposure = 1.6;
       renderer.domElement.id = 'c';
@@ -751,7 +927,20 @@
       ], 1.5);
 
       setupInput();
-      addEventListener('resize', function () { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
+      addEventListener('resize', function () {
+        camera.aspect = innerWidth / innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(innerWidth, innerHeight);
+      });
+      if (mobile) {
+        addEventListener('orientationchange', function () {
+          setTimeout(function () {
+            camera.aspect = innerWidth / innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(innerWidth, innerHeight);
+          }, 200);
+        });
+      }
       loop();
     }
 
@@ -1120,10 +1309,14 @@
       document.getElementById('touch-ui').style.display = 'block';
       var jZ = document.getElementById('joy-area'), kn = document.getElementById('joy-knob'), lZ = document.getElementById('look-area');
       var jCx = 0, jCy = 0, lTid = null, lx = 0, ly = 0;
-      function updK(cx, cy) { var dx = cx - jCx, dy = cy - jCy, d = Math.sqrt(dx * dx + dy * dy), mx = 35; if (d > mx) { dx = dx / d * mx; dy = dy / d * mx; } kn.style.left = (35 + dx) + 'px'; kn.style.top = (35 + dy) + 'px'; jVx = dx / mx; jVy = dy / mx; }
+      var jSize = (innerHeight <= 500 && innerWidth > innerHeight) ? 100 : 140;
+      var knSize = (innerHeight <= 500 && innerWidth > innerHeight) ? 42 : 56;
+      var knOff = (jSize - knSize) / 2;
+      var jMax = jSize / 4;
+      function updK(cx, cy) { var dx = cx - jCx, dy = cy - jCy, d = Math.sqrt(dx * dx + dy * dy), mx = jMax; if (d > mx) { dx = dx / d * mx; dy = dy / d * mx; } kn.style.left = (knOff + dx) + 'px'; kn.style.top = (knOff + dy) + 'px'; jVx = dx / mx; jVy = dy / mx; }
       jZ.addEventListener('touchstart', function (e) { e.preventDefault(); var t = e.changedTouches[0]; jTid = t.identifier; jActive = true; var r = jZ.getBoundingClientRect(); jCx = r.left + r.width / 2; jCy = r.top + r.height / 2; updK(t.clientX, t.clientY); }, { passive: false });
       jZ.addEventListener('touchmove', function (e) { e.preventDefault(); for (var i = 0; i < e.changedTouches.length; i++)if (e.changedTouches[i].identifier === jTid) updK(e.changedTouches[i].clientX, e.changedTouches[i].clientY); }, { passive: false });
-      function endJ(e) { for (var i = 0; i < e.changedTouches.length; i++)if (e.changedTouches[i].identifier === jTid) { jActive = false; jTid = null; jVx = 0; jVy = 0; kn.style.left = '35px'; kn.style.top = '35px'; } }
+      function endJ(e) { for (var i = 0; i < e.changedTouches.length; i++)if (e.changedTouches[i].identifier === jTid) { jActive = false; jTid = null; jVx = 0; jVy = 0; kn.style.left = knOff + 'px'; kn.style.top = knOff + 'px'; } }
       jZ.addEventListener('touchend', endJ, { passive: false }); jZ.addEventListener('touchcancel', endJ, { passive: false });
       lZ.addEventListener('touchstart', function (e) { e.preventDefault(); var t = e.changedTouches[0]; lTid = t.identifier; lx = t.clientX; ly = t.clientY; }, { passive: false });
       lZ.addEventListener('touchmove', function (e) { e.preventDefault(); for (var i = 0; i < e.changedTouches.length; i++) { var t = e.changedTouches[i]; if (t.identifier === lTid) { yaw -= (t.clientX - lx) * .005; pitch -= (t.clientY - ly) * .005; pitch = Math.max(-1, Math.min(1, pitch)); lx = t.clientX; ly = t.clientY; } } }, { passive: false });
@@ -1299,8 +1492,9 @@
     var pts;
     function addDust() {
       var geo = new THREE.BufferGeometry();
-      var pos = new Float32Array(1500 * 3);
-      for (var i = 0; i < 1500 * 3; i++) pos[i] = (Math.random() - 0.5) * 140;
+      var dustCount = mobile ? 500 : 1500;
+      var pos = new Float32Array(dustCount * 3);
+      for (var i = 0; i < dustCount * 3; i++) pos[i] = (Math.random() - 0.5) * 140;
       geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
       var mat = new THREE.PointsMaterial({ color: 0xffeedd, size: 0.15, transparent: true, opacity: 0.4, blending: THREE.AdditiveBlending, depthWrite: false });
       pts = new THREE.Points(geo, mat);
@@ -1374,8 +1568,9 @@
         if (artData) {
           var tmp = document.createElement('canvas'); tmp.width = artData.pw; tmp.height = artData.ph;
           artData.paint(tmp.getContext('2d'));
-          var maxW = Math.min(window.innerWidth * 0.8, 600);
-          var sc = Math.floor(maxW / artData.pw);
+          var maxW = Math.min(window.innerWidth * (mobile ? 0.9 : 0.8), mobile ? 400 : 600);
+          var maxH = window.innerHeight * (mobile ? 0.5 : 0.65);
+          var sc = Math.floor(Math.min(maxW / artData.pw, maxH / artData.ph));
           if (sc < 1) sc = 1;
           zc.width = artData.pw * sc; zc.height = artData.ph * sc;
           var zx = zc.getContext('2d');
