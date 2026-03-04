@@ -1705,21 +1705,23 @@
       }
     });
 
+    // Mute button logic
     var muteBtn = document.getElementById('mute-btn');
-    muteBtn.addEventListener('click', function () {
-      if (!actx) return;
-      if (actx.state === 'running') {
-        actx.suspend().then(function () {
-          isMuted = true;
+    if (muteBtn) {
+      muteBtn.addEventListener('click', function () {
+        if (!actx || !pGain || !ambGain) return;
+        isMuted = !isMuted;
+        if (isMuted) {
+          pGain.gain.value = 0;
+          ambGain.gain.value = 0;
           muteBtn.innerHTML = '🔇';
-        });
-      } else if (actx.state === 'suspended') {
-        actx.resume().then(function () {
-          isMuted = false;
+        } else {
+          pGain.gain.value = 0.15;
+          ambGain.gain.value = 0.05;
           muteBtn.innerHTML = '🔊';
-        });
-      }
-    });
+        }
+      });
+    }
   </script>
 </body>
 

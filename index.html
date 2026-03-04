@@ -161,7 +161,7 @@
     #mute-btn {
       position: fixed;
       top: 10px;
-      right: 10px;
+      left: 10px;
       background: rgba(0, 0, 0, .5);
       color: #fff;
       border: 1px solid #aa9060;
@@ -518,15 +518,9 @@
 
         #mute-btn {
           top: calc(10px + env(safe-area-inset-top));
-          right: calc(10px + env(safe-area-inset-right))
+          left: calc(10px + env(safe-area-inset-left))
         }
       }
-    }
-
-    top: calc(10px + env(safe-area-inset-top));
-    left: calc(10px + env(safe-area-inset-left))
-    }
-    }
     }
 
     #crosshair {
@@ -1799,6 +1793,24 @@
       if (dragging && Math.abs(e.clientX - dragX) > 5) return;
       fireRaycast();
     });
+
+    // Mute button logic
+    var muteBtn = document.getElementById('mute-btn');
+    if (muteBtn) {
+      muteBtn.addEventListener('click', function () {
+        if (!actx || !pGain || !ambGain) return;
+        isMuted = !isMuted;
+        if (isMuted) {
+          pGain.gain.value = 0;
+          ambGain.gain.value = 0;
+          muteBtn.innerHTML = '🔇';
+        } else {
+          pGain.gain.value = 0.15;
+          ambGain.gain.value = 0.05;
+          muteBtn.innerHTML = '🔊';
+        }
+      });
+    }
   </script>
 </body>
 
