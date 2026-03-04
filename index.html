@@ -355,6 +355,15 @@
         opacity: 0.7
       }
 
+      #mute-btn {
+        top: 10px;
+        left: 10px;
+        right: auto;
+        font-size: 16px;
+        padding: 8px;
+        opacity: 0.7;
+      }
+
       #art-close {
         top: 10px;
         right: 10px;
@@ -494,6 +503,11 @@
           bottom: calc(20px + env(safe-area-inset-bottom));
           right: calc(10px + env(safe-area-inset-right))
         }
+
+        #mute-btn {
+          top: calc(10px + env(safe-area-inset-top));
+          right: calc(10px + env(safe-area-inset-right))
+        }
       }
 
       @media(min-width:768px) {
@@ -501,7 +515,18 @@
           top: calc(10px + env(safe-area-inset-top));
           left: calc(10px + env(safe-area-inset-left))
         }
+
+        #mute-btn {
+          top: calc(10px + env(safe-area-inset-top));
+          right: calc(10px + env(safe-area-inset-right))
+        }
       }
+    }
+
+    top: calc(10px + env(safe-area-inset-top));
+    left: calc(10px + env(safe-area-inset-left))
+    }
+    }
     }
 
     #crosshair {
@@ -1623,6 +1648,7 @@
       document.getElementById('overlay').classList.add('hidden');
       document.getElementById('vignette').style.display = 'block';
       document.getElementById('crosshair').style.display = 'block';
+      document.getElementById('mute-btn').style.display = 'block';
       initAudio();
       document.getElementById('minimap').style.display = 'block';
       document.getElementById('fs-btn').style.display = 'block';
