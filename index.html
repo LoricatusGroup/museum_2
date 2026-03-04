@@ -158,6 +158,22 @@
       display: none;
     }
 
+    #mute-btn {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: rgba(0, 0, 0, .5);
+      color: #fff;
+      border: 1px solid #aa9060;
+      padding: 10px;
+      cursor: pointer;
+      font-size: 16px;
+      z-index: 100;
+      border-radius: 5px;
+      display: none;
+      line-height: 1;
+    }
+
     #info-panel .t {
       font-family: 'Press Start 2P', cursive;
       font-size: clamp(7px, 1.8vw, 10px);
@@ -346,6 +362,13 @@
         height: 48px;
         font-size: 40px;
         line-height: 42px
+      }
+
+      #mute-btn {
+        top: 10px;
+        right: 10px;
+        padding: 8px;
+        font-size: 14px;
       }
 
       #art-canvas-container {
@@ -644,6 +667,7 @@
 
   <div id="wing-label" id="wL"></div>
   <div id="fs-btn">🔲 TELJES KÉPERNYŐ</div>
+  <div id="mute-btn" title="Hang ki/be">🔊</div>
   <div id="info-panel">
     <div class="t" id="iT"></div>
     <div class="a" id="iA"></div>
@@ -1507,6 +1531,7 @@
     // ── AMBIENT & AUDIO ──
     var actx = null, pGain = null, ambOsc = null, ambGain = null;
     var lastStep = 0, stepFlip = false;
+    var isMuted = false;
     function initAudio() {
       if (actx) return;
       var AudioContext = window.AudioContext || window.webkitAudioContext;

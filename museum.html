@@ -348,6 +348,13 @@
         line-height: 42px
       }
 
+      #mute-btn {
+        top: 10px;
+        right: 10px;
+        padding: 8px;
+        font-size: 14px;
+      }
+
       #art-canvas-container {
         width: 95%;
         max-height: 70vh;
@@ -644,6 +651,7 @@
 
   <div id="wing-label" id="wL"></div>
   <div id="fs-btn">🔲 TELJES KÉPERNYŐ</div>
+  <div id="mute-btn" title="Hang ki/be">🔊</div>
   <div id="info-panel">
     <div class="t" id="iT"></div>
     <div class="a" id="iA"></div>
@@ -1466,6 +1474,7 @@
     // ── AMBIENT & AUDIO ──
     var actx = null, pGain = null, ambOsc = null, ambGain = null;
     var lastStep = 0, stepFlip = false;
+    var isMuted = false;
     function initAudio() {
       if (actx) return;
       var AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -1673,6 +1682,22 @@
         if (obj.userData.name) {
           openArt(obj);
         }
+      }
+    });
+
+    var muteBtn = document.getElementById('mute-btn');
+    muteBtn.addEventListener('click', function () {
+      if (!actx) return;
+      if (actx.state === 'running') {
+        actx.suspend().then(function () {
+          isMuted = true;
+          muteBtn.innerHTML = '🔇';
+        });
+      } else if (actx.state === 'suspended') {
+        actx.resume().then(function () {
+          isMuted = false;
+          muteBtn.innerHTML = '🔊';
+        });
       }
     });
   </script>
