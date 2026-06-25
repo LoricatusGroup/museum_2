@@ -91,14 +91,24 @@ function renderQuestion(q, num) {
 
 const sections = doc.sections || [];
 const questions = doc.questions || [];
+const meta = doc.meta || {};
+const TITLE = meta.title || '3D virtuális bemutatótér — felmérő kérdőív';
+const SUBTITLE = meta.subtitle || 'Építőipari cég elkészült munkáinak online, 3D-s bemutatásához. Ez az adatlap segít, hogy pontos ajánlatot és tervet készíthessünk.';
+const HOWTO = meta.howto || '<b>Kitöltési útmutató.</b> Kérjük, a megfelelő válasznál tegyen egy <span class="legendbox x"></span> jelet az üres négyzetbe <span class="legendbox"></span>. Ahol jelezzük, több válasz is jelölhető. Ha egyik felkínált válasz sem pontos, írja be sajátját az „Egyéb" sorba. Amit nem tud, hagyja üresen vagy jelölje a „Nem tudom" lehetőséget — a végén átbeszéljük. Az utolsó, <b>E</b> szakaszt kérjük a cég <b>rendszergazdája / IT-felelőse</b> töltse ki.';
 
 let body = '';
 let num = 0;
 sections.forEach((sec, i) => {
-  const pageBreak = sec.key === 'E' ? ' pagebreak' : '';
+  const pageBreak = (sec.pageBreak === true || sec.key === 'E') ? ' pagebreak' : '';
   body += `<div class="section${pageBreak}">`;
-  body += `<div class="section-head"><span class="stitle">${esc(sec.key)}. ${esc(sec.title)}</span><span class="swho">${esc(sec.who)}</span></div>`;
-  const qs = questions.filter((q) => (q.section || '').trim().toUpperCase() === sec.key.toUpperCase());
+  const head = (sec.key && String(sec.key).trim()) ? `${esc(sec.key)}. ${esc(sec.title)}` : esc(sec.title);
+  body += `<div class="section-head"><span class="stitle">${head}</span><span class="swho">${esc(sec.who)}</span></div>`;
+  const secKey = (sec.key || '').trim().toUpperCase();
+  const secTitle = (sec.title || '').trim().toUpperCase();
+  const qs = questions.filter((q) => {
+    const s = (q.section || '').trim().toUpperCase();
+    return (secKey && s === secKey) || s === secTitle;
+  });
   for (const q of qs) {
     num += 1;
     body += renderQuestion(q, num);
@@ -110,8 +120,8 @@ const html = `<!DOCTYPE html>
 <html lang="hu"><head><meta charset="UTF-8"><title>3D bemutatótér – felmérő kérdőív</title><style>${CSS}</style></head>
 <body>
   <div class="cover">
-    <h1>3D virtuális bemutatótér — felmérő kérdőív</h1>
-    <p class="sub">Építőipari cég elkészült munkáinak online, 3D-s bemutatásához. Ez az adatlap segít, hogy pontos ajánlatot és tervet készíthessünk.</p>
+    <h1>${TITLE}</h1>
+    <p class="sub">${SUBTITLE}</p>
     <div class="meta-row">
       <div class="meta-field"><span class="lbl">Cég neve</span><span class="fill"></span></div>
       <div class="meta-field"><span class="lbl">Kitöltő neve / beosztása</span><span class="fill"></span></div>
@@ -121,12 +131,7 @@ const html = `<!DOCTYPE html>
       <div class="meta-field"><span class="lbl">Kitöltés dátuma</span><span class="fill"></span></div>
     </div>
   </div>
-  <div class="howto">
-    <b>Kitöltési útmutató.</b> Kérjük, a megfelelő válasznál tegyen egy <span class="legendbox x"></span> jelet az üres négyzetbe <span class="legendbox"></span>.
-    Ahol jelezzük, több válasz is jelölhető. Ha egyik felkínált válasz sem pontos, írja be sajátját az <b>„Egyéb"</b> sorba.
-    Amit nem tud, hagyja üresen vagy jelölje a <b>„Nem tudom"</b> lehetőséget — a végén átbeszéljük. Az utolsó, <b>E</b> szakaszt kérjük a cég
-    <b>rendszergazdája / IT-felelőse</b> töltse ki.
-  </div>
+  <div class="howto">${HOWTO}</div>
   ${body}
   <div class="footer-sign">
     <div class="sf"><div class="cap">Kitöltő aláírása</div><div class="fill"></div></div>
