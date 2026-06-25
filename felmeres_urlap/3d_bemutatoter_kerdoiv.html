@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<title>3D bemutatótér – felmérő kérdőív</title>
+<style>
+  @page { size: A4; margin: 14mm 14mm 16mm 14mm; }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: "DejaVu Sans", Arial, Helvetica, sans-serif;
+    color: #1a1a1a;
+    font-size: 10.3pt;
+    line-height: 1.34;
+  }
+
+  /* ---------- Fejléc ---------- */
+  .cover {
+    border: 2px solid #b4541f;
+    border-radius: 6px;
+    padding: 14px 16px;
+    margin-bottom: 14px;
+  }
+  .cover h1 {
+    margin: 0 0 2px 0;
+    font-size: 18pt;
+    color: #b4541f;
+    letter-spacing: .2px;
+  }
+  .cover .sub { margin: 0 0 10px 0; font-size: 10pt; color: #444; }
+  .meta-row { display: flex; gap: 14px; margin-top: 8px; }
+  .meta-field { flex: 1; font-size: 9.3pt; }
+  .meta-field .lbl { color: #555; display:block; margin-bottom: 1px; }
+  .fill { border-bottom: 1px solid #999; display:block; height: 15px; }
+
+  /* ---------- Kitöltési útmutató ---------- */
+  .howto {
+    background: #f6efe9;
+    border-left: 4px solid #b4541f;
+    padding: 8px 12px;
+    margin-bottom: 16px;
+    font-size: 9.4pt;
+  }
+  .howto b { color: #b4541f; }
+  .legendbox {
+    display:inline-block; width: 12px; height: 12px;
+    border: 1.3px solid #333; vertical-align: -2px; margin: 0 2px;
+    position: relative;
+  }
+  .legendbox.x::after {
+    content: "✗"; position:absolute; top:-4px; left:0px; font-size: 12px; color:#b4541f; font-weight:700;
+  }
+
+  /* ---------- Szekciók ---------- */
+  .section { margin-top: 6px; }
+  .section-head {
+    background: #b4541f;
+    color: #fff;
+    padding: 6px 12px;
+    border-radius: 4px;
+    margin: 18px 0 4px 0;
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+  .section-head .stitle { font-size: 12.5pt; font-weight: 700; }
+  .section-head .swho { font-size: 8.8pt; font-weight: 400; opacity: .95; display:block; margin-top:1px; }
+
+  /* ---------- Kérdés ---------- */
+  .q {
+    border-bottom: 1px dotted #cfcfcf;
+    padding: 7px 2px 8px 2px;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .q:last-child { border-bottom: none; }
+  .qt { margin: 0 0 5px 0; font-weight: 700; }
+  .qt .num { color: #b4541f; margin-right: 4px; }
+  .qt .hint { font-weight: 400; font-size: 8.8pt; color: #777; }
+
+  .opts { padding-left: 2px; }
+  /* két oszlopos opciók a tömörségért */
+  .opts.cols2 { column-count: 2; column-gap: 22px; }
+  .opt {
+    display: block;
+    padding: 1.5px 0;
+    break-inside: avoid;
+  }
+  .box {
+    display:inline-block; width: 12px; height: 12px;
+    border: 1.3px solid #444; vertical-align: -2px; margin-right: 6px;
+    border-radius: 2px;
+  }
+  .other { padding: 2px 0 0 0; }
+  .other .oline { border-bottom: 1px solid #999; display:inline-block; min-width: 60%; height: 14px; vertical-align: -2px; }
+
+  /* írásos válasz vonalak */
+  .lines .ln { border-bottom: 1px solid #aaa; height: 17px; margin-top: 5px; }
+
+  .note { font-size: 8.8pt; color: #777; margin-top: 3px; font-style: italic; }
+
+  .footer-sign {
+    margin-top: 22px; padding-top: 10px; border-top: 2px solid #b4541f;
+    display:flex; gap: 26px; break-inside: avoid;
+  }
+  .footer-sign .sf { flex:1; }
+  .footer-sign .sf .fill { margin-top: 18px; }
+  .footer-sign .cap { font-size: 9pt; color: #555; }
+
+  .pagebreak { break-before: page; page-break-before: always; }
+</style>
+</head>
+<body>
+
+  <div class="cover">
+    <h1>3D virtuális bemutatótér — felmérő kérdőív</h1>
+    <p class="sub">Építőipari cég elkészült munkáinak online, 3D-s bemutatásához. Ez az adatlap segít, hogy pontos ajánlatot és tervet készíthessünk.</p>
+    <div class="meta-row">
+      <div class="meta-field"><span class="lbl">Cég neve</span><span class="fill"></span></div>
+      <div class="meta-field"><span class="lbl">Kitöltő neve / beosztása</span><span class="fill"></span></div>
+    </div>
+    <div class="meta-row">
+      <div class="meta-field"><span class="lbl">Telefon / e-mail</span><span class="fill"></span></div>
+      <div class="meta-field"><span class="lbl">Kitöltés dátuma</span><span class="fill"></span></div>
+    </div>
+  </div>
+
+  <div class="howto">
+    <b>Kitöltési útmutató.</b> Kérjük, a megfelelő válasznál tegyen egy <span class="legendbox x"></span> jelet a négyzetbe <span class="legendbox"></span>.
+    Több válasz is jelölhető ott, ahol ezt külön jelezzük. Ha egyik felkínált válasz sem pontos, írja be a saját válaszát az <b>„Egyéb"</b> sorba.
+    Amit nem tud, nyugodtan hagyja üresen, vagy jelölje a <b>„Nem tudom"</b> lehetőséget — a végén úgyis átbeszéljük. Az utolsó (E) szakaszt a cég
+    <b>rendszergazdája / IT-felelőse</b> töltse ki.
+  </div>
+
+  <!-- ============ A. ÁLTALÁNOS ============ -->
+  <div class="section">
+    <div class="section-head">
+      <span class="stitle">A. Általános — a cégről és a célról</span>
+      <span class="swho">Kitölti: bárki a cégtől (ügyvezető / marketinges / asszisztens)</span>
+    </div>
+
+    <div class="q">
+      <p class="qt"><span class="num">1.</span> Néhány szóban: mivel foglalkozik a cég, és mit szeretne elérni ezzel a 3D bemutatótérrel?</p>
+      <div class="lines"><div class="ln"></div><div class="ln"></div></div>
+    </div>
+
+    <div class="q">
+      <p class="qt"><span class="num">2.</span> Mi a bemutatótér fő célja? <span class="hint">(több is jelölhető)</span></p>
+      <div class="opts cols2">
+        <label class="opt"><span class="box"></span> Új ügyfelek, megrendelők szerzése</label>
+        <label class="opt"><span class="box"></span> Referenciák, portfólió bemutatása</label>
+        <label class="opt"><span class="box"></span> Megjelenés vásáron / kiállításon, standon</label>
+        <label class="opt"><span class="box"></span> Befektetők / partnerek felé prezentáció</label>
+        <label class="opt"><span class="box"></span> Pályázat / közbeszerzés melléklete</label>
+        <label class="opt"><span class="box"></span> Cégarculat, presztízs erősítése</label>
+      </div>
+      <div class="other">Egyéb: <span class="oline"></span></div>
+    </div>
+
+    <div class="q">
+      <p class="qt"><span class="num">3.</span> Kinek szól elsősorban (célközönség)? <span class="hint">(több is jelölhető)</span></p>
+      <div class="opts cols2">
+        <label class="opt"><span class="box"></span> Magánszemély megrendelők (lakossági)</label>
+        <label class="opt"><span class="box"></span> Cégek, üzleti megrendelők</label>
+        <label class="opt"><span class="box"></span> Önkormányzat / állami megrendelő</label>
+        <label class="opt"><span class="box"></span> Befektetők, partnerek</label>
+        <label class="opt"><span class="box"></span> Nagyközönség / sajtó</label>
+      </div>
+      <div class="other">Egyéb: <span class="oline"></span></div>
+    </div>
+
+    <div class="q">
+      <p class="qt"><span class="num">4.</span> Hogyan jutnának el a látogatók a bemutatótérhez? <span class="hint">(több is jelölhető)</span></p>
+      <div class="opts cols2">
+        <label class="opt"><span class="box"></span> A cég weboldaláról, gombbal/menüből</label>
+        <label class="opt"><span class="box"></span> Közvetlen linkkel (e-mailben, hírlevélben)</label>
+        <label class="opt"><span class="box"></span> QR-kóddal (névjegy, plakát, kiadvány)</label>
+        <label class="opt"><span class="box"></span> Közösségi médiából (Facebook, Instagram…)</label>
+        <label class="opt"><span class="box"></span> Helyszíni érintőképernyőn / standon (kioszk)</label>
+      </div>
+      <div class="other">Egyéb: <span class="oline"></span></div>
+    </div>
+
+    <div class="q">
+      <p class="qt"><span class="num">5.</span> Mikorra szeretnék, hogy elkészüljön?</p>
+      <div class="opts cols2">
+        <label class="opt"><span class="box"></span> Nincs konkrét határidő, ráérünk</label>
+        <label class="opt"><span class="box"></span> 1 hónapon belül</label>
+        <label class="opt"><span class="box"></span> 1–3 hónapon belül</label>
+        <label class="opt"><span class="box"></span> 3–6 hónapon belül</label>
+        <label class="opt"><span class="box"></span> Konkrét dátumhoz / eseményhez kötött</label>
+      </div>
+      <div class="other">Konkrét dátum / esemény, ha van: <span class="oline"></span></div>
+    </div>
+
+    <div class="q">
+      <p class="qt"><span class="num">6.</span> Van-e olyan meglévő honlap vagy 3D bemutató, ami tetszik és példának venné? <span class="hint">(link vagy név)</span></p>
+      <div class="lines"><div class="ln"></div></div>
+    </div>
+
+    <div class="q">
+      <p class="qt"><span class="num">7.</span> Hozzávetőleges költségkeret a projektre <span class="hint">(opcionális, nagyságrend)</span></p>
+      <div class="opts cols2">
+        <label class="opt"><span class="box"></span> Még nem tudjuk, az ajánlat alapján döntünk</label>
+        <label class="opt"><span class="box"></span> Minimális, alapszintű megoldás</label>
+        <label class="opt"><span class="box"></span> Közepes, igényes megoldás</label>
+        <label class="opt"><span class="box"></span> Nincs szűk korlát, a minőség a fontos</label>
+      </div>
+      <div class="other">Megjegyzés: <span class="oline"></span></div>
+    </div>
+  </div>
+
+  <!-- ============ B. TARTALOM ============ -->
+  <div class="section">
+    <div class="section-head">
+      <span class="stitle">B. Mit szeretnének bemutatni? — tartalom</span>
+      <span class="swho">Kitölti: aki a cég munkáit / marketinganyagait ismeri</span>
+    </div>
+
+    <div class="q">
+      <p class="qt"><span class="num">8.</span> Hány elkészült munkát / projektet szeretnének most bemutatni?</p>
+      <div class="opts cols2">
+        <label class="opt"><span class="box"></span> 1–5 db</label>
+        <label class="opt"><span class="box"></span> 6–15 db</label>
+        <label class="opt"><span class="box"></span> 16–30 db</label>
+        <label class="opt"><span class="box"></span> 30-nál több</label>
+      </div>
+      <div class="other">Pontosabban, ha tudják: <span class="oline"></span></div>
+    </div>
+
+    <div class="q">
+      <p class="qt"><span class="num">9.</span> Bővülne-e később a bemutatott munkák száma?</p>
+      <div class="opts cols2">
+        <label class="opt"><span class="box"></span> Igen, rendszeresen (új projektekkel)</label>
+        <label class="opt"><span class="box"></span> Igen, de csak alkalmanként</label>
+        <label class="opt"><span class="box"></span> Nem, egyszeri, fix tartalom lesz</label>
+        <label class="opt"><span class="box"></span> Nem tudom</label>
+      </div>
+    </div>
+
+    <div class="q">
+      <p class="qt"><span class="num">10.</span> Milyen jellegű munkák lesznek a bemutatóban? <span class="hint">(több is jelölhető)</span></p>
+      <div class="opts cols2">
+        <label class="opt"><span class="box"></span> Lakóépület (családi ház, társasház)</label>
+        <label class="opt"><span class="box"></span> Ipari / kereskedelmi épület, csarnok</label>
+        <label class="opt"><span class="box"></span> Közintézmény (iskola, sport, egészségügy)</label>
+        <label class="opt"><span class="box"></span> Út, híd, közmű, infrastruktúra</label>
+        <label class="opt"><span class="box"></span> Felújítás / műemlék</label>
+        <label class="opt"><span class="box"></span> Belsőépítészet / enteriőr</label>
+      </div>
+      <div class="other">Egyéb: <span class="oline"></span></div>
+    </div>
+
+    <div class="q">
+      <p class="qt"><span class="num">11.</span> Milyen anyag áll rendelkezésre az egyes munkákról? <span class="hint">(több is jelölhető — ez nagyon fontos!)</span></p>
+      <div class="opts cols2">
+        <label class="opt"><span class="box"></span> Fényképek (kész épületről)</label>
+        <label class="opt"><span class="box"></span> Drónfelvétel / videó</label>
+        <label class="opt"><span class="box"></span> Látványterv / 3D render kép</label>
+        <label class="opt"><span class="box"></span> 3D modell (BIM / CAD)</label>
+        <label class="opt"><span class="box"></span> Alaprajzok, műszaki rajzok</label>
+        <label class="opt"><span class="box"></span> Szöveges leírás a projektről</label>
+        <label class="opt"><span class="box"></span> Egyelőre szinte semmi, ezt is kérjük segítsék</label>
+      </div>
+      <div class="other">Egyéb: <span class="oline"></span></div>
+    </div>
+
+    <div class="q">
+      <p class="qt"><span class="num">12.</span> Van-e meglévő 3D modell a projektekről? <span class="hint">(a tervezőtől / kivitelezésből)</span></p>
+      <div class="opts cols2">
+        <label class="opt"><span class="box"></span> Igen — BIM modell (pl. Revit / IFC / ArchiCAD)</label>
+        <label class="opt"><span class="box"></span> Igen — SketchUp / más CAD</label>
+        <label class="opt"><span class="box"></span> Igen — egyéb 3D formátum</label>
+        <label class="opt"><span class="box"></span> Nincs, de a tervezőtől beszerezhető</label>
+        <label class="opt"><span class="box"></span> Nincs és nem is elérhető</label>
+        <label class="opt"><span class="box"></span> Nem tudom</label>
+      </div>
+      <div class="other">Formátum / megjegyzés: <span class="oline"></span></div>
+    </div>
+
+    <div class="q">
+      <p class="qt"><span class="num">13.</span> Ki adja a tartalmat (anyagok + szövegek)?</p>
+      <div class="opts">
+        <label class="opt"><span class="box"></span> Mi adjuk át kész, rendezett formában (mappa, fájlok)</label>
+        <label class="opt"><span class="box"></span> Mi adjuk a nyersanyagot, a fejlesztő rendezze/dolgozza fel</label>
+        <label class="opt"><span class="box"></span> Szeretnénk, ha a fejlesztő a szövegeket is megírná</label>
+        <label class="opt"><span class="box"></span> Nem tudom / később egyeztetjük</label>
+      </div>
+    </div>
+
+    <div class="q">
+      <p class="qt"><span class="num">14.</span> Mit szeretnének megjeleníteni egy-egy munka mellett? <span class="hint">(több is jelölhető)</span></p>
+      <div class="opts cols2">
+        <label class="opt"><span class="box"></span> Projekt neve, rövid leírás</label>
+        <label class="opt"><span class="box"></span> Helyszín / térkép</label>
+        <label class="opt"><span class="box"></span> Megvalósítás éve</label>
+        <label class="opt"><span class="box"></span> Műszaki adatok (alapterület, technológia…)</label>
+        <label class="opt"><span class="box"></span> Megrendelő / referencia név</label>
+        <label class="opt"><span class="box"></span> „Ajánlatkérés / kapcsolat" gomb</label>
+      </div>
+      <div class="other">Egyéb: <span class="oline"></span></div>
+    </div>
+
+    <div class="q">
+      <p class="qt"><span class="num">15.</span> Milyen nyelven legyen a bemutató?</p>
+      <div class="opts cols2">
+        <label class="opt"><span class="box"></span> Csak magyar</label>
+        <label class="opt"><span class="box"></span> Magyar és angol</label>
+        <label class="opt"><span class="box"></span> Egyéb nyelv(ek) is</label>
+        <label class="opt"><span class="box"></span> Nem tudom</label>
+      </div>
+      <div class="other">Mely nyelvek: <span class="oline"></span></div>
+    </div>
+  </div>
+
+  <!-- ============ C. MEGJELENÉS / ÉLMÉNY ============ -->
+  <div class="section">
+    <div class="section-head">
+      <span class="stitle">C. Megjelenés, élmény, eszközök</span>
+      <span class="swho">Kitölti: ügyvezető / marketing (ízlés és elvárás kérdése)</span>
+    </div>
+
+    <div class="q">
+      <p class="qt"><span class="num">16.</span> Milyen élményt képzelnek el?</p>
+      <div class="opts">
+        <label class="opt"><span class="box"></span> Bejárható 3D tér, ahol a látogató „sétál" a munkák között (mint egy virtuális múzeum)</label>
+        <label class="opt"><span class="box"></span> Egyszerűbb, kattintható galéria / képes katalógus 3D elemekkel</label>
+        <label class="opt"><span class="box"></span> Vezetett bemutató (a látogatót végigvezeti egy útvonalon)</label>
+        <label class="opt"><span class="box"></span> Nem tudom, kérünk javaslatot</label>
+      </div>
+      <div class="other">Egyéb: <span class="oline"></span></div>
+    </div>
+
+    <div class="q">
+      <p class="qt"><span class="num">17.</span> Milyen eszközön nézik majd elsősorban? <span class="hint">(több is jelölhető)</span></p>
+      <div class="opts cols2">
+        <label class="opt"><span class="box"></span> Számítógép / laptop</label>
+        <label class="opt"><span class="box"></span> Mobiltelefon</label>
+        <label class="opt"><span class="box"></span> Tablet</label>
+        <label class="opt"><span class="box"></span> Nagy érintőképernyő a standon/irodában (kioszk)</label>
+        <label class="opt"><span class="box"></span> VR-szemüveg</label>
+      </div>
+      <div class="other">Egyéb: <span class="oline"></span></div>
+    </div>
+
+    <div class="q">
+      <p class="qt"><span class="num">18.</span> Kell-e hang a bemutatóhoz?</p>
+      <div class="opts cols2">
+        <label class="opt"><span class="box"></span> Igen, halk háttérzene</label>
+        <label class="opt"><span class="box"></span> Igen, beszélt narráció / hangos vezetés</label>
+        <label class="opt"><span class="box"></span> Nem kell hang</label>
+        <label class="opt"><span class="box"></span> Nem tudom</label>
+      </div>
+    </div>
+
+    <div class="q">
+      <p class="qt"><span class="num">19.</span> Van-e a cégnek arculata (logó, színek, betűtípus, arculati kézikönyv)?</p>
+      <div class="opts cols2">
+        <label class="opt"><span class="box"></span> Igen, és át tudjuk adni</label>
+        <label class="opt"><span class="box"></span> Részben (csak logó / csak színek)</label>
+        <label class="opt"><span class="box"></span> Nincs, ezt is kérjük segítsék</label>
+        <label class="opt"><span class="box"></span> Nem tudom</label>
+      </div>
+    </div>
+
+    <div class="q">
+      <p class="qt"><span class="num">20.</span> Fontos-e az akadálymentesség / jogszabályi megfelelés? <span class="hint">(pl. pályázat, közintézményi elvárás)</span></p>
+      <div class="opts cols2">
+        <label class="opt"><span class="box"></span> Igen, kötelező számunkra</label>
+        <label class="opt"><span class="box"></span> Jó lenne, de nem kötelező</label>
+        <label class="opt"><span class="box"></span> Nem fontos</label>
+        <label class="opt"><span class="box"></span> Nem tudom</label>
+      </div>
+    </div>
+
+    <div class="q">
+      <p class="qt"><span class="num">21.</span> Hogyan jelenjen meg a bemutató a meglévő weboldalhoz képest?</p>
+      <div class="opts">
+        <label class="opt"><span class="box"></span> Épüljön be a jelenlegi weboldalunkba (al-oldalként)</label>
+        <label class="opt"><span class="box"></span> Legyen külön, önálló oldal (saját címen)</label>
+        <label class="opt"><span class="box"></span> Nincs még weboldalunk</label>
+        <label class="opt"><span class="box"></span> Nem tudom, kérünk javaslatot</label>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ D. ÜZEMELTETÉS / DÖNTÉSEK ============ -->
+  <div class="section">
+    <div class="section-head">
+      <span class="stitle">D. Üzemeltetés és működtetés a jövőben</span>
+      <span class="swho">Kitölti: ügyvezető / döntéshozó (IT-segítséggel)</span>
+    </div>
+
+    <div class="q">
+      <p class="qt"><span class="num">22.</span> Az elkészülés után ki üzemeltesse / gondozza a bemutatót?</p>
+      <div class="opts">
+        <label class="opt"><span class="box"></span> Mi magunk (a cég IT-se) szeretnénk kezelni</label>
+        <label class="opt"><span class="box"></span> A fejlesztő tartsa karban megbízási/havidíjas alapon</label>
+        <label class="opt"><span class="box"></span> Vegyes (mi a tartalmat, a fejlesztő a technikát)</label>
+        <label class="opt"><span class="box"></span> Nem tudom</label>
+      </div>
+    </div>
+
+    <div class="q">
+      <p class="qt"><span class="num">23.</span> Új munkák feltöltését / frissítését hogyan képzelik?</p>
+      <div class="opts">
+        <label class="opt"><span class="box"></span> Mi magunk szeretnénk feltölteni (kell hozzá egyszerű felület)</label>
+        <label class="opt"><span class="box"></span> A frissítést a fejlesztőtől rendeljük meg alkalmanként</label>
+        <label class="opt"><span class="box"></span> Nem lesz frissítés</label>
+        <label class="opt"><span class="box"></span> Nem tudom</label>
+      </div>
+    </div>
+
+    <div class="q">
+      <p class="qt"><span class="num">24.</span> Szeretnének-e látogatottsági statisztikát (hányan, mit néztek)?</p>
+      <div class="opts cols2">
+        <label class="opt"><span class="box"></span> Igen</label>
+        <label class="opt"><span class="box"></span> Nem</label>
+        <label class="opt"><span class="box"></span> Nem tudom</label>
+      </div>
+    </div>
+
+    <div class="q">
+      <p class="qt"><span class="num">25.</span> Kérnek-e kapcsolatfelvételi / ajánlatkérő funkciót a bemutatóban?</p>
+      <div class="opts cols2">
+        <label class="opt"><span class="box"></span> Igen, űrlap / „kérek ajánlatot" gomb</label>
+        <label class="opt"><span class="box"></span> Elég egy telefonszám / e-mail kiírva</label>
+        <label class="opt"><span class="box"></span> Nem kell</label>
+        <label class="opt"><span class="box"></span> Nem tudom</label>
+      </div>
+    </div>
+
+    <div class="q">
+      <p class="qt"><span class="num">26.</span> Bármi egyéb elvárás, ötlet, kérés, amit fontosnak tart?</p>
+      <div class="lines"><div class="ln"></div><div class="ln"></div></div>
+    </div>
+  </div>
+
+  <!-- ============ E. TECHNIKAI / RENDSZERGAZDA ============ -->
+  <div class="section pagebreak">
+    <div class="section-head">
+      <span class="stitle">E. Technikai rész — a cég rendszergazdájának / IT-felelősének</span>
+      <span class="swho">Ezt a szakaszt kérjük az töltse ki, aki a cég weboldalát, domainjét és informatikáját kezeli. Amit nem tud, jelölje „Nem tudom".</span>
+    </div>
+
+    <div class="q">
+      <p class="qt"><span class="num">27.</span> Van-e a cégnek saját domainje (internetcíme, pl. cegnev.hu)?</p>
+      <div class="opts cols2">
+        <label class="opt"><span class="box"></span> Igen, egy van</label>
+        <label class="opt"><span class="box"></span> Igen, több is</label>
+        <label class="opt"><span class="box"></span> Nincs, de szeretnénk vásárolni</label>
+        <label class="opt"><span class="box"></span> Nincs és nem is tervezünk</label>
+      </div>
+      <div class="other">A domain(ek) neve(i): <span class="oline"></span></div>
+    </div>
+
+    <div class="q">
+      <p class="qt"><span class="num">28.</span> Ki kezeli / kinél van regisztrálva a domain?</p>
+      <div class="opts cols2">
+        <label class="opt"><span class="box"></span> Belső IT, mi kezeljük</label>
+        <label class="opt"><span class="box"></span> Külső szolgáltató / ügynökség</label>
+        <label class="opt"><span class="box"></span> Tárhelyszolgáltatónál (pl. Tárhely.eu, Rackforest, BlazeArts/Forpsi…)</label>
+        <label class="opt"><span class="box"></span> Nem tudom</label>
+      </div>
+      <div class="other">Szolgáltató neve / kapcsolattartó: <span class="oline"></span></div>
+    </div>
+
+    <div class="q">
+      <p class="qt"><span class="num">29.</span> Hozzáférnek-e a DNS-beállításokhoz (al-domain, A/CNAME rekord létrehozása)?</p>
+      <div class="opts cols2">
+        <label class="opt"><span class="box"></span> Igen, mi be tudunk állítani</label>
+        <label class="opt"><span class="box"></span> Csak külső féltől kérve</label>
+        <label class="opt"><span class="box"></span> Nem</label>
+        <label class="opt"><span class="box"></span> Nem tudom</label>
+      </div>
+    </div>
+
+    <div class="q">
+      <p class="qt"><span class="num">30.</span> Hol / kinél van a jelenlegi weboldal tárhelye (hosting)?</p>
+      <div class="opts cols2">
+        <label class="opt"><span class="box"></span> Saját szerveren (helyben / céges)</label>
+        <label class="opt"><span class="box"></span> Bérelt tárhelyen (webhosting)</label>
+        <label class="opt"><span class="box"></span> Felhőben (AWS / Azure / Google Cloud)</label>
+        <label class="opt"><span class="box"></span> Külső ügynökség kezeli</label>
+        <label class="opt"><span class="box"></span> Nincs weboldal</label>
+        <label class="opt"><span class="box"></span> Nem tudom</label>
+      </div>
+      <div class="other">Szolgáltató / megjegyzés: <span class="oline"></span></div>
+    </div>
+
+    <div class="q">
+      <p class="qt"><span class="num">31.</span> Milyen rendszeren fut a jelenlegi weboldal?</p>
+      <div class="opts cols2">
+        <label class="opt"><span class="box"></span> WordPress</label>
+        <label class="opt"><span class="box"></span> Egyedi fejlesztésű oldal</label>
+        <label class="opt"><span class="box"></span> Honlapépítő (Wix, Webnode, Shoptet…)</label>
+        <label class="opt"><span class="box"></span> Nincs weboldal</label>
+        <label class="opt"><span class="box"></span> Nem tudom</label>
+      </div>
+      <div class="other">Egyéb: <span class="oline"></span></div>
+    </div>
+
+    <div class="q">
+      <p class="qt"><span class="num">32.</span> Van-e HTTPS (lakat ikon, biztonságos kapcsolat) a jelenlegi oldalon?</p>
+      <div class="opts cols2">
+        <label class="opt"><span class="box"></span> Igen</label>
+        <label class="opt"><span class="box"></span> Nem</label>
+        <label class="opt"><span class="box"></span> Nincs weboldal</label>
+        <label class="opt"><span class="box"></span> Nem tudom</label>
+      </div>
+    </div>
+
+    <div class="q">
+      <p class="qt"><span class="num">33.</span> Fel tudnak-e tölteni fájlokat a tárhelyre (FTP / SFTP / admin felület)?</p>
+      <div class="opts cols2">
+        <label class="opt"><span class="box"></span> Igen, van hozzáférésünk</label>
+        <label class="opt"><span class="box"></span> Csak külső féltől kérve</label>
+        <label class="opt"><span class="box"></span> Nem</label>
+        <label class="opt"><span class="box"></span> Nem tudom</label>
+      </div>
+    </div>
+
+    <div class="q">
+      <p class="qt"><span class="num">34.</span> Van-e (vagy létrehozható) céges fiók kódtároláshoz / felhőhöz? <span class="hint">(pl. GitHub, GitLab, felhős tárhely)</span></p>
+      <div class="opts cols2">
+        <label class="opt"><span class="box"></span> Van ilyen fiókunk</label>
+        <label class="opt"><span class="box"></span> Nincs, de létre tudunk hozni</label>
+        <label class="opt"><span class="box"></span> Nem tudom</label>
+        <label class="opt"><span class="box"></span> Inkább a fejlesztő intézze</label>
+      </div>
+    </div>
+
+    <div class="q">
+      <p class="qt"><span class="num">35.</span> Van-e olyan belső IT-szabály / tűzfal, ami korlátozza külső tartalom beágyazását, scriptek futtatását?</p>
+      <div class="opts cols2">
+        <label class="opt"><span class="box"></span> Nincs ilyen korlátozás</label>
+        <label class="opt"><span class="box"></span> Igen, van korlátozás</label>
+        <label class="opt"><span class="box"></span> Nem tudom</label>
+      </div>
+      <div class="other">Részletek, ha van: <span class="oline"></span></div>
+    </div>
+
+    <div class="q">
+      <p class="qt"><span class="num">36.</span> A 3D / CAD / BIM fájlok hozzáférése: hol tárolódnak, milyen formátumban, kitől kérhetők? <span class="hint">(pl. IFC, RVT, SKP, DWG, FBX, OBJ, GLB)</span></p>
+      <div class="lines"><div class="ln"></div><div class="ln"></div></div>
+    </div>
+
+    <div class="q">
+      <p class="qt"><span class="num">37.</span> Informatikai kapcsolattartó adatai (akivel a fejlesztő egyeztethet):</p>
+      <div class="meta-row">
+        <div class="meta-field"><span class="lbl">Név</span><span class="fill"></span></div>
+        <div class="meta-field"><span class="lbl">Telefon / e-mail</span><span class="fill"></span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ ALÁÍRÁS ============ -->
+  <div class="footer-sign">
+    <div class="sf">
+      <div class="cap">Kitöltő aláírása</div>
+      <div class="fill"></div>
+    </div>
+    <div class="sf">
+      <div class="cap">Dátum</div>
+      <div class="fill"></div>
+    </div>
+  </div>
+
+</body>
+</html>
