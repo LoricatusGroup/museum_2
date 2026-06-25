@@ -1,0 +1,2551 @@
+{
+  "sections": [
+    {
+      "key": "A",
+      "title": "Általános: a cégről és a célról",
+      "who": "Bárki (ügyvezető, marketing)"
+    },
+    {
+      "key": "B",
+      "title": "Tartalom: mit szeretnének bemutatni",
+      "who": "Tartalom-/marketingfelelős"
+    },
+    {
+      "key": "C",
+      "title": "Megjelenés, élmény, eszközök",
+      "who": "Vezetés / marketing"
+    },
+    {
+      "key": "D",
+      "title": "Üzemeltetés, domain, költség, tulajdon – ki mit csinál",
+      "who": "Vezetés, IT bevonásával"
+    },
+    {
+      "key": "E",
+      "title": "Részletes technikai kérdések",
+      "who": "A cég rendszergazdája / IT-felelőse"
+    }
+  ],
+  "questions": [
+    {
+      "section": "A",
+      "text": "Néhány mondatban: mivel foglalkozik a cég, és mit szeretnének elérni ezzel a 3D bemutatótérrel?",
+      "type": "text",
+      "options": [],
+      "hasOther": false,
+      "hasDontKnow": false,
+      "hint": "Pár szó a cégről és a fő célról",
+      "textLines": 3,
+      "otherLabel": ""
+    },
+    {
+      "section": "A",
+      "text": "Mi a bemutatótér legfőbb célja? (Több is jelölhető)",
+      "type": "multi",
+      "options": [
+        "Új ügyfelek, megrendelők szerzése",
+        "Eddigi munkák, referenciák bemutatása (portfólió)",
+        "Megjelenés vásáron, kiállításon, céges standon",
+        "Befektetők, partnerek felé prezentáció",
+        "Pályázat vagy közbeszerzés melléklete",
+        "A cég presztízsének, modernségének erősítése"
+      ],
+      "hasOther": true,
+      "hasDontKnow": false,
+      "hint": "",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "A",
+      "text": "Kik a fő célközönség, akiknek a bemutatót szánják? (Több is jelölhető)",
+      "type": "multi",
+      "options": [
+        "Magánszemély megrendelők (lakásépítés, felújítás)",
+        "Üzleti, céges megrendelők",
+        "Önkormányzatok, állami megrendelők",
+        "Befektetők, pénzügyi partnerek",
+        "Szakmai partnerek, alvállalkozók",
+        "Sajtó, nyilvánosság, leendő munkatársak"
+      ],
+      "hasOther": true,
+      "hasDontKnow": false,
+      "hint": "",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "A",
+      "text": "Milyen benyomást keltsen a bemutatótér a látogatóban? (Több is jelölhető)",
+      "type": "multi",
+      "options": [
+        "Megbízható, stabil, nagy tapasztalat",
+        "Modern, innovatív, technológiailag élen jár",
+        "Prémium, igényes, minőségi munka",
+        "Barátságos, közvetlen, emberközeli",
+        "Precíz, szakszerű, mérnöki"
+      ],
+      "hasOther": true,
+      "hasDontKnow": false,
+      "hint": "Hangulat, üzenet",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "A",
+      "text": "Hogyan jusson el a látogató a bemutatótérhez? (Több is jelölhető)",
+      "type": "multi",
+      "options": [
+        "Önálló weboldalon, internetes linkre kattintva",
+        "A cég meglévő weboldaláról, gombról/menüből",
+        "QR-kóddal (névjegyen, kiadványon, plakáton beolvasva)",
+        "Helyszíni kiállításon, érintőképernyős kioszkon / totemen",
+        "Közösségi médiában megosztott linkkel",
+        "E-mailben kiküldött linkkel (hírlevél, ajánlat)"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Elérési mód",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "A",
+      "text": "Láttak-e már hasonló online megoldást (akár más iparágban), ami tetszett vagy mintaként szolgálhat?",
+      "type": "single",
+      "options": [
+        "Igen, van konkrét példa, amit szeretünk (link/név alább)",
+        "Igen, láttunk ilyet, de nem emlékszünk pontosan",
+        "Nem, de nyitottak vagyunk a fejlesztő javaslatára",
+        "Nem, és nem is tudjuk, mit várjunk"
+      ],
+      "hasOther": true,
+      "hasDontKnow": false,
+      "hint": "Ha igen, az Egyéb sorba kérjük a linket/nevet",
+      "textLines": 0,
+      "otherLabel": "Link / név, ha van"
+    },
+    {
+      "section": "A",
+      "text": "Van-e olyan megoldás, stílus vagy elem, amit kifejezetten NEM szeretnének?",
+      "type": "text",
+      "options": [],
+      "hasOther": false,
+      "hasDontKnow": false,
+      "hint": "Pl. túl játékos, túl rideg, túl bonyolult – amitől tartanak",
+      "textLines": 2,
+      "otherLabel": ""
+    },
+    {
+      "section": "A",
+      "text": "Milyen jellegű ez a megbízás Önök szerint?",
+      "type": "single",
+      "options": [
+        "Egyszeri projekt: elkészül, átadjuk, utána ritkán kell hozzányúlni",
+        "Folyamatos együttműködés: rendszeresen bővítjük, frissítjük új munkákkal",
+        "Először egy próbaverzió (pilot), később döntünk a folytatásról"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Segít eldönteni, egyszeri díjas vagy havidíjas modell illik-e jobban",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "A",
+      "text": "Van-e konkrét határidő vagy esemény, amire el kell készülnie?",
+      "type": "single",
+      "options": [
+        "Nincs kötött határidő, a minőség a fontos",
+        "Lazán, néhány hónapon belül jó lenne",
+        "Konkrét dátumra kell (vásár, évforduló, kampány)",
+        "Minél előbb, sürgős"
+      ],
+      "hasOther": true,
+      "hasDontKnow": false,
+      "hint": "Ha van fix dátum/esemény, kérjük az Egyéb sorba a nevét és időpontját",
+      "textLines": 0,
+      "otherLabel": "Esemény neve és időpontja, ha van"
+    },
+    {
+      "section": "A",
+      "text": "Az ajánlatkéréskor több fejlesztőtől / ügynökségtől is kérnek ajánlatot, vagy minket kértek fel egyedül?",
+      "type": "single",
+      "options": [
+        "Csak Önt (Loricatust) kértük fel, nincs versenyeztetés",
+        "Több ajánlatot is bekérünk, összehasonlítjuk",
+        "Egy pályázati / közbeszerzési eljárás része",
+        "Még nem dőlt el"
+      ],
+      "hasOther": true,
+      "hasDontKnow": false,
+      "hint": "Befolyásolja az ajánlat részletességét és a ráfordítható időt",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "A",
+      "text": "Milyen formában várják az ajánlatot, és van-e belső jóváhagyási / döntési folyamat, ami időt vesz igénybe?",
+      "type": "single",
+      "options": [
+        "Egyszerű írásos ajánlat e-mailben elég, gyors döntés",
+        "Részletes, tételes árajánlat kell (több döntéshozónak)",
+        "Testületi / tulajdonosi jóváhagyás kell, ez hetekig tarthat",
+        "Nem tudjuk még"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Hogy reális legyen a projekt indulási ütemezése",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "A",
+      "text": "Ki a projekt fő kapcsolattartója és ki hozza a pénzügyi/jogi döntéseket a cég oldaláról?",
+      "type": "text",
+      "options": [],
+      "hasOther": false,
+      "hasDontKnow": false,
+      "hint": "Név, beosztás, elérhetőség – külön kapcsolattartó és döntéshozó is lehet",
+      "textLines": 2,
+      "otherLabel": ""
+    },
+    {
+      "section": "B",
+      "text": "Hány elkészült munkát (projektet) szeretnének bemutatni az induláskor?",
+      "type": "single",
+      "options": [
+        "1-5 munka",
+        "6-10 munka",
+        "11-20 munka",
+        "21-40 munka",
+        "Több mint 40 munka"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Hozzávetőleges darabszám is jó",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "B",
+      "text": "Várhatóan bővül-e később a bemutatott munkák száma?",
+      "type": "single",
+      "options": [
+        "Nem, a jelenlegi készlet végleges",
+        "Igen, alkalmanként hozzáadunk 1-2 újat",
+        "Igen, rendszeresen (pl. minden új projektet)",
+        "Egyelőre nem tudjuk megmondani"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Befolyásolja, kell-e könnyen bővíthető megoldás",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "B",
+      "text": "Milyen jellegű munkákat mutatnának be? (Több is jelölhető)",
+      "type": "multi",
+      "options": [
+        "Lakóépület (családi ház, társasház)",
+        "Ipari, kereskedelmi épület (csarnok, üzlet, iroda)",
+        "Középület, közintézmény (iskola, hivatal)",
+        "Felújítás, korszerűsítés, homlokzat",
+        "Infrastruktúra (út, híd, közmű, mélyépítés)",
+        "Belsőépítészet, enteriőr"
+      ],
+      "hasOther": true,
+      "hasDontKnow": false,
+      "hint": "",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "B",
+      "text": "Egy munkát hogyan érdemes leginkább megjeleníteni?",
+      "type": "single",
+      "options": [
+        "Az egész épület 3D modellje, körbejárható",
+        "Csak a homlokzat / külső megjelenés",
+        "Külső ÉS belső is bejárható",
+        "Fotók és látványtervek táblákon, kevés 3D",
+        "Vegyesen, munkánként eltérően"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Hogyan álljon a látogató elé egy projekt",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "B",
+      "text": "Körülbelül hány nézőpont / helyiség / megálló legyen egy-egy bejárható épületben?",
+      "type": "single",
+      "options": [
+        "Csak külső, 1-2 fő nézet épületenként",
+        "Néhány fő helyiség / megálló (kb. 3-6)",
+        "Részletes belső bejárás, sok helyiség (több mint 6)",
+        "Munkánként nagyon eltérő",
+        "Nem tudjuk, kérünk javaslatot"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "A részletesség erősen befolyásolja a modellezési munkát és a fájlméretet",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "B",
+      "text": "Milyen anyagok állnak rendelkezésre a munkákról? (Több is jelölhető)",
+      "type": "multi",
+      "options": [
+        "Hagyományos fényképek a kész munkáról",
+        "Drónfelvételek (légi fotó vagy videó)",
+        "Látványtervek, renderek (3D-ből készült képek)",
+        "3D modellek (kész fájlok, pl. GLB, FBX, OBJ)",
+        "BIM / CAD tervek (pl. Revit, ArchiCAD, AutoCAD, IFC, DWG)",
+        "Videók, idővonalas (timelapse) felvételek"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Ami már megvan, kész formában",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "B",
+      "text": "Van-e már kész, bejárható 3D modell bármelyik munkáról?",
+      "type": "single",
+      "options": [
+        "Igen, több munkáról is van kész 3D modell",
+        "Igen, egy-két munkáról van",
+        "Nincs, de BIM/CAD tervből készíthető",
+        "Nincs, és terv sincs hozzá",
+        "Nem tudjuk, mi számít kész 3D modellnek"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Olyan 3D, amit meg lehet forgatni a képernyőn",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "B",
+      "text": "Ha vannak BIM/CAD tervek, milyen programból származnak és milyen formátumban?",
+      "type": "text",
+      "options": [],
+      "hasOther": false,
+      "hasDontKnow": false,
+      "hint": "Pl. ArchiCAD/IFC, Revit/RVT, AutoCAD/DWG – a rendszergazda/tervező segíthet",
+      "textLines": 2,
+      "otherLabel": ""
+    },
+    {
+      "section": "B",
+      "text": "Mennyire tükrözik a tervek a MEGVALÓSULT állapotot (az építés közbeni változtatásokkal együtt)?",
+      "type": "single",
+      "options": [
+        "Pontosan, megvan a megvalósulási (as-built) terv",
+        "Nagyrészt, de voltak kisebb eltérések",
+        "Csak az eredeti engedélyezési/kiviteli terv van, nem az as-built",
+        "Nem tudjuk, a tervezővel kell egyeztetni"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Ha a terv eltér a valóságtól, plusz egyeztetés/javítás kellhet a hű megjelenítéshez",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "B",
+      "text": "A bemutatandó 3D modelleket / anyagokat ki biztosítja, illetve ki készíti el, ha még nincsenek? (Több is jelölhető)",
+      "type": "multi",
+      "options": [
+        "A cég adja a saját kész BIM/CAD vagy 3D fájljait",
+        "A cég tervezője/építésze készíti a BIM/CAD-ből",
+        "A cég adja a terveket/fotókat, a fejlesztő készíti belőlük a 3D modellt",
+        "A fejlesztő modellez mindent (a cég anyagaiból)",
+        "Külső 3D-s szakembert vonnánk be",
+        "Még nincs anyagunk / nem dőlt el"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Felelősség: ők vagy a fejlesztő – több is jelölhető, ha vegyes a forrás",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "B",
+      "text": "Ki adja a bemutatóhoz a szövegeket, leírásokat (a munkák ismertetése)?",
+      "type": "single",
+      "options": [
+        "A cég megírja és átadja kész szövegként",
+        "A cég vázlatot ad, a fejlesztő véglegesíti",
+        "A fejlesztő/szövegíró írja a cég adatai alapján",
+        "Nem lesz hosszú szöveg, csak rövid címkék"
+      ],
+      "hasOther": true,
+      "hasDontKnow": false,
+      "hint": "",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "B",
+      "text": "Egy munka mellett milyen információ jelenjen meg? (Több is jelölhető)",
+      "type": "multi",
+      "options": [
+        "A munka neve / megnevezése",
+        "Rövid leírás, érdekességek",
+        "Helyszín (település, cím)",
+        "Befejezés éve / időtartam",
+        "Alapterület, méretadatok, fontosabb számok",
+        "Megrendelő / partner neve (ha megosztható)",
+        "Fotók, galéria a kész munkáról",
+        "Letölthető anyag (pl. PDF adatlap, referencialevél)"
+      ],
+      "hasOther": true,
+      "hasDontKnow": false,
+      "hint": "Mit lásson a látogató egy projektnél",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "B",
+      "text": "Csoportosítva jelenjenek-e meg a munkák? (Több is jelölhető)",
+      "type": "multi",
+      "options": [
+        "Nincs csoportosítás, egyszerű felsorolás",
+        "Típus szerint (lakó / ipari / középület / felújítás)",
+        "Időrend szerint (legújabb elöl)",
+        "Helyszín / régió szerint",
+        "Méret vagy jelentőség szerint (kiemelt projektek elöl)"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Rendezési, szűrési szempont",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "B",
+      "text": "Van-e olyan kiemelt, zászlóvivő projekt, amit a középpontba állítanának?",
+      "type": "single",
+      "options": [
+        "Igen, van egy fő referenciaprojekt",
+        "Igen, több kiemelt projekt is van",
+        "Nem, mind egyenrangú legyen"
+      ],
+      "hasOther": true,
+      "hasDontKnow": false,
+      "hint": "Ha igen, az Egyéb sorba a projekt neve",
+      "textLines": 0,
+      "otherLabel": "A kiemelt projekt(ek) neve"
+    },
+    {
+      "section": "B",
+      "text": "Milyen nyelven legyen elérhető a bemutató?",
+      "type": "single",
+      "options": [
+        "Csak magyar",
+        "Magyar és angol",
+        "Magyar, angol és további nyelv(ek)",
+        "Csak angol (nemzetközi célközönség)"
+      ],
+      "hasOther": true,
+      "hasDontKnow": false,
+      "hint": "",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "B",
+      "text": "Ha többnyelvű, ki biztosítja a fordítást?",
+      "type": "single",
+      "options": [
+        "A cég adja a kész fordításokat",
+        "A fejlesztő szervezi (külön költség)",
+        "Csak a magyar fontos most, a többi később",
+        "Nem releváns (egynyelvű lesz)"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "B",
+      "text": "Az anyagokat (fotók, tervek, modellek) egyben az elején kapjuk meg, vagy menet közben érkeznek?",
+      "type": "single",
+      "options": [
+        "Mindent egyben átadunk az induláskor",
+        "Nagy részét az elején, a többit menet közben",
+        "Folyamatosan, ütemezve adjuk át",
+        "Nem tudjuk még"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "A késve érkező anyag a fejlesztő hibáján kívül csúsztathatja a határidőt",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "B",
+      "text": "Hány egyeztetési / javítási kört (visszajelzés a modellekre, szövegekre) terveznek a leadás előtt?",
+      "type": "single",
+      "options": [
+        "1 kör (egyszer átnézzük, apró javítások)",
+        "2-3 kör (átnézés, javítás, ellenőrzés)",
+        "Több kör is lehet, amíg tökéletes nem lesz",
+        "Nem tudjuk, kérünk javaslatot"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "A korlátlan javítási igény jelentősen növelheti a ráfordítást és az árat",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "B",
+      "text": "Ki ellenőrzi és hagyja jóvá, hogy egy 3D modell és adatai szakmailag helyesek (méretek, anyagok, megnevezések)?",
+      "type": "single",
+      "options": [
+        "A cég kijelölt szakembere / építésze ellenőrzi és jóváhagyja",
+        "Az ügyvezető / projektfelelős nézi át",
+        "Megbízunk a fejlesztő munkájában, nincs külön szakmai ellenőrzés",
+        "Nem tudjuk, kérünk javaslatot"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Ki felel a szakmai tartalmi pontosságért, hogy ne kelljen sokszor újrázni",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "B",
+      "text": "Bármilyen további megjegyzés a tartalomról, amit fontosnak tartanak?",
+      "type": "text",
+      "options": [],
+      "hasOther": false,
+      "hasDontKnow": false,
+      "hint": "",
+      "textLines": 2,
+      "otherLabel": ""
+    },
+    {
+      "section": "C",
+      "text": "Milyen alapélményt képzelnek el a látogatónak?",
+      "type": "single",
+      "options": [
+        "Szabadon bejárható, sétálható 3D tér (mint egy kiállítás)",
+        "Vezetett túra, ami végigvisz a munkákon",
+        "Egyszerű galéria: kattintható, forgatható modellek/képek",
+        "Térkép / áttekintő, ahonnan a munkákba lehet belépni",
+        "Bízzuk a fejlesztő javaslatára"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Hogyan mozogjon a látogató a térben",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "C",
+      "text": "Milyen környezetben \"álljanak\" a bemutatott munkák?",
+      "type": "single",
+      "options": [
+        "Letisztult, semleges kiállítóterem (galéria-jelleg)",
+        "Modern, látványos, építészeti enteriőr",
+        "A cég arculatához illő, márkás környezet",
+        "Valósághű külső környezet (terep, ég, táj)",
+        "Mindegy, a munkák legyenek a fókuszban"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "A virtuális tér hangulata",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "C",
+      "text": "Mennyire legyen interaktív a bemutató? (Több is jelölhető)",
+      "type": "multi",
+      "options": [
+        "Séta / mozgás a térben",
+        "Modellek forgatása, nagyítása, közelről nézése",
+        "Kattintható pontok extra infóval (fotó, adat, leírás)",
+        "Belső bejárás (be lehet menni az épületbe)",
+        "Réteg/állapot váltás (pl. előtte-utána, terv vs. kész)",
+        "Csak nézegetés, minimális interakció"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Mit tudjon csinálni a látogató",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "C",
+      "text": "Mely eszközökön kell jól működnie? (Több is jelölhető)",
+      "type": "multi",
+      "options": [
+        "Asztali számítógép / laptop",
+        "Mobiltelefon",
+        "Tablet",
+        "Helyszíni érintőképernyő / kioszk (vásár, bemutatóterem)",
+        "Kivetítő / nagy képernyő prezentációhoz",
+        "VR-szemüveg (virtuális valóság)"
+      ],
+      "hasOther": true,
+      "hasDontKnow": false,
+      "hint": "Hol fogják nézni a látogatók",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "C",
+      "text": "A felsoroltak közül melyik a LEGFONTOSABB eszköz, amin tökéletesen kell mennie?",
+      "type": "single",
+      "options": [
+        "Asztali számítógép / laptop",
+        "Mobiltelefon",
+        "Tablet",
+        "Helyszíni kioszk / érintőképernyő",
+        "Mindegyiken egyformán fontos"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "A fő prioritás",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "C",
+      "text": "Legyen-e hang a bemutatóban? (Több is jelölhető)",
+      "type": "multi",
+      "options": [
+        "Ne legyen hang (csendes)",
+        "Halk háttérzene / ambient hangulat",
+        "Narráció, beszélt ismertető a munkákról",
+        "Kattintásra megszólaló rövid hangok, effektek",
+        "Legyen, de a látogató kapcsolhassa ki/be"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "C",
+      "text": "Rendelkezésre áll-e a cég arculata (logó, színek, betűtípus)?",
+      "type": "single",
+      "options": [
+        "Igen, van kész arculati kézikönyv (átadjuk)",
+        "Van logó és színek, de nincs teljes kézikönyv",
+        "Csak logó van",
+        "Nincs, de a fejlesztő igazodjon a weboldalunkhoz",
+        "Nincs semmi, kérünk javaslatot"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "C",
+      "text": "Mennyire kövesse szorosan a bemutató a cég meglévő arculatát?",
+      "type": "single",
+      "options": [
+        "Pontosan illeszkedjen a meglévő arculathoz",
+        "Igazodjon hozzá, de lehet látványosabb, egyedibb",
+        "Új, önálló látványvilágot kaphat",
+        "Nincs preferencia"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "C",
+      "text": "Legyen-e bevezető / nyitóképernyő, amikor megnyílik a bemutató?",
+      "type": "single",
+      "options": [
+        "Igen, igényes nyitóképernyő logóval, bevezetővel",
+        "Rövid üdvözlés, majd egyből a térbe lép",
+        "Ne legyen, azonnal induljon a bemutató",
+        "Bízzuk a fejlesztő javaslatára"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Pl. üdvözlő képernyő logóval, rövid bevezetővel",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "C",
+      "text": "Kell-e a látogatónak egyszerű útmutatás / segítség a kezeléshez (pl. első indításkor hogyan mozogjon, kattintson)?",
+      "type": "single",
+      "options": [
+        "Igen, legyen rövid kezelési útmutató / buborékok az elején",
+        "Elég egy diszkrét segítség-ikon, ha kell",
+        "Nem szükséges, legyen magától értetődő",
+        "Bízzuk a fejlesztő javaslatára"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Sok látogató nem ismeri a 3D-s mozgást; ez csökkenti a lemorzsolódást",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "C",
+      "text": "Fontos-e az akadálymentesség és a könnyű kezelhetőség kevésbé gyakorlott felhasználóknak?",
+      "type": "single",
+      "options": [
+        "Igen, kifejezetten fontos (pl. közintézményi/pályázati elvárás)",
+        "Fontos, hogy egyszerű és érthető legyen, de nincs előírás",
+        "Nem kiemelt szempont",
+        "Nem tudjuk megítélni"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Pl. idősebb, vagy a 3D-ben járatlan látogatók",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "C",
+      "text": "Kell-e egyszerűbb, \"2D\" alternatíva azoknak, akiknek a 3D nehézkes vagy lassú (pl. gyenge telefon)?",
+      "type": "single",
+      "options": [
+        "Igen, legyen egyszerű fotógaléria-alternatíva is",
+        "Nem szükséges, elég a 3D",
+        "Bízzuk a fejlesztő javaslatára"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Tartalék, egyszerű képgaléria nézet",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "C",
+      "text": "Mekkora betöltési időt / várakozást tartanak még elfogadhatónak a látogató oldalán?",
+      "type": "single",
+      "options": [
+        "Azonnali kell, max. pár másodperc várakozás",
+        "Néhány másodperc töltődés elfogadható (töltőképernyővel)",
+        "Akár hosszabb töltés is belefér, ha utána gyors és szép",
+        "Nem tudjuk megítélni, kérünk javaslatot"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "A nagy 3D fájlok és a látvány-minőség kompromisszum a betöltési idővel",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "C",
+      "text": "Legyen-e lehetőség kapcsolatfelvételre vagy ajánlatkérésre a bemutatón belül? (Több is jelölhető)",
+      "type": "multi",
+      "options": [
+        "Ne legyen, csak bemutató",
+        "Kapcsolat gomb (telefon, e-mail)",
+        "Ajánlatkérő / üzenetküldő űrlap",
+        "Link a cég weboldalára / közösségi oldalaira",
+        "Letölthető cégbemutató / referencia-PDF"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Hívja-e cselekvésre a látogatót",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "C",
+      "text": "Kell-e a látogatónak lehetőség képernyőkép / megosztható nézet készítésére egy munkáról?",
+      "type": "single",
+      "options": [
+        "Igen, jó lenne képernyőkép / megosztás funkció",
+        "Nem szükséges",
+        "Bízzuk a fejlesztő javaslatára"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Marketing szempontból hasznos lehet a megosztható nézet",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "C",
+      "text": "Fontos-e, hogy szépen jelenjen meg, amikor a bemutató linkjét megosztják (pl. Facebookon, üzenetben)?",
+      "type": "single",
+      "options": [
+        "Igen, legyen igényes előnézeti kép és cím",
+        "Jó lenne, de nem kritikus",
+        "Nem foglalkozunk vele",
+        "Nem tudjuk megítélni"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Megosztási előnézet: cím, leírás, kép",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "C",
+      "text": "Szeretnének-e látogatottság-mérést / statisztikát az oldalról (hányan, honnan, mit néznek)?",
+      "type": "single",
+      "options": [
+        "Igen, fontos a részletes statisztika",
+        "Elég egy egyszerű látogatószámláló",
+        "Nem szükséges statisztika",
+        "Nem tudjuk, kérünk javaslatot"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "A részletes méréshez jellemzően süti-tájékoztató is kell",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "C",
+      "text": "Van-e bármilyen megjelenésbeli elvárás vagy kötöttség, amit mindenképp tudnunk kell?",
+      "type": "text",
+      "options": [],
+      "hasOther": false,
+      "hasDontKnow": false,
+      "hint": "Pl. kötelező logóhasználat, tiltott színek, korábbi minta",
+      "textLines": 2,
+      "otherLabel": ""
+    },
+    {
+      "section": "D",
+      "text": "KI ÜZEMELTETI / HOSTOLJA a kész oldalt – ki felel azért, hogy nap mint nap elérhető legyen? (\"ők vagy én\")",
+      "type": "single",
+      "options": [
+        "A cég maga (saját IT / rendszergazda)",
+        "A fejlesztő (Loricatus) üzemelteti megbízás / karbantartási szerződés keretében",
+        "Vegyes: a fejlesztő üzemeltet egy ideig, majd átadja a cégnek",
+        "Külső szolgáltató / a cég webes partnere üzemelteti",
+        "Még nem tudjuk, kérünk javaslatot"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Ez az egyik legfontosabb kérdés – ki a felelős az élesben tartásért",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "D",
+      "text": "MIRŐL fusson a kész oldal (hol legyen a tárhely)?",
+      "type": "single",
+      "options": [
+        "A cég saját gépéről / saját szerveréről (a cég telephelyén, on-premise)",
+        "Bérelt webtárhelyen (klasszikus tárhely-szolgáltatónál, pl. a mostani weboldalé)",
+        "Felhőben, a cég saját felhőfiókjában (pl. AWS / Azure / Google)",
+        "Felhőben, amit a fejlesztő biztosít és kezel",
+        "Mindegy, csak működjön – a fejlesztő válassza ki a legjobbat"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Statikus 3D-oldalhoz általában elég egy egyszerű/felhős tárhely",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "D",
+      "text": "Van-e MÁR most a cégnek olyan webtárhelye/szervere, amire ez az oldal felkerülhet?",
+      "type": "single",
+      "options": [
+        "Igen, van, és szeretnénk azt használni",
+        "Igen, van, de nem tudjuk, alkalmas-e",
+        "Nem, ezt is be kell szerezni",
+        "Bízzuk a fejlesztőre, mit javasol"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "D",
+      "text": "Ha a fejlesztő intézi a tárhelyet/felhőt: az kinek a nevén / fiókjában legyen a végén?",
+      "type": "single",
+      "options": [
+        "A cég saját nevén / fiókjában, a fejlesztő csak meghívott kezelőként fér hozzá",
+        "A fejlesztő nevén / fiókjában, mi rajta keresztül érjük el (havidíjban)",
+        "Induljon a fejlesztőnél, de később írjuk át a cég nevére",
+        "Nem tudjuk, kérünk javaslatot"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Ki legyen a tulajdonos, ha gond van vagy ha leváltanák a fejlesztőt",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "D",
+      "text": "Be kell-e épülnie a bemutatónak a cég meglévő weboldalába, vagy önálló címen fusson?",
+      "type": "single",
+      "options": [
+        "Épüljön be a jelenlegi weboldalunkba (al-oldalként / beágyazva)",
+        "Legyen teljesen önálló oldal, saját címen (pl. bemutato.cegnev.hu)",
+        "Mindkettő: önálló oldal, de a weboldalról is elérhető linkkel",
+        "Nincs még weboldalunk, ez lesz az első",
+        "Nem tudjuk, kérünk javaslatot"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Pl. beágyazva egy al-oldalba, vagy külön linken/aldomainen",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "D",
+      "text": "VAN-e a cégnek saját domainje (internetcíme, pl. cegnev.hu), amin a bemutató elérhető lehetne?",
+      "type": "single",
+      "options": [
+        "Igen, van, és ezt szeretnénk használni",
+        "Igen, van, de a bemutatónak ÚJ, külön domaint / aldomaint szeretnénk",
+        "Nincs, de szeretnénk vásárolni egyet",
+        "Nincs, és elég lenne egy ingyenes cím (pl. cegnev.fejlesztoirendszer.app)"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "A domain az a cím, amit a böngészőbe írnak, pl. pelda.hu",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "D",
+      "text": "HA VAN domain: pontosan mi a domain / aldomain, amit használni szeretnének a bemutatóhoz?",
+      "type": "text",
+      "options": [],
+      "hasOther": false,
+      "hasDontKnow": true,
+      "hint": "Írják le pontosan, pl. epitoipari-cegnev.hu vagy 3d.cegnev.hu – ha nincs, hagyják üresen",
+      "textLines": 1,
+      "otherLabel": ""
+    },
+    {
+      "section": "D",
+      "text": "HA VAN domain: hol jelenjen meg a 3D bemutató a cím szerkezetében?",
+      "type": "single",
+      "options": [
+        "Egy aldomainen (pl. bemutato.cegnev.hu vagy 3d.cegnev.hu)",
+        "Egy almappában (pl. cegnev.hu/bemutato)",
+        "A fő domain gyökerén (pl. cegnev.hu – ez lesz a fő tartalom)",
+        "Mindegy, javasoljatok megoldást"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Aldomain = a fő oldal érintése nélkül kap külön címet a bemutató",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "D",
+      "text": "HA VAN domain: ki kezeli jelenleg (a beállításait, DNS-t)?",
+      "type": "single",
+      "options": [
+        "A cég nevén van, mi (belső IT) kezeljük",
+        "A cég nevén van, de külső szolgáltató / ügynökség kezeli",
+        "Egy korábbi fejlesztő / partner kezeli",
+        "A domain-regisztrátornál mi magunk kezeljük",
+        "Nem tudjuk, ki kezeli"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "DNS = az a beállítás, ami megmondja, melyik címhez melyik szerver tartozik",
+      "textLines": 0,
+      "otherLabel": "Szolgáltató / kapcsolattartó neve, ha tudja"
+    },
+    {
+      "section": "D",
+      "text": "HA VAN domain: kinek a NEVÉN / cégén van bejegyezve a tulajdonos?",
+      "type": "single",
+      "options": [
+        "A cég hivatalos nevén",
+        "Az ügyvezető / egy magánszemély nevén",
+        "Egy korábbi fejlesztő / ügynökség nevén",
+        "Nem tudjuk"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Fontos, hogy a domain a cég tulajdonában legyen, ne egy külső személyé",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "D",
+      "text": "HA VAN domain: ki fizeti és ki újítja meg évről évre?",
+      "type": "single",
+      "options": [
+        "Mi (a cég) fizetjük, és figyelünk a megújításra",
+        "A cég fizeti, de nem tudjuk pontosan, mikor jár le",
+        "Külső szolgáltató / korábbi fejlesztő intézi és számlázza",
+        "Nem tudjuk"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Ha lejár a domain, az egész oldal egyik napról a másikra leállhat",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "D",
+      "text": "HA VAN domain: van-e már működő céges e-mail ezen a domainen, amit nem szabad megzavarni?",
+      "type": "single",
+      "options": [
+        "Van működő céges e-mailünk ezen a domainen, azt NE bántsátok",
+        "Igen, és kérünk hozzá új e-mail címet/címeket is erre a domainre",
+        "Nem, e-mailre nincs szükség, csak a bemutató oldal",
+        "Nem tudjuk"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "A levelezés és a weboldal külön beállítások; vigyázni kell, hogy ne ütközzenek",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "D",
+      "text": "HA NINCS domain: kérnek-e segítséget új cím KIVÁLASZTÁSÁBAN?",
+      "type": "single",
+      "options": [
+        "Igen, javasoljatok pár szabad, jól hangzó nevet",
+        "Van már elképzelésünk a névről, csak ellenőrzést kérünk",
+        "Nem, mi magunk kiválasztjuk és megvesszük",
+        "Egyelőre nem tudjuk eldönteni, kell-e külön domain"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Ha nincs cím, kereshetünk egy szabad, a céghez illő nevet",
+      "textLines": 0,
+      "otherLabel": "Kívánt domain-név ötlet, ha van"
+    },
+    {
+      "section": "D",
+      "text": "HA ÚJ domaint vennének: KI vásárolja meg ténylegesen?",
+      "type": "single",
+      "options": [
+        "A cég maga veszi meg (saját fiókból)",
+        "A fejlesztő vegye meg a CÉG nevére, a cég fizeti / megtéríti",
+        "A fejlesztő vegye meg átmenetileg a saját nevén, később átírjuk a cégre",
+        "Nem tudjuk, kérünk javaslatot"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "\"Ők vagy én\" – ki intézi a vásárlást. Ajánlott, hogy a végén a cég legyen a tulajdonos",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "D",
+      "text": "HA ÚJ domaint vennének: kinek a NEVÉRE legyen bejegyezve a tulajdonos?",
+      "type": "single",
+      "options": [
+        "A cég hivatalos nevére (ajánlott)",
+        "Az ügyvezető / egy munkatárs magánnevére",
+        "A fejlesztő nevére (ideiglenesen, az átadásig)",
+        "Mindegy, a szokásos/ajánlott megoldást kérjük"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "A tulajdonos az, akié jogilag a domain – erősen ajánlott a cég",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "D",
+      "text": "HA ÚJ domaint vennének: ki fizesse a megvásárlást és az évenkénti díjat?",
+      "type": "single",
+      "options": [
+        "A cég közvetlenül fizeti a szolgáltatónak",
+        "A fejlesztő előlegezi meg, és továbbszámlázza a cégnek",
+        "Az induló projektdíj / havi üzemeltetési díj tartalmazza, a megújítást a cég fizeti",
+        "Még nem tudjuk, kérünk javaslatot"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Egy .hu domain jellemzően néhány ezer Ft/év",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "D",
+      "text": "HA ÚJ domaint vennének: milyen végződést (kiterjesztést) szeretnének, és hogyan viselkedjenek a hasonló nevek?",
+      "type": "single",
+      "options": [
+        ".hu (magyar) – egy cím elég",
+        "Több végződés (pl. .hu és .com), egy fő cím, a többi oda irányít át",
+        ".com vagy .eu (nemzetközi célközönség miatt)",
+        "Mindegy, javasoljatok a névhez illőt"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Több végződés is megvehető, hogy mások ne foglalják el; átirányítás = bármelyiket gépelik, ugyanaz az oldal jön be",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "D",
+      "text": "Mennyire fontos, hogy a cím rövid, jól megjegyezhető és könnyen diktálható legyen (névjegykártyára, plakátra)?",
+      "type": "single",
+      "options": [
+        "Nagyon fontos, marketingben is használjuk",
+        "Közepesen fontos",
+        "Nem fontos, csak működjön",
+        "Nem tudjuk"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "D",
+      "text": "Elfogadható-e ÁTMENETILEG egy ingyenes, szolgáltatótól kapott ideiglenes cím, amíg a végleges domain elkészül?",
+      "type": "single",
+      "options": [
+        "Igen, az induláshoz/teszteléshez megfelel egy ideiglenes cím",
+        "Csak ha a végleges domain hamarosan élesedik",
+        "Nem, már az első éles verzió is a saját domainen legyen",
+        "Nem tudjuk, mit jelent ez"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Pl. egy *.pages.dev vagy hasonló ideiglenes, próbacím",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "D",
+      "text": "Elvárás-e, hogy az oldal biztonságos, lakatos (https://) kapcsolaton legyen elérhető?",
+      "type": "single",
+      "options": [
+        "Igen, mindenképp biztonságos (https) legyen",
+        "Nekünk mindegy, a szakmailag helyes megoldást kérjük",
+        "Nem tudjuk, mit jelent"
+      ],
+      "hasOther": false,
+      "hasDontKnow": true,
+      "hint": "A 3D/hang funkciókhoz ez technikailag amúgy is kötelező; alapból megoldjuk",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "D",
+      "text": "A bemutató FOLYAMATOS költségeit (tárhely, domain, esetleg felhő) ki fizesse és ki számlázza?",
+      "type": "single",
+      "options": [
+        "A cég közvetlenül fizet a szolgáltatóknak (a mi nevünkön)",
+        "A fejlesztő fizet mindent, és egy összevont havi/éves díjat számláz a cégnek",
+        "Vegyes: pl. a domaint a cég, a tárhelyet a fejlesztő intézi (vagy fordítva)",
+        "Megpróbáljuk ingyenes / minimális költségű megoldással megoldani",
+        "Nem tudjuk, kérünk költségbecslést"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "A havi/éves üzemeltetési költségekről van szó, nem az egyszeri fejlesztésről",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "D",
+      "text": "Van-e határ vagy elvárás a FOLYAMATOS havi/éves üzemeltetési + karbantartási költségre?",
+      "type": "single",
+      "options": [
+        "Lehetőleg nulla / minimális (csak a kötelező tárhely és domain)",
+        "Pár ezer Ft / hó nagyságrend",
+        "10 000 – 30 000 Ft / hó nagyságrend",
+        "A megbízhatóság a fontos, ennél több is belefér, ha indokolt",
+        "Inkább egy összegben, évente előre fizetnénk",
+        "Nem tudjuk, kérünk ajánlatot"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Tárhely, domain, frissítések, hibajavítás együtt",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "D",
+      "text": "Milyen nagyságrendű költségkeretet szántak a projekt ELKÉSZÍTÉSÉRE (egyszeri rész)?",
+      "type": "single",
+      "options": [
+        "500 000 Ft alatt",
+        "500 000 – 1 000 000 Ft",
+        "1 000 000 – 2 500 000 Ft",
+        "2 500 000 – 5 000 000 Ft",
+        "5 000 000 Ft felett",
+        "Nincs előre rögzített keret, az ajánlat alapján döntünk"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Tájékoztató jellegű, nem kötelez semmire",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "D",
+      "text": "Milyen fizetési/elszámolási modellt preferálnak a fejlesztésre? (Több is jelölhető)",
+      "type": "multi",
+      "options": [
+        "Egyszeri, fix díj a teljes elkészítésért",
+        "Részletekben, mérföldkövek szerint (terv, első verzió, átadás)",
+        "Óradíjas / ráfordítás alapú elszámolás",
+        "Fix elkészítés + utána havidíjas karbantartás",
+        "Banki átutalás, számla ellenében",
+        "Előleg + végszámla"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Több is jelölhető",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "D",
+      "text": "A cég ÁFA-alany (vissza tudja igényelni az áfát)?",
+      "type": "single",
+      "options": [
+        "Igen, áfa-alany cég",
+        "Nem / nem tudjuk visszaigényelni"
+      ],
+      "hasOther": false,
+      "hasDontKnow": true,
+      "hint": "Az ajánlat bruttó/nettó kommunikációjához",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "D",
+      "text": "Várhatóan hányan látogatják majd a bemutatót? (nagyságrend)",
+      "type": "single",
+      "options": [
+        "Kevesen, alkalmanként (havi pár tucat látogató)",
+        "Mérsékelten (havi néhány száz látogató)",
+        "Sokan, folyamatosan (havi több ezer látogató)",
+        "Hullámzóan, kampányokhoz / eseményekhez kötve (időnként nagy csúcs)"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Becslés is elég – ez befolyásolja a tárhely választását",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "D",
+      "text": "Kell-e, hogy a bemutató folyamatosan, éjjel-nappal elérhető legyen?",
+      "type": "single",
+      "options": [
+        "Igen, mindig elérhetőnek kell lennie (0-24)",
+        "Általában legyen elérhető, de rövid kiesés nem gond",
+        "Elég alkalmanként / csak kampányok, események idején"
+      ],
+      "hasOther": false,
+      "hasDontKnow": true,
+      "hint": "Pl. ha külföldi partnerek is nézhetik bármikor",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "D",
+      "text": "Kérnek-e szerződésben rögzített rendelkezésre állást (az oldal az idő hány százalékában legyen elérhető)?",
+      "type": "single",
+      "options": [
+        "Nem, elég ha általában működik",
+        "Igen, szeretnénk erre garanciát (pl. 99% elérhetőség)",
+        "Nem tudjuk, kérünk javaslatot"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Statikus oldalnál ez általában magas és olcsó",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "D",
+      "text": "Lesz-e a bemutató helyszínen, fizikailag is kihelyezve? (Több is jelölhető)",
+      "type": "multi",
+      "options": [
+        "Nem, csak interneten, böngészőben nézik",
+        "Igen, érintőképernyős kioszk / totem a standon vagy irodában",
+        "Igen, a saját laptopunkon / tabletünkön mutatjuk be ügyfeleknek",
+        "Igen, kivetítőn / nagy képernyőn, prezentáción"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Pl. vásári standon, irodában, ügyfélváróban",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "D",
+      "text": "HA lesz helyszíni kioszk: működnie kell-e internet nélkül is (offline mód), és ki biztosítja a hardvert/internetet?",
+      "type": "single",
+      "options": [
+        "Lesz stabil internet a helyszínen, a hardvert és a netet mi biztosítjuk",
+        "Internet nélkül is működnie kell (offline), a hardvert mi adjuk",
+        "Kérjük a fejlesztőt, hogy javasoljon / szerezzen be eszközt és megoldást",
+        "Jó lenne offline tartalék arra az esetre, ha kiesik a net",
+        "Nem lesz kioszk / nem releváns"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Vásári/standos internet gyakran gyenge vagy nincs; a hardver és a net beszerzése \"ők vagy én\" kérdés",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "D",
+      "text": "HA lesz kioszk: ki felel a helyszínen az eszköz napi be-/kikapcsolásáért és felügyeletéért az esemény alatt?",
+      "type": "single",
+      "options": [
+        "A cég munkatársa a helyszínen (a fejlesztő betanítja)",
+        "Kérjük a fejlesztő helyszíni jelenlétét / támogatását (külön díjazás)",
+        "Az eszköz teljesen önműködő legyen (kioszk-mód, automatikus indulás)",
+        "Nem lesz kioszk / nem releváns"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Vásári/standos üzemeltetés gyakran helyszíni jelenlétet vagy automatizálást igényel",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "D",
+      "text": "Tervezik-e a bemutatót VR-szemüvegen is használni, és ha igen, ez a megrendelés része most?",
+      "type": "single",
+      "options": [
+        "Nem, VR nem szükséges",
+        "Most nem, de a jövőben szeretnénk (legyen rá felkészítve)",
+        "Igen, a VR-támogatás a megrendelés része",
+        "Nem tudjuk, kérünk javaslatot"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "A VR-támogatás jelentős plusz munka és tesztelési igény; jó előre tisztázni",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "D",
+      "text": "A LEADÁS UTÁN ki tölti fel és frissíti a tartalmat (új munka, új fotó, módosított leírás)?",
+      "type": "single",
+      "options": [
+        "A cég maga, ha kap hozzá egy egyszerű kezelőfelületet",
+        "A cég maga, akár technikaibb módon is, ha betanítják",
+        "A fejlesztő végzi minden alkalommal (megbízásra / előfizetésre)",
+        "Vegyesen, a feladattól függően",
+        "Ritkán változik, majd eseti megbízással megoldjuk"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "\"Ők vagy én\" – ez dönti el, kell-e egyszerű kezelőfelület",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "D",
+      "text": "Egy későbbi tartalombővítés (új munka hozzáadása) árazása hogyan történjen?",
+      "type": "single",
+      "options": [
+        "Előre rögzített egységár munkánként / modellenként",
+        "Eseti árajánlat minden bővítésnél",
+        "A havidíjas csomag tartalmazzon havi X mennyiségű frissítést",
+        "Nem tudjuk, kérünk javaslatot"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Hogy a jövőbeli bővítés ára kiszámítható legyen mindkét félnek",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "D",
+      "text": "Szeretnének-e a leadás után folyamatos KARBANTARTÁSI / támogatási szerződést? (Több is jelölhető)",
+      "type": "multi",
+      "options": [
+        "Hibajavítás, ha valami elromlik (pl. nem töltődik be egy modell)",
+        "Időnkénti tartalomfrissítés (új projektek hozzáadása)",
+        "Technikai frissítések (böngészőváltozások, biztonsági frissítések)",
+        "Telefonos/e-mailes támogatás kérdések esetén",
+        "Nincs igény, az átadás után magunk kezeljük",
+        "Még nem döntöttük el, kérünk árajánlatot rá is"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Pl. havidíjas csomag frissítésekre, hibajavításra – több is jelölhető",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "D",
+      "text": "A havi/éves üzemeltetési díjat milyen időtartamra és milyen felmondási feltétellel vállalnák?",
+      "type": "single",
+      "options": [
+        "Határozatlan időre, bármikor felmondható (pl. 30 nap)",
+        "1 éves elköteleződés, utána megújítható",
+        "Csak rövid, eseti időszakokra",
+        "Nem tudjuk, kérünk javaslatot"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Az üzemeltetési szerződés időtartama és felmondhatósága",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "D",
+      "text": "Milyen garanciát / díjmentes hibajavítási időszakot várnak el az átadás után?",
+      "type": "single",
+      "options": [
+        "Nincs külön elvárás",
+        "30 nap",
+        "3 hónap",
+        "6 hónap",
+        "12 hónap",
+        "Folyamatos, havidíjas karbantartási szerződés keretében"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Amikor a felmerülő hibákat a fejlesztő díjmentesen javítja",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "D",
+      "text": "Komoly hiba esetén (pl. az oldal nem érhető el) milyen gyors hibaelhárítást várnának el?",
+      "type": "single",
+      "options": [
+        "Néhány órán belül (sürgős, üzletileg fontos)",
+        "1 munkanapon belül",
+        "Pár munkanapon belül is megfelelő",
+        "Nincs különösebb elvárás (\"amint a fejlesztő ráér\")"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Reális elvárás segít a karbantartási csomag árazásában",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "D",
+      "text": "Ki kapjon értesítést és intézkedjen, ha az oldal leáll vagy probléma van?",
+      "type": "single",
+      "options": [
+        "A cég egy megnevezett munkatársa (pl. marketing / IT)",
+        "A fejlesztő figyelje és intézkedjen automatikusan",
+        "Mindketten kapjunk értesítést",
+        "Nem tudjuk"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Hogy ne maradjon \"gazdátlan\" a hibajelzés",
+      "textLines": 0,
+      "otherLabel": "Felelős neve / elérhetősége, ha van"
+    },
+    {
+      "section": "D",
+      "text": "A projekt VÉGÉN kié legyen a TULAJDONJOG az alábbiakon? (jelölje mindet, ahol a CÉG legyen a tulajdonos)",
+      "type": "multi",
+      "options": [
+        "A domain (internetes cím)",
+        "A tárhely / hosting fiók",
+        "A kész oldal forráskódja (a program maga)",
+        "A 3D modellek és a feltöltött tartalmak (képek, leírások)",
+        "A felhasználói / belépési fiókok és jelszavak",
+        "A teljes anyag – minden a cégé legyen"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Hogy a cég ne kerüljön kiszolgáltatott helyzetbe egy fejlesztővel szemben",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "D",
+      "text": "A kész oldal forráskódját (a programot magát) megkapja-e teljesen a cég a leadáskor?",
+      "type": "single",
+      "options": [
+        "Igen, teljes forráskódot kérünk a cég tulajdonába",
+        "Elég, ha a működő oldalt megkapjuk, a forráskód a fejlesztőé maradhat",
+        "Forráskód is kell, de a fejlesztő hasonló alapokon dolgozhat másnak is",
+        "Nem tudjuk megítélni, kérünk magyarázatot és javaslatot"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "A forráskód birtoklása nélkül később más fejlesztő nehezen tud rajta dolgozni",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "D",
+      "text": "Az EREDETI, nyers 3D modellfájlokat (a tömörítés előtti, szerkeszthető verziókat) megkapja-e a cég?",
+      "type": "single",
+      "options": [
+        "Igen, minden nyers, szerkeszthető fájlt kérünk átadáskor",
+        "Elég a weboldalon megjelenő (kész) verzió",
+        "Nyers fájl is kell, és a cégnél is, meg biztonsági másolatban is legyen",
+        "Nem tudjuk megítélni, kérünk javaslatot"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Ezek nélkül később nehéz módosítani vagy újrahasznosítani a modelleket",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "D",
+      "text": "Mennyire fontos, hogy a projekt NE legyen egyetlen fejlesztőhöz kötve (bármikor átadható legyen másnak)?",
+      "type": "single",
+      "options": [
+        "Nagyon fontos – minden fiók, kód, jelszó a cégé legyen, bárki folytathassa",
+        "Fontos, de bízunk a fejlesztőben, hosszú távra tervezünk vele",
+        "Most nem prioritás, csak működjön",
+        "Nem gondoltunk rá – kérünk magyarázatot, miért számít"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Vagyis ne legyen \"függőség\" egyetlen embertől vagy cégtől",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "D",
+      "text": "Ha a fejlesztő üzemelteti, de megszűnik az együttműködés vagy a fejlesztő elérhetetlenné válik, mi a terv?",
+      "type": "single",
+      "options": [
+        "Legyen írásos vészforgatókönyv és átadási csomag erre az esetre",
+        "A cég maga is hozzáfér mindenhez, így bármikor átveheti",
+        "Bízunk benne, hogy ez nem fordul elő, nem foglalkozunk vele",
+        "Nem tudjuk, kérünk javaslatot"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Folytonosság: mi van, ha az egyszemélyes fejlesztő kiesik",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "D",
+      "text": "Mi történjen az oldallal és a folyamatos költségekkel, ha a cég később MEGSZÜNTETI a bemutatót?",
+      "type": "single",
+      "options": [
+        "A cég bármikor felmondhatja, leállítjuk és lezárjuk a költségeket",
+        "Meghatározott felmondási idővel mondható fel",
+        "Az anyagot átadjuk, a cég maga archiválja",
+        "Nem tudjuk, kérünk javaslatot"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Kilépési / leállási forgatókönyv, hogy ne maradjon nyitott kötelezettség",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "D",
+      "text": "Az átadáskor mit várnak el, hogy a cég megkapjon? (jelöljön mindent, ami fontos)",
+      "type": "multi",
+      "options": [
+        "Teljes forráskód",
+        "Minden jelszó és belépési adat (domain, tárhely, fiókok)",
+        "A nyers 3D modellek és tartalmak",
+        "Írott üzemeltetési / kezelési útmutató (dokumentáció)",
+        "Betanítás (személyes vagy videós oktatás a kezelésről)",
+        "Lista a külső szolgáltatásokról és azok díjairól, amikre az oldal támaszkodik"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "D",
+      "text": "A betanítást (oktatást) milyen formában szeretnék?",
+      "type": "single",
+      "options": [
+        "Személyes / online élő betanítás a cég munkatársának",
+        "Felvett oktatóvideó, amit később bármikor visszanézhetünk",
+        "Csak írott, lépésről lépésre útmutató elég",
+        "Nem kell betanítás, a fejlesztő intézi a kezelést is"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "D",
+      "text": "Ki legyen a cég részéről a kapcsolattartó / felelős, aki a fiókokat és jelszavakat őrzi?",
+      "type": "single",
+      "options": [
+        "A cég IT-se / rendszergazdája",
+        "Az ügyvezető / egy vezető",
+        "Marketing- vagy kommunikációs felelős",
+        "Még nem jelöltünk ki ilyen személyt"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Jó, ha egy konkrét, állandó személy vagy szerep felel értük",
+      "textLines": 0,
+      "otherLabel": "A felelős személy neve / beosztása"
+    },
+    {
+      "section": "D",
+      "text": "Az üzemeltetéshez szükséges fiókok közös, céges e-mail címhez kötődjenek-e (ne egy magánszemélyéhez)?",
+      "type": "single",
+      "options": [
+        "Igen, mindenképp céges, megosztott e-mail címhez kössük (pl. info@cegnev.hu)",
+        "Egy konkrét munkatárs céges címéhez kössük",
+        "Mindegy, döntsön a fejlesztő a legjobb gyakorlat szerint",
+        "Nem tudjuk, kérünk magyarázatot"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Így a fiók a cégnél marad munkatárs távozása esetén is",
+      "textLines": 0,
+      "otherLabel": "A használandó céges e-mail cím"
+    },
+    {
+      "section": "D",
+      "text": "Ki a felelős a megjelenő tartalom (szövegek, helyszínek, adatok) HELYESSÉGÉÉRT és jogszerűségéért a publikáláskor?",
+      "type": "single",
+      "options": [
+        "A cég felel a megjelenő tartalom helyességéért és jogszerűségéért",
+        "A fejlesztő csak technikailag felel, a tartalomért a cég",
+        "Közös felelősség, írásban rögzítve",
+        "Nem tudjuk, kérünk javaslatot"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Tisztázandó, hogy téves adat / jogsértő tartalom esetén ki a felelős",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "D",
+      "text": "A bemutatni kívánt munkák KÉPI és 3D anyagának (fotók, rajzok, BIM/CAD modellek) joga kié? (Több is jelölhető)",
+      "type": "multi",
+      "options": [
+        "A cégé, korlátozás nélkül felhasználhatjuk",
+        "Részben az építészé / tervezőé, engedélyt kell kérni",
+        "Részben a megrendelőé (akinek építettünk)",
+        "Részben külső fotós / vizualizációs cég joga",
+        "Nem tudjuk pontosan, tisztázni kell"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Fontos, hogy jogtisztán használhassuk az anyagokat",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "D",
+      "text": "Van-e olyan bemutatandó projekt, amelyet titoktartás (NDA) vagy szerződéses korlátozás véd?",
+      "type": "single",
+      "options": [
+        "Nincs ilyen, minden szabadon bemutatható",
+        "Igen, van néhány ilyen projekt (ezeket kihagyjuk vagy engedélyt kérünk)",
+        "Igen, és előzetes engedélyt kell kérnünk a megrendelőtől",
+        "Nem tudjuk, ellenőrizni kell"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Pl. katonai, ipari, magánszemély megbízása",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "D",
+      "text": "Megjeleníthetők-e a megrendelők nevei és a projektek helyszínei az egyes munkáknál?",
+      "type": "single",
+      "options": [
+        "Igen, minden megrendelő neve és pontos helyszín megjeleníthető",
+        "Csak részben / projektenként eltér (jelezzük), vagy csak településszint",
+        "Nem, a megrendelők nevét és a helyszínt nem tüntetjük fel",
+        "Nem tudjuk, projektenként kell eldönteni"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "D",
+      "text": "Szerepelhetnek-e a bemutatóban felismerhető személyek (pl. fotókon dolgozók, megrendelők) vagy más cégek logói?",
+      "type": "multi",
+      "options": [
+        "Nincs ilyen tartalom",
+        "Igen, felismerhető személyek, és van rá hozzájárulás / engedély",
+        "Nem, kerüljük a felismerhető személyeket",
+        "Igen, idegen logók/védjegyek, és van rá engedélyünk",
+        "Igen, idegen logók, de az engedélyt még be kell szereznünk"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Képmáshoz való jog / GDPR és védjegy szempont – több is jelölhető",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "D",
+      "text": "Felhasználhatja-e a fejlesztő (Loricatus) ezt a munkát saját referenciaként / a portfóliójában, és említhető-e a cég neve?",
+      "type": "single",
+      "options": [
+        "Igen, szabadon bemutathatja, a cég neve is említhető",
+        "Igen, de csak előzetes egyeztetés / engedély után",
+        "Igen, de a cég / megrendelők nevének említése nélkül (anonim)",
+        "Nem, ez bizalmas, nem mutatható be"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "D",
+      "text": "Kerüljön-e a kész oldalra diszkrét \"fejlesztette\" megjelölés és/vagy a cég impresszuma/elérhetősége? (Több is jelölhető)",
+      "type": "multi",
+      "options": [
+        "Igen, legyen a cég impresszuma / elérhetősége az oldalon",
+        "Mehet rá diszkrét \"fejlesztette: ...\" kredit a láblécben",
+        "Csak a cég logója / neve, fejlesztői kredit nélkül",
+        "Semmilyen extra felirat ne legyen"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "D",
+      "text": "Gyűjt-e az oldal bármilyen SZEMÉLYES ADATOT a látogatóktól? (Több is jelölhető)",
+      "type": "multi",
+      "options": [
+        "Nem, csak megtekinthető tartalom lesz (nincs űrlap, nincs regisztráció)",
+        "Lesz kapcsolatfelvételi űrlap (név, e-mail)",
+        "Lesz hírlevél-feliratkozás",
+        "Lesz látogatottság-mérés / sütik",
+        "Nem tudjuk még"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Ettől függ, kell-e adatkezelési tájékoztató",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "D",
+      "text": "Kell-e adatkezelési tájékoztató és süti- (cookie) tájékoztató/elfogadó sáv, és ki adja a jogi szöveget?",
+      "type": "single",
+      "options": [
+        "Igen, kérjük ezek elkészítését; a jogi szöveget a cég / a cég ügyvédje adja",
+        "Igen, és a fejlesztő illesszen be egy általános sablont (nem jogi tanácsadás)",
+        "A cégnek már van ilyen szövege, azt használjuk",
+        "Nem szükséges (nincs adatgyűjtés, nincs süti)"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "A jogi tartalomért alapvetően a cég felel (\"ők vagy én\")",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "D",
+      "text": "Kell-e impresszum / cégadatok (üzemeltető neve, székhely, elérhetőség) az oldalra?",
+      "type": "single",
+      "options": [
+        "Igen, tegyük ki a cég impresszumát (az adatokat alább / külön adjuk)",
+        "A cégnek van kész impresszum-szövege, azt használjuk",
+        "Nem szükséges",
+        "Nem tudjuk, kérünk javaslatot"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Ha most nincs kéznél, később is pótolható",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "D",
+      "text": "Szükség van-e formális szerződésre és titoktartási nyilatkozatra (NDA) a megbízásról?",
+      "type": "single",
+      "options": [
+        "Igen, írásos szerződést és NDA-t is kérünk",
+        "Igen, írásos szerződést, NDA nem szükséges",
+        "Elég egy rövid írásos megállapodás / ajánlat elfogadása",
+        "A cég saját szerződésmintáját / NDA-ját használnánk"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Hatáskör, határidő, fizetés, jogok, felelősség, titoktartás",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "D",
+      "text": "Hol legyen az EREDETI forrásanyagok (3D modellek, fotók, szövegek) hosszú távú, biztonságos tárolása?",
+      "type": "single",
+      "options": [
+        "A cégnél (mi őrizzük az eredetieket)",
+        "A fejlesztőnél is maradjon egy másolat",
+        "Közös felhős tárhelyen, mindkét fél hozzáfér",
+        "Nem tudjuk"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "D",
+      "text": "Van-e a cégnek saját IT-se / rendszergazdája, akit be lehet vonni a technikai kérdésekbe?",
+      "type": "single",
+      "options": [
+        "Igen, házon belüli IT-s / rendszergazda",
+        "Igen, külső IT-partner / szolgáltató",
+        "Nincs, ezt teljesen a fejlesztőre bízzuk",
+        "Csak alkalmanként, megbízással érünk el ilyen szakembert"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "A kérdőív E szekciója neki szól",
+      "textLines": 0,
+      "otherLabel": "Az IT-felelős / partner neve, elérhetősége"
+    },
+    {
+      "section": "E",
+      "text": "Van-e a cégnek jelenleg élő, működő weboldala? Ha igen, mi a pontos webcíme?",
+      "type": "single",
+      "options": [
+        "Igen, van élő weboldalunk",
+        "Igen, de fejlesztés/átalakítás alatt áll",
+        "Nincs, korábban volt, de már nem él",
+        "Nincs, és még soha nem volt"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Ha van, kérjük az Egyéb sorba a pontos URL-t, pl. https://www.cegnev.hu",
+      "textLines": 0,
+      "otherLabel": "A weboldal pontos címe (URL)"
+    },
+    {
+      "section": "E",
+      "text": "Milyen rendszerre (CMS, tartalomkezelő) épül a jelenlegi weboldal?",
+      "type": "single",
+      "options": [
+        "WordPress",
+        "Joomla / Drupal",
+        "Egyedi fejlesztésű (saját kódbázis)",
+        "Honlapépítő szolgáltatás (pl. Wix, Shoptet, Webnode, Squarespace)",
+        "Statikus HTML oldal (nincs tartalomkezelő mögötte)",
+        "Nincs weboldalunk"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "A CMS az a rendszer, amivel a tartalmat szerkesztik",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "E",
+      "text": "Ki fejlesztette / üzemelteti jelenleg a meglévő weboldalt?",
+      "type": "single",
+      "options": [
+        "Belső munkatárs / a cég IT-se",
+        "Külső ügynökség vagy fejlesztő (van élő szerződés)",
+        "Korábbi fejlesztő, akivel már megszűnt a kapcsolat",
+        "Senki, magunk tartjuk karban",
+        "Nincs weboldalunk"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "E",
+      "text": "Ha a cég SAJÁT szerveréről/gépéről menne (on-premise): milyen az a gép és a hálózat? (Több is jelölhető)",
+      "type": "multi",
+      "options": [
+        "Van mindig bekapcsolt, dedikált céges szerver",
+        "Csak egy iroda gép, ami nem feltétlen üzemel 0-24",
+        "Van fix, kívülről is elérhető (publikus) IP-cím",
+        "Csak belső hálózaton lenne elérhető (intraneten)",
+        "Nem tervezünk helyi üzemeltetést"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Csak ha helyi (on-premise) üzemeltetést terveznek",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "E",
+      "text": "HA on-premise: ki adminisztrálja a szervert (telepítés, frissítés, elérhetőség)?",
+      "type": "single",
+      "options": [
+        "A cég saját rendszergazdája teljesen",
+        "A fejlesztő kap hozzáférést és ő állítja be / tartja karban",
+        "Vegyes: a fejlesztő beüzemel, a cég IT-je üzemeltet tovább",
+        "Külső IT-partner / szolgáltató kezeli",
+        "Nem tervezünk helyi üzemeltetést"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "On-premise = a cég saját, helyben üzemeltetett gépe/szervere",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "E",
+      "text": "Melyik tárhely- / hosting-szolgáltatónál van jelenleg a weboldal vagy a domain, és milyen típusú a kiszolgáló?",
+      "type": "single",
+      "options": [
+        "Megosztott tárhely (shared hosting)",
+        "Virtuális szerver (VPS) vagy dedikált szerver",
+        "Felhőszolgáltatás (AWS, Azure, Google Cloud stb.)",
+        "Saját, házon belüli (on-premise) szerver a cégnél",
+        "Honlapépítő saját rendszere (nem mi kezeljük a szervert)",
+        "Nincs jelenleg tárhelyünk"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Kérjük az Egyéb sorba a szolgáltató nevét, pl. Tárhely.Eu, Rackforest, DigitalOcean, AWS, Hetzner",
+      "textLines": 0,
+      "otherLabel": "Szolgáltató neve / csomag"
+    },
+    {
+      "section": "E",
+      "text": "Van-e teljes körű adminisztrátori hozzáférésünk a tárhelyhez / vezérlőpulthoz, és milyen vezérlőpult fut rajta?",
+      "type": "single",
+      "options": [
+        "Igen, teljes admin hozzáférés (cPanel)",
+        "Igen, teljes admin hozzáférés (Plesk / DirectAdmin / egyéb)",
+        "Részleges hozzáférésünk van",
+        "Nincs, csak a szolgáltató / külső fél fér hozzá"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "A vezérlőpult a tárhely beállításait kezelő webes felület (pl. cPanel, Plesk)",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "E",
+      "text": "A 3D bemutató statikus fájlokból is működik. Milyen futtatókörnyezetet támogat a tárhely? (Több is jelölhető)",
+      "type": "multi",
+      "options": [
+        "Csak statikus fájlok kiszolgálása (HTML/CSS/JS) is elegendő",
+        "PHP",
+        "Node.js",
+        "Apache webszerver",
+        "Nginx webszerver",
+        "Nem tudjuk, mi áll rendelkezésre"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "A 3D kiállítótér jellemzően statikus fájlokból is fut",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "E",
+      "text": "Milyen fájlfeltöltési / hozzáférési módok állnak rendelkezésre, és tudunk-e a fejlesztőnek hozzáférést adni a feltöltéshez? (Több is jelölhető)",
+      "type": "multi",
+      "options": [
+        "FTP",
+        "SFTP / SSH (titkosított kapcsolat)",
+        "Tárhely fájlkezelő a vezérlőpultban (webes felület)",
+        "Git-alapú telepítés (deploy)",
+        "Tudunk külön, dedikált hozzáférést adni a fejlesztőnek",
+        "A feltöltést nekünk kell elvégeznünk a fejlesztő anyagaiból"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Ezekkel lehet a kész fájlokat feltölteni a szerverre",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "E",
+      "text": "Van-e a cégnek céges felhőfiók, amelyen az oldal futtatható lenne, vagy a fejlesztő hozza? (Több is jelölhető)",
+      "type": "multi",
+      "options": [
+        "AWS (Amazon)",
+        "Microsoft Azure",
+        "Google Cloud",
+        "Cloudflare",
+        "Vercel / Netlify (statikus oldal-hosting)",
+        "Nincs ilyen fiókunk, de létre tudunk hozni a cég nevén",
+        "Nincs, bízzuk a fejlesztőre, az ő fiókjában fusson"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Rendszergazdának: melyik felhő áll rendelkezésre",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "E",
+      "text": "Ki birtokolja és kezelje a kód-tárolót (a forráskód verziókövető helye, pl. GitHub/GitLab)?",
+      "type": "single",
+      "options": [
+        "A cég saját fiókjában / szervezetében (a fejlesztő meghívott közreműködő)",
+        "A fejlesztő fiókjában, de a cégnek admin hozzáférést adva",
+        "A fejlesztő fiókjában, leadáskor a cég fiókjába átadva (transzfer)",
+        "Nincs igény verziókövetőre, csak a kész fájlokat kérjük",
+        "Bízzuk a fejlesztőre"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Itt él a forráskód, innen frissül az oldal",
+      "textLines": 0,
+      "otherLabel": "Meglévő céges Git-fiók (GitHub/GitLab/Bitbucket), ha van"
+    },
+    {
+      "section": "E",
+      "text": "Hozzáférünk-e a domain DNS-beállításaihoz, és hol van delegálva a DNS-zóna (a névszerverek)?",
+      "type": "single",
+      "options": [
+        "Igen, magunk szerkesztjük a DNS-t a regisztrátornál",
+        "Igen, a DNS a tárhelyszolgáltatónál van, ott szerkesztjük",
+        "A DNS Cloudflare-en / saját DNS-szerveren van",
+        "Igen, de csak külső fél / szolgáltató közreműködésével",
+        "Nem, nincs hozzáférésünk / nem tudjuk, hol kezelik"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "DNS = a domainnevet a megfelelő szerverre irányító beállítások",
+      "textLines": 0,
+      "otherLabel": "Regisztrátor / DNS-szolgáltató neve, ha tudja"
+    },
+    {
+      "section": "E",
+      "text": "Milyen hozzáférést tud az IT biztosítani a DNS-kezeléshez a bemutató élesítéséhez?",
+      "type": "single",
+      "options": [
+        "Teljes hozzáférést adunk a fejlesztőnek a DNS-kezeléshez / meghívjuk a fiókba",
+        "Mi végezzük el a DNS-módosításokat a fejlesztő pontos utasításai szerint",
+        "A domaint külső fél kezeli, vele kell egyeztetni",
+        "Nincs még domain",
+        "Nem tudjuk, egyeztetünk az IT-vel"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "A bemutató élesítéséhez egy-két DNS-beállítás kell (a fejlesztő pontos értékeket ad)",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "E",
+      "text": "Át lehet-e helyezni a DNS-zóna kezelését a hostinghoz illeszkedő szolgáltatóhoz (pl. Cloudflare), vagy maradjon a jelenlegi helyén?",
+      "type": "single",
+      "options": [
+        "Maradjon a jelenlegi DNS-szolgáltatónál, csak rekordokat módosítunk",
+        "Áthelyezhető a fejlesztő által javasolt szolgáltatóhoz",
+        "Nem, a DNS-t a cég IT-je szigorúan kézben tartja",
+        "Nem tudjuk, egyeztetünk az IT-vel"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "A névszerver-váltás gyorsabb beállítást és jobb teljesítményt adhat",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "E",
+      "text": "Milyen DNS-rekordokat tud a rendszergazda felvenni az élesítéshez? (Több is jelölhető; a fejlesztő pontos értékeket ad)",
+      "type": "multi",
+      "options": [
+        "CNAME aldomainhez (pl. bemutato -> a hosting címére)",
+        "A és AAAA rekordok apex/gyökér-domainhez",
+        "TXT rekord domain-igazoláshoz (tulajdon-ellenőrzés)",
+        "A rekordok módosítását IT-jegyként kezeljük",
+        "A rendszergazda végzi, a fejlesztő csak az értékeket adja"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Aldomainhez jellemzően egy CNAME elég; gyökérhez A/AAAA rekordok kellenek",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "E",
+      "text": "Vannak-e MEGLÉVŐ, élesben futó DNS-rekordok, amelyeket NEM szabad megváltoztatni (e-mail, jelenlegi weboldal)? (Több is jelölhető)",
+      "type": "multi",
+      "options": [
+        "Igen, MX rekordok (e-mail) – ezeket ne bántsuk",
+        "Igen, SPF/DKIM/DMARC (levél-hitelesítés) – ezeket ne bántsuk",
+        "Igen, a jelenlegi weboldal A/CNAME rekordjai – maradjanak",
+        "Nincs ütköző rekord, vagy teszt domain",
+        "Nem tudjuk, ellenőrizni kell az IT-vel"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Fontos, hogy a bemutató beállítása ne törje el a meglévő e-mailt/weboldalt",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "E",
+      "text": "Hogyan kezeljék az SSL/HTTPS tanúsítványt, és van-e tanúsítvány-kiállítási megkötés (pl. CAA rekord)?",
+      "type": "single",
+      "options": [
+        "Automatikus, ingyenes tanúsítvány (Let's Encrypt / hosting platform) megfelel, nincs CAA-megkötés",
+        "A cégnek saját, megvásárolt tanúsítványa van, azt kell használni",
+        "Van CAA rekord / megkötés, az IT megadja a megengedett kibocsátókat",
+        "Nem tudjuk, a szokásos megoldást kérjük"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "A legtöbb hosting automatikusan, ingyen kiállítja és megújítja; a CAA rekord korlátozhatja a kibocsátót",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "E",
+      "text": "Kérnek-e HTTP->HTTPS automatikus átirányítást és www/nem-www egységesítést (kanonizálást)?",
+      "type": "single",
+      "options": [
+        "Igen: kötelező HTTPS-átirányítás + a www és a sima cím is ugyanoda visz",
+        "Csak HTTPS-átirányítás kell, a www-vel nem foglalkozunk",
+        "Az IT egyedi szabályt ad meg",
+        "Nem tudjuk, a javasolt megoldást kérjük"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Cél, hogy bárhogy gépelik (www-vel vagy anélkül), ugyanaz az oldal jöjjön be biztonságosan",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "E",
+      "text": "Be kell-e ágyazni (iframe) a bemutatót a meglévő weboldalba, és ha igen, mely domain(ek)ről engedélyezett?",
+      "type": "single",
+      "options": [
+        "Nem, önálló címen fut, nincs beágyazás",
+        "Igen, csak a cég saját domainjéről engedélyezett a beágyazás",
+        "Igen, több megadott domainről is engedélyezett",
+        "Nem tudjuk"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Beágyazás esetén biztonsági fejléceket (frame-ancestors) kell a domainhez igazítani",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "E",
+      "text": "Van-e a cégnél tűzfal, tartalomszűrő, proxy vagy CSP/biztonsági fejléc, ami befolyásolhatja az oldal vagy a 3D tartalom elérését? (Több is jelölhető)",
+      "type": "multi",
+      "options": [
+        "Nincs ilyen korlátozás",
+        "Van céges tűzfal/proxy – szükség esetén engedélyezzük a domaint",
+        "Van IP-korlátozás az adminra, de a fejlesztő IP-jét felvesszük a kivételek közé",
+        "A jelenlegi oldalon van beállított CSP / biztonsági fejléc",
+        "Külső szkriptek / beágyazások (CDN, betűtípus, analitika) tiltottak vagy jóváhagyáshoz kötöttek"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Helyszíni kioszk/iroda esetén a hálózati szűrés vagy szigorú CSP blokkolhatja a WebGL / 3D tartalmat",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "E",
+      "text": "Engedélyezi-e a cég böngészős / hálózati környezete a WebGL és a nagyobb 3D fájlok betöltését?",
+      "type": "single",
+      "options": [
+        "Igen, nincs ismert korlátozás",
+        "Van proxy / szűrő, de testreszabható",
+        "Igen, de a cégen belüli gépeken korlátozott lehet",
+        "Nem tudjuk"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "WebGL = a böngészőben futó 3D megjelenítés technológiája",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "E",
+      "text": "Milyen böngészőket és (minimum) eszköz-/hardverszintet kell támogatni? (Több is jelölhető)",
+      "type": "multi",
+      "options": [
+        "Friss böngészők elegendők (Chrome, Edge, Firefox, Safari aktuális verziói)",
+        "Régebbi céges gépeken / böngészőkön is futnia kell",
+        "Vannak gyenge / régi mobilok a célközönségben",
+        "Vállalati felügyelt (managed) böngészőkön kell futnia",
+        "Nem tudjuk"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "A WebGL és a 3D teljesítmény régi/gyenge eszközökön korlátozott lehet",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "E",
+      "text": "Van-e a tárhelyen ismert korlát, ami a nagy 3D fájlokat érinti? (Több is jelölhető)",
+      "type": "multi",
+      "options": [
+        "Korlátos a tárterület (pl. néhány GB)",
+        "Korlátos a havi forgalom / sávszélesség",
+        "Van egyszerre feltölthető fájlméret-korlát",
+        "Nincs tudtunkkal korlát",
+        "Nem tudjuk"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "A 3D modellek nagyobb tárterületet és adatforgalmat igényelhetnek, mint egy átlagos weboldal",
+      "textLines": 0,
+      "otherLabel": "Ismert korlátok, ha vannak"
+    },
+    {
+      "section": "E",
+      "text": "A felhős/tárhely-díj forgalom-alapú is lehet. Vállalják-e a 3D fájlok nagy forgalmából eredő, ingadozó havi költséget?",
+      "type": "single",
+      "options": [
+        "Igen, a változó, forgalomarányos díj elfogadható",
+        "Inkább fix, kiszámítható havidíjat szeretnénk (akár felső korláttal)",
+        "Kérünk forgalmi riasztást / költségplafont a meglepetés-számla ellen",
+        "Nem tudjuk, kérünk javaslatot"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Nagy 3D fájloknál és sok látogatónál a sávszélesség-díj váratlanul megugorhat",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "E",
+      "text": "Tervezik-e külön CDN (tartalomkiszolgáló hálózat) használatát a nagy 3D fájlok gyorsabb betöltéséhez?",
+      "type": "single",
+      "options": [
+        "Igen, már használunk CDN-t (pl. Cloudflare)",
+        "Nem, de nyitottak vagyunk rá, ha javasolt",
+        "Nem szeretnénk külön CDN-t",
+        "Nem tudjuk, mit jelent / kérünk javaslatot"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "CDN = világszerte elosztott szerverek, amik gyorsítják a nagy fájlok letöltését",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "E",
+      "text": "Hol tárolódnak jelenleg a 3D / CAD / BIM forrásfájlok, és milyen formátumban? (Több is jelölhető)",
+      "type": "multi",
+      "options": [
+        "Belső céges szerveren / hálózati meghajtón",
+        "Felhős tárhelyen (Google Drive, OneDrive, Dropbox)",
+        "Az egyes munkatársak / tervezők gépein",
+        "Külső tervezőirodánál / alvállalkozónál",
+        "IFC / RVT / ArchiCAD (BIM)",
+        "DWG/DXF (AutoCAD), FBX/OBJ, vagy GLB/glTF (webes 3D)",
+        "Nincsenek ilyen fájljaink, csak rajzok / fotók"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "GLB/glTF a webhez legalkalmasabb; a többiből konvertálni kell",
+      "textLines": 0,
+      "otherLabel": "Formátum részletei, ha tudja"
+    },
+    {
+      "section": "E",
+      "text": "Körülbelül mekkorák a meglévő 3D / CAD / BIM fájlok, és kitől / melyik részlegtől kérhetők be?",
+      "type": "single",
+      "options": [
+        "Kicsi, jellemzően néhány MB-os fájlok",
+        "Közepes, néhányszor tíz – pár száz MB",
+        "Nagy, több száz MB – néhány GB",
+        "Nagyon nagy, több GB-os fájlok",
+        "Vegyes / nagyon eltérő"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "A fájlméret befolyásolja a feldolgozás idejét. Az Egyéb sorba kérjük, kitől kérhetők be (pl. tervezési osztály, BIM-koordinátor, külső iroda)",
+      "textLines": 0,
+      "otherLabel": "Kitől / melyik részlegtől kérhetők be"
+    },
+    {
+      "section": "E",
+      "text": "Hogyan tudják a forrásfájlokat átadni a fejlesztőnek? (Több is jelölhető)",
+      "type": "multi",
+      "options": [
+        "Felhős megosztó linken (Google Drive, OneDrive, Dropbox stb.)",
+        "Céges fájlmegosztó / FTP szerveren",
+        "Külső adathordozón (pendrive, külső HDD)",
+        "E-mailben (csak kis fájlok esetén)",
+        "Még nem tudjuk, kérünk javaslatot"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "E",
+      "text": "A 3D modellek esetében elvárás-e a látogató felé történő védelem (a nyers modellek ne legyenek könnyen letölthetők/másolhatók)?",
+      "type": "single",
+      "options": [
+        "Igen, fontos, hogy a modelleket ne lehessen egyszerűen letölteni/másolni",
+        "Nem lényeges, a megjelenítés a cél",
+        "Csak a kiemelt / érzékeny modelleknél fontos",
+        "Nem tudjuk, kérünk javaslatot"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Webes 3D-nél a modell technikailag teljesen nem védhető, csak nehezíthető",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "E",
+      "text": "Lesznek-e a kész oldalon belépést igénylő felhasználói fiókok (pl. zárt, csak partnereknek szóló rész), és ki kezeli őket?",
+      "type": "single",
+      "options": [
+        "Nem, az oldal bárki számára nyitottan elérhető",
+        "Igen, jelszóval védett, de elég egy közös belépés",
+        "Igen, külön felhasználói fiókok kellenek; a cég IT-je / munkatársa kezeli",
+        "Igen, és a fejlesztő kezelje a felhasználókat (megbízásra)",
+        "Még nem tudjuk, kérünk javaslatot"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Ez befolyásolja, kell-e belépési rendszer és ki kezeli a felhasználókat",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "E",
+      "text": "Kérnek-e keresőoptimalizálást / keresőben való megjelenést (SEO), vagy NE legyen kereshető a bemutató?",
+      "type": "single",
+      "options": [
+        "Igen, jelenjen meg a Google-keresésben (alap SEO)",
+        "Mindegy, a linket amúgy is mi osztjuk meg",
+        "Kifejezetten NE legyen indexelhető / kereshető (zárt bemutató)",
+        "Nem tudjuk, kérünk javaslatot"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "A 3D-s, JavaScript-alapú oldalak keresőoptimalizálása külön munka lehet",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "E",
+      "text": "Van-e a cégnek meglévő analitikai / látogatottság-mérő rendszere, és milyen adatvédelmi megoldást preferálnak?",
+      "type": "single",
+      "options": [
+        "Google Analytics (akkor süti-tájékoztató kell)",
+        "Matomo / más adatvédelem-barát, süti nélküli megoldás (kevesebb GDPR-teher)",
+        "Nincs, de szeretnénk valamilyet – a fejlesztő javasoljon",
+        "Nincs, és nem is szükséges statisztika"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "A süti-mentes mérés egyszerűsíti a jogi megfelelést",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "E",
+      "text": "Van-e bármilyen meglévő rendszerintegráció, amivel az új oldalnak együtt kell működnie (pl. űrlap, CRM, hírlevél, ügyfélkapu)?",
+      "type": "text",
+      "options": [],
+      "hasOther": false,
+      "hasDontKnow": true,
+      "hint": "Írja le röviden, ha van ilyen igény (pl. kapcsolatfelvételi űrlap egy meglévő rendszerbe)",
+      "textLines": 2,
+      "otherLabel": ""
+    },
+    {
+      "section": "E",
+      "text": "Van-e belső IT-/biztonsági előírás, ami befolyásolja a hostingot vagy az üzemeltetést? (Több is jelölhető)",
+      "type": "multi",
+      "options": [
+        "Az adatoknak/tárhelynek Magyarországon vagy EU-ban kell maradnia",
+        "Csak meghatározott / jóváhagyott szolgáltatók engedélyezettek",
+        "Belső jelszó- és hozzáférés-kezelési szabályzat vonatkozik rá",
+        "Nincs külön előírás",
+        "Kérjük, az IT-vel egyeztessen a fejlesztő (elérhetőség alább)"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "GDPR és belső szabályzat szempont – több is jelölhető",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "E",
+      "text": "Ki kapja és kezelje a szolgáltatói fiókokat (tárhely, domain, statisztika, mentés) – a cég vagy a fejlesztő fiókjában legyenek?",
+      "type": "single",
+      "options": [
+        "A cég saját fiókjaiban (a fejlesztő meghívottként kap hozzáférést)",
+        "A fejlesztő fiókjaiban (üzemeltetés idejére), később átadja",
+        "Vegyesen, szolgáltatónként eltérhet",
+        "Nem tudjuk, kérünk javaslatot"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "\"Ők vagy én\" – a tulajdonjog miatt fontos, kinek a fiókja",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "E",
+      "text": "A munka idejére adott fejlesztői hozzáféréseket a LEADÁS után hogyan kezeljék?",
+      "type": "single",
+      "options": [
+        "Minden fejlesztői hozzáférést vonjunk vissza és cseréljünk jelszót",
+        "Csökkentett (csak-olvasás / karbantartó) szintre állítsuk",
+        "Maradjon meg, mert folyamatos együttműködést tervezünk",
+        "Nem tudjuk, kérünk javaslatot a biztonságos gyakorlatra"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Pl. visszavonás, jelszócsere, jogszint csökkentése",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "E",
+      "text": "Hol őrizzék a jelszavakat és belépési adatokat (domain, tárhely, fiókok)?",
+      "type": "single",
+      "options": [
+        "A cég jelszókezelőjében / IT-rendszerében",
+        "Átadott, lezárt dokumentumban (papíron / titkosított fájlban)",
+        "Megosztott céges jelszókezelőben, amihez a fejlesztő is hozzáfér",
+        "Nincs erre rendszerünk – kérünk javaslatot"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "E",
+      "text": "Ki feleljen a rendszeres biztonsági mentésért (a kód és a tartalmak külön másolatáért), és hol legyen tárolva?",
+      "type": "single",
+      "options": [
+        "A cég IT-je készít és őriz mentéseket",
+        "A fejlesztő gondoskodik róla (karbantartás keretében, külön helyre mentve)",
+        "A használt szolgáltató automatikus mentése elég",
+        "Elég egyszer, átadáskor megkapnunk a teljes anyagot (a tartalmak nálunk amúgy is megvannak)",
+        "Még nem tervezünk mentést – kérünk javaslatot"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Hogy meghibásodás vagy fiók-elvesztés esetén is meglegyen minden",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "E",
+      "text": "Van-e elvárás üzemfelügyeletre / leállás-figyelésre (monitoring, riasztás), és ki kapja a riasztásokat?",
+      "type": "single",
+      "options": [
+        "Nem szükséges külön monitoring",
+        "Igen, legyen automatikus elérhetőség-figyelés és riasztás",
+        "A cég saját monitoring-rendszerébe kell bekötni",
+        "Nem tudjuk, kérünk javaslatot"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Hogy egy leállásról ne a látogató panaszából értesüljünk először",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "E",
+      "text": "Szükség lesz-e éles indulás előtt teszt- / előnézeti környezetre, és ki férjen hozzá?",
+      "type": "single",
+      "options": [
+        "Igen, kell teszt-környezet, a cég kijelölt emberei férjenek hozzá",
+        "Igen, kell, de jelszóval védve, csak a fejlesztő és 1-2 vezető",
+        "Nem szükséges, elég a kész változatot átnézni",
+        "Bízzuk a fejlesztőre, hogyan oldja meg"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "Itt nézhető meg az oldal nyilvánosság elé kerülés előtt",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "E",
+      "text": "Az átadáskor pontosan mihez kérnek hozzáférést / mit kérnek átadni? (Több is jelölhető)",
+      "type": "multi",
+      "options": [
+        "A bemutató forrásfájljai (a teljes weboldal)",
+        "A nyers 3D modellek és eredeti anyagok",
+        "A tárhely / felhőfiók belépési adatai",
+        "A domain kezelőfelületének hozzáférése",
+        "Írott üzemeltetési és frissítési útmutató",
+        "Nem tudjuk, kérünk javaslatot"
+      ],
+      "hasOther": true,
+      "hasDontKnow": true,
+      "hint": "A teljes átvétel feltételei",
+      "textLines": 0,
+      "otherLabel": ""
+    },
+    {
+      "section": "E",
+      "text": "Mi számít a cég számára KÉSZNEK (átvételi feltétel), és ki hagyja jóvá az átadást?",
+      "type": "text",
+      "options": [],
+      "hasOther": false,
+      "hasDontKnow": false,
+      "hint": "Pl. minden munka betöltődik; a megadott eszközökön hibátlan; a kezelést a kijelölt munkatárs önállóan tudja; ki írja alá az átvételt",
+      "textLines": 3,
+      "otherLabel": ""
+    },
+    {
+      "section": "E",
+      "text": "Ki lesz a projekt IT-oldali kapcsolattartója, mik az elérhetőségei, és hogyan érhető el legkönnyebben?",
+      "type": "text",
+      "options": [],
+      "hasOther": false,
+      "hasDontKnow": true,
+      "hint": "Név, beosztás, e-mail, telefon, és preferált egyeztetési mód (e-mail / telefon / online hívás / személyes)",
+      "textLines": 3,
+      "otherLabel": ""
+    },
+    {
+      "section": "E",
+      "text": "A rendszergazdának bármilyen további technikai megjegyzése, megkötése vagy meglévő beállítása?",
+      "type": "text",
+      "options": [],
+      "hasOther": false,
+      "hasDontKnow": true,
+      "hint": "Pl. meglévő rekordok listája, belső névszerver, registrar-lock, DNSSEC, megfelelőségi szabály, belső jóváhagyási folyamat, korábbi rossz tapasztalat",
+      "textLines": 3,
+      "otherLabel": ""
+    }
+  ]
+}
