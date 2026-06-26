@@ -26,10 +26,19 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup Pages
         uses: actions/configure-pages@v5
+      - name: Prune non-public files
+        # A belső/üzleti anyagok és fejlesztői fájlok NE kerüljenek ki a nyilvános oldalra.
+        # Csak a CI-checkoutból töröljük; a repóban megmaradnak.
+        run: |
+          rm -rf felmeres_urlap FELMERESI_CHECKLIST.md \
+                 tools uploads .github \
+                 package.json package-lock.json .gitignore \
+                 errors.log log.txt test_camera.js upgrade.py \
+                 museum.html museum_backup.html
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # A gyökérmappa feltöltése
+          # A gyökérmappa feltöltése (a fenti prune után)
           path: '.'
       - name: Deploy to GitHub Pages
         id: deployment

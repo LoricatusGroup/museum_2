@@ -711,7 +711,9 @@
       document.body.innerHTML = '<div style="color:#eee;font-family:sans-serif;padding:2em;text-align:center;line-height:1.6">A 3D motor (three.js) nem töltődött be.<br>Ellenőrizd az internetkapcsolatot, majd frissítsd az oldalt.</div>';
       throw new Error('THREE missing — CDN nem elérhető');
     }
-    var mobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || ('ontouchstart' in window && innerWidth < 1024);
+    var mobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+      || ('ontouchstart' in window && innerWidth < 1024)
+      || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent)); // iPadOS 13+ "desktop" UA
     document.getElementById('hint').innerHTML = mobile
       ? 'Bal: Joystick · Jobb: Húzás = nézés' : 'WASD / Nyilak: Mozgás · Egér húzás: Nézés';
 
@@ -1333,7 +1335,7 @@
 
         if (!mobile) {
           var sfSpotl = new THREE.SpotLight(0xffffff, 1.5, 10, Math.PI / 6, 0.3, 1);
-          sfSpotl.position.set(sp.x, 5, sp.z); sfSpotl.target = sfGrp; sfSpotl.castShadow = true; scene.add(sfSpotl);
+          sfSpotl.position.set(sp.x, 5, sp.z); sfSpotl.target = sfGrp; sfSpotl.castShadow = false; scene.add(sfSpotl); // árnyék kikapcsolva: sok spot együtt átlépi a GPU textúraegység-limitjét
         }
         scene.add(sfGrp); artMeshes.push(sfGrp);
       }
@@ -1527,7 +1529,8 @@
       // Minimap
       var mc = document.getElementById('minimap');
       if (mc.style.display !== 'none') {
-        var w = mc.clientWidth, h = mc.clientHeight; mc.width = w; mc.height = h;
+        var w = mc.clientWidth, h = mc.clientHeight;
+        if (mc.width !== w || mc.height !== h) { mc.width = w; mc.height = h; } // csak méretváltáskor, ne minden frame-ben
         var mx = mc.getContext('2d');
         mx.fillStyle = '#f0e8d8'; mx.fillRect(0, 0, w, h);
         var s = w / 160, ox = w / 2, oy = h / 2;
@@ -1582,6 +1585,9 @@
       ambGain = actx.createGain(); ambGain.gain.value = 0.05;
       noise.connect(filter); filter.connect(ambGain); ambGain.connect(actx.destination);
       noise.start(0);
+      // Az autoplay-policy miatt a friss AudioContext "suspended" lehet (főleg iOS Safari) —
+      // user-gesztusból (Start gomb) hívva fel kell oldani, különben néma marad.
+      if (actx.state === 'suspended' && actx.resume) actx.resume();
     }
 
     function playStep() {
@@ -1632,7 +1638,7 @@
 
       if (!mobile) {
         var sl = new THREE.SpotLight(0xffffff, 2, 10, Math.PI / 6, 0.3, 1);
-        sl.position.set(x, 5, z); sl.target = grp; sl.castShadow = true; scene.add(sl);
+        sl.position.set(x, 5, z); sl.target = grp; sl.castShadow = false; scene.add(sl); // árnyék kikapcsolva a GPU textúraegység-limit miatt
       }
 
       scene.add(grp); artMeshes.push(grp);
@@ -1818,6 +1824,13 @@
     // ezért a renderer-függő eseménykötéseket a setup() hívja meg ezen a függvényen át —
     // NEM a top-level scriptben, különben "Cannot read properties of undefined (reading 'domElement')".
     function bindRendererEvents() {
+    // WebGL context-loss kezelése (gyenge/mobil GPU elengedheti a kontextust) — ne maradjon némán fekete a vászon.
+    renderer.domElement.addEventListener('webglcontextlost', function (ev) {
+      ev.preventDefault();
+      console.warn('WebGL context lost');
+      var n = document.getElementById('hint');
+      if (n) n.textContent = 'A 3D nézet megszakadt — kérlek, frissítsd az oldalt.';
+    }, false);
     renderer.domElement.addEventListener('click', function (e) {
       if (dragging && Math.abs(e.clientX - dragX) > 5) return;
       fireRaycast();
