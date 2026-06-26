@@ -6,6 +6,22 @@ const xlsxPath = path.resolve('uploads/meta.xlsx');
 const exhibitsPath = path.resolve('assets/exhibits.json');
 const creditsPath = path.resolve('CREDITS.html');
 
+// A modellek a "models" GitHub Release-en élnek; ABSZOLÚT URL kell, mert a relatív út
+// projekt-aloldalon (/museum_2/) vagy egyedi domainen eltörik. Felülírható env-ből.
+const MODEL_BASE = process.env.MODEL_BASE_URL
+    || 'https://github.com/LoricatusGroup/museum_2/releases/download/models/';
+
+// HTML-escape és URL-validálás a tárolt XSS ellen (a meta.xlsx külső/emberi input).
+function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => (
+        { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+    ));
+}
+function safeUrl(u) {
+    u = String(u == null ? '' : u);
+    return /^https?:\/\//i.test(u) ? u : '#';
+}
+
 if (!fs.existsSync(xlsxPath)) {
     console.log(`No meta.xlsx found at ${xlsxPath}. Skipping conversion.`);
     process.exit(0);
@@ -35,11 +51,17 @@ let creditsHTML = `<!DOCTYPE html>
   <h1>Exhibit Credits</h1>
 `;
 
+let skipped = 0;
 for (const row of data) {
-    if (!row.Filename) continue; // ha üres a fájlnév, kihagyjuk ezt a sort, vagyis még nincs feltöltve!
+    if (!row.Filename) {
+        // Üres fájlnév = a modell még nincs feltöltve. NE némán hagyjuk ki: jelezzük!
+        skipped++;
+        console.warn(`⚠️  Kihagyva (nincs Filename / feltöltött modell): "${row.Title || '(névtelen sor)'}"`);
+        continue;
+    }
 
     exhibits.push({
-        modelUrl: `releases/download/models/${row.Filename}`,
+        modelUrl: `${MODEL_BASE}${row.Filename}`,
         title: row.Title || 'Ismeretlen',
         author: row.Author || 'Ismeretlen',
         license: row.License || 'Ismeretlen',
@@ -48,10 +70,10 @@ for (const row of data) {
 
     creditsHTML += `
   <div class="exhibit">
-    <h2>${row.Title || 'Ismeretlen'}</h2>
-    <p><strong>Szerző:</strong> ${row.Author || 'Ismeretlen'}</p>
-    <p><strong>Licensz:</strong> ${row.License || 'Ismeretlen'}</p>
-    <p><strong>Forrás:</strong> <a href="${row.SourceLink || '#'}" target="_blank">Sketchfab Link</a></p>
+    <h2>${escapeHtml(row.Title || 'Ismeretlen')}</h2>
+    <p><strong>Szerző:</strong> ${escapeHtml(row.Author || 'Ismeretlen')}</p>
+    <p><strong>Licensz:</strong> ${escapeHtml(row.License || 'Ismeretlen')}</p>
+    <p><strong>Forrás:</strong> <a href="${safeUrl(row.SourceLink)}" target="_blank" rel="noopener">Sketchfab Link</a></p>
   </div>
   `;
 }
@@ -67,4 +89,7 @@ if (!fs.existsSync(path.dirname(exhibitsPath))) {
 fs.writeFileSync(exhibitsPath, JSON.stringify(exhibits, null, 2));
 fs.writeFileSync(creditsPath, creditsHTML);
 
-console.log(`Extracted ${exhibits.length} exhibits and generated config + CREDITS.html`);
+console.log(`Kész: ${exhibits.length} kiállítási tárgy beírva, ${skipped} sor kihagyva (nincs feltöltött modell). CREDITS.html frissítve.`);
+if (skipped > 0) {
+    console.warn(`FIGYELEM: ${skipped}/${data.length} kiállítási tárgy hiányzik, mert nincs hozzá feltöltött GLB fájl (üres Filename a meta.xlsx-ben).`);
+}

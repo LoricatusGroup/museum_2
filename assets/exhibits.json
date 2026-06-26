@@ -1,6 +1,6 @@
 [
   {
-    "modelUrl": "releases/download/models/tree.glb",
+    "modelUrl": "https://github.com/LoricatusGroup/museum_2/releases/download/models/tree.glb",
     "title": "Tree (1)",
     "author": "Loricatus",
     "license": "Unknown",

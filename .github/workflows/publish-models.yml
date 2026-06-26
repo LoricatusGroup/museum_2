@@ -36,7 +36,10 @@ jobs:
             if [ -f "$file" ]; then
               filename=$(basename "$file")
               echo "Optimizing $filename..."
-              gltfpack -i "$file" -o "uploads/optimized/$filename" -cc -tc || cp "$file" "uploads/optimized/$filename"
+              # NE használj -cc (meshopt) / -tc (KTX2) tömörítést, amíg a frontend GLTFLoader-e
+              # nem kap MeshoptDecoder-t / KTX2Loader-t — különben a modellek NÉMÁN nem töltődnek be.
+              # A sima gltfpack KHR_mesh_quantization-t használ, amit a GLTFLoader natívan ért.
+              gltfpack -i "$file" -o "uploads/optimized/$filename" || cp "$file" "uploads/optimized/$filename"
             fi
           done
 

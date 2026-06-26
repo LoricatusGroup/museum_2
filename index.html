@@ -704,6 +704,13 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
   <script>
+    // Ha a three.js a CDN-ről nem töltődött be (hálózati hiba, blokkolás, CDN-kiesés),
+    // ne fehér oldal fogadja a látogatót, hanem érthető üzenet.
+    // (SRI + self-hosting a hosszú távú, robusztusabb megoldás.)
+    if (typeof THREE === 'undefined') {
+      document.body.innerHTML = '<div style="color:#eee;font-family:sans-serif;padding:2em;text-align:center;line-height:1.6">A 3D motor (three.js) nem töltődött be.<br>Ellenőrizd az internetkapcsolatot, majd frissítsd az oldalt.</div>';
+      throw new Error('THREE missing — CDN nem elérhető');
+    }
     var mobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || ('ontouchstart' in window && innerWidth < 1024);
     document.getElementById('hint').innerHTML = mobile
       ? 'Bal: Joystick · Jobb: Húzás = nézés' : 'WASD / Nyilak: Mozgás · Egér húzás: Nézés';
@@ -1011,6 +1018,7 @@
           }, 200);
         });
       }
+      bindRendererEvents();
       loop();
     }
 
@@ -1300,6 +1308,11 @@
               model.position.sub(center); // Középre igazítás
               model.position.y += 0.5; // Kicsit feljebb a talapzaton
               group.add(model);
+            }, undefined, function (err) {
+              // Ha a modell nem tölthető be (404, CORS, sérült vagy dekóder nélküli tömörített GLB),
+              // ne maradjon NÉMÁN üres a talapzat: látható holo-fallback + figyelmeztetés a konzolba.
+              console.warn('GLB betöltése sikertelen:', url, err);
+              group.add(new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.1, 0.8), sfHoloMat));
             });
           })(sfGrp, sf.glbUrl);
         } else {
@@ -1497,7 +1510,7 @@
         panel.classList.add('visible');
         var uT = closest.userData.name;
         if (closest.userData.sourceLink) {
-          document.getElementById('iT').innerHTML = "<a href='" + closest.userData.sourceLink + "' target='_blank' style='color:#aa9060; text-decoration:none;'>" + uT + "</a>";
+          document.getElementById('iT').innerHTML = "<a href='" + safeUrl(closest.userData.sourceLink) + "' target='_blank' rel='noopener' style='color:#aa9060; text-decoration:none;'>" + escHtml(uT) + "</a>";
         } else {
           document.getElementById('iT').textContent = uT;
         }
@@ -1673,12 +1686,24 @@
       document.getElementById('art-viewer').classList.remove('show');
       document.getElementById('sketchfab-viewer').src = ""; // Állítsuk le a 3D modellt, ha bezárja
     });
+    // Biztonsági segédfüggvények: az exhibits.json-ből (külső/generált forrás) jövő
+    // szövegek innerHTML-be írása előtt escape-elünk, a linkeket pedig https(s)-re szűrjük,
+    // hogy ne legyen tárolt DOM-XSS (pl. <img onerror> a szerző mezőben, vagy javascript: link).
+    function escHtml(s) {
+      return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+      });
+    }
+    function safeUrl(u) {
+      u = String(u == null ? '' : u);
+      return /^https?:\/\//i.test(u) ? u : '#';
+    }
     function openArt(obj) {
       var ud = obj.userData;
 
       var titleHtml = ud.sourceLink
-        ? "<a href='" + ud.sourceLink + "' target='_blank' style='color:inherit;text-decoration:underline;'>" + ud.name + "</a> <br><span style='font-size:0.6em;color:#da0'>" + ud.year + "</span>"
-        : ud.name + " <br><span style='font-size:0.6em;color:#da0'>" + ud.year + "</span>";
+        ? "<a href='" + safeUrl(ud.sourceLink) + "' target='_blank' rel='noopener' style='color:inherit;text-decoration:underline;'>" + escHtml(ud.name) + "</a> <br><span style='font-size:0.6em;color:#da0'>" + escHtml(ud.year) + "</span>"
+        : escHtml(ud.name) + " <br><span style='font-size:0.6em;color:#da0'>" + escHtml(ud.year) + "</span>";
 
       document.getElementById('art-title').innerHTML = titleHtml;
 
@@ -1689,27 +1714,27 @@
       var sfViewer = document.getElementById('sketchfab-viewer');
 
       if (ud.glbUrl) {
-        document.getElementById('art-desc').innerHTML = "Készítette: " + ud.artist + "<p>Ez a valós életből vett műtárgy 3D mása a Sketchfabról származik.</p><p style='font-size:0.7em;color:#aaa'>(Húzd az egeret vagy az ujjad a képernyőn a forgatáshoz)</p>";
+        document.getElementById('art-desc').innerHTML = "Készítette: " + escHtml(ud.artist) + "<p>Ez a valós életből vett műtárgy 3D mása a Sketchfabról származik.</p><p style='font-size:0.7em;color:#aaa'>(Húzd az egeret vagy az ujjad a képernyőn a forgatáshoz)</p>";
         zc.style.display = 'none';
         sfViewer.style.display = 'none';
         sfViewer.src = "";
         activeSculpture = obj;
         viewer.classList.add('sculpture-mode');
       } else if (ud.sketchfabId) {
-        document.getElementById('art-desc').innerHTML = "Készítette: " + ud.artist + "<br><span style='font-size:0.75em'>" + ud.year + "</span><p>Forgasd a 3D modellt az egérrel (vagy érintéssel)! A görgővel nagyíthatsz.</p>";
+        document.getElementById('art-desc').innerHTML = "Készítette: " + escHtml(ud.artist) + "<br><span style='font-size:0.75em'>" + escHtml(ud.year) + "</span><p>Forgasd a 3D modellt az egérrel (vagy érintéssel)! A görgővel nagyíthatsz.</p>";
         zc.style.display = 'none';
         sfViewer.src = "https://sketchfab.com/models/" + ud.sketchfabId + "/embed?autostart=1&ui_theme=dark&ui_infos=0&ui_watermark=0&ui_annotations=0";
         sfViewer.style.display = 'block';
         viewer.classList.add('sculpture-mode'); // Use same transparent style
       } else if (ud.isSculpture) {
-        document.getElementById('art-desc').innerHTML = "Készítette: " + ud.artist + "<p>Ez a voxel újraalkotás a klasszikus szobrászat előtt tiszteleg.</p><p style='font-size:0.7em;color:#aaa'>(Húzd az egeret vagy az ujjad az ablakon a forgatáshoz)</p>";
+        document.getElementById('art-desc').innerHTML = "Készítette: " + escHtml(ud.artist) + "<p>Ez a voxel újraalkotás a klasszikus szobrászat előtt tiszteleg.</p><p style='font-size:0.7em;color:#aaa'>(Húzd az egeret vagy az ujjad az ablakon a forgatáshoz)</p>";
         zc.style.display = 'none';
         sfViewer.style.display = 'none';
         sfViewer.src = "";
         activeSculpture = obj;
         viewer.classList.add('sculpture-mode');
       } else {
-        document.getElementById('art-desc').innerHTML = "Festette: " + ud.artist + "<p>Ez a pixel art reprodukció tisztelgés a világ egyik legcsodálatosabb alkotása előtt.</p>";
+        document.getElementById('art-desc').innerHTML = "Festette: " + escHtml(ud.artist) + "<p>Ez a pixel art reprodukció tisztelgés a világ egyik legcsodálatosabb alkotása előtt.</p>";
         zc.style.display = 'block';
         sfViewer.style.display = 'none';
         sfViewer.src = "";
@@ -1789,6 +1814,10 @@
       }
     }
 
+    // FONTOS: a renderer/camera csak a setup()-ban jön létre (a fetch().then-ből hívva),
+    // ezért a renderer-függő eseménykötéseket a setup() hívja meg ezen a függvényen át —
+    // NEM a top-level scriptben, különben "Cannot read properties of undefined (reading 'domElement')".
+    function bindRendererEvents() {
     renderer.domElement.addEventListener('click', function (e) {
       if (dragging && Math.abs(e.clientX - dragX) > 5) return;
       fireRaycast();
@@ -1810,6 +1839,7 @@
           muteBtn.innerHTML = '🔊';
         }
       });
+    }
     }
   </script>
 </body>
