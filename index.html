@@ -680,6 +680,12 @@
       color: #111;
       transform: scale(1.1)
     }
+    #model-loading {
+      position: fixed; bottom: 14px; left: 50%; transform: translateX(-50%);
+      background: rgba(0,0,0,0.7); color: #ffe; font-family: 'VT323', monospace;
+      font-size: 20px; padding: 6px 16px; border-radius: 6px; letter-spacing: 1px;
+      z-index: 50; display: none; pointer-events: none;
+    }
   </style>
 </head>
 
@@ -693,6 +699,7 @@
   <div id="vignette"></div>
 
   <div id="crosshair"></div>
+  <div id="model-loading">⏳ Modell betöltése…</div>
   <div id="art-viewer">
     <div id="art-close">X</div>
     <div id="art-canvas-container">
@@ -1206,7 +1213,45 @@
       [-30, -50].forEach(function (x) { buildBench(1, 3, x, 0); });
     }
 
+    var pendingModels = [];   // lazy-betöltendő GLB modellek (közelség alapján)
+    var modelsLoading = 0;    // hány modell tölt épp
+    var LAZY_DIST = 18;       // ennyi egységen belül kezdjük a betöltést
+    function updateModelLoadingBadge() {
+      var el = document.getElementById('model-loading');
+      if (el) el.style.display = modelsLoading > 0 ? 'block' : 'none';
+    }
+    function loadPendingModel(rec) {
+      rec.loading = true;
+      modelsLoading++; updateModelLoadingBadge();
+      gltfLoader.load(rec.url, function (gltf) {
+        var model = gltf.scene;
+        var box = new THREE.Box3().setFromObject(model);
+        var size = box.getSize(new THREE.Vector3()).length();
+        var scale = 1.8 / (size === 0 ? 1 : size);
+        model.scale.setScalar(scale);
+        box.setFromObject(model);
+        var center = box.getCenter(new THREE.Vector3());
+        model.position.sub(center);
+        model.position.y += 0.5;
+        if (rec.holo && rec.holo.parent) rec.holo.parent.remove(rec.holo); // holo-placeholder eltávolítása betöltés után
+        rec.group.add(model);
+        rec.loaded = true; modelsLoading--; updateModelLoadingBadge();
+      }, undefined, function (err) {
+        // 404/CORS/sérült: a holo-placeholder látható fallbackként marad
+        console.warn('GLB betöltése sikertelen:', rec.url, err);
+        rec.loaded = true; modelsLoading--; updateModelLoadingBadge();
+      });
+    }
+    function updateLazyModels() {
+      if (!pendingModels.length || typeof camera === 'undefined' || !camera) return;
+      for (var i = 0; i < pendingModels.length; i++) {
+        var rec = pendingModels[i];
+        if (rec.loaded || rec.loading) continue;
+        if (camera.position.distanceTo(rec.group.position) < LAZY_DIST) loadPendingModel(rec);
+      }
+    }
     function placeAllArt() {
+      pendingModels.length = 0; // tiszta lista minden felépítéskor
       // Artwork spots per wing
       var spots = [
         // North wing
@@ -1316,32 +1361,11 @@
         sfPed.position.y = -hOff / 2 + 0.1;
         sfGrp.add(sfPed);
 
-        // Ha van glbUrl, megpróbáljuk betölteni a 3D fájlt, különben marad a drótváz!
+        // Holo-placeholder minden talapzaton; a GLB-t LAZY módon, közelség alapján töltjük be (lásd updateLazyModels).
+        var sfHolo = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.1, 0.8), sfHoloMat);
+        sfGrp.add(sfHolo);
         if (sf.glbUrl) {
-          (function (group, url) {
-            gltfLoader.load(url, function (gltf) {
-              var model = gltf.scene;
-              // Méretezés, hogy kb 1.5 egység magas legyen
-              var box = new THREE.Box3().setFromObject(model);
-              var size = box.getSize(new THREE.Vector3()).length();
-              var scale = 1.8 / (size === 0 ? 1 : size);
-              model.scale.setScalar(scale);
-              box.setFromObject(model);
-              var center = box.getCenter(new THREE.Vector3());
-              model.position.sub(center); // Középre igazítás
-              model.position.y += 0.5; // Kicsit feljebb a talapzaton
-              group.add(model);
-            }, undefined, function (err) {
-              // Ha a modell nem tölthető be (404, CORS, sérült vagy dekóder nélküli tömörített GLB),
-              // ne maradjon NÉMÁN üres a talapzat: látható holo-fallback + figyelmeztetés a konzolba.
-              console.warn('GLB betöltése sikertelen:', url, err);
-              group.add(new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.1, 0.8), sfHoloMat));
-            });
-          })(sfGrp, sf.glbUrl);
-        } else {
-          // Fallback holo wireframe, ha még nincs letöltve a fájl, vagy iframe mód van
-          var sfHolo = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.1, 0.8), sfHoloMat);
-          sfGrp.add(sfHolo);
+          pendingModels.push({ group: sfGrp, url: sf.glbUrl, holo: sfHolo, loaded: false, loading: false });
         }
 
         sfGrp.position.set(sp.x, hOff, sp.z);
@@ -1487,6 +1511,7 @@
     // ── GAME LOOP ──
     function loop() {
       requestAnimationFrame(loop);
+      updateLazyModels();
       var dt = Math.min(clock.getDelta(), 0.05), speed = 6;
       camera.quaternion.setFromEuler(new THREE.Euler(pitch, yaw, 0, 'YXZ'));
 
