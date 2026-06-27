@@ -53,6 +53,20 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Archive raw + optimized models (immutable backup)
+        # Verziózott, SHA-taggelt mentés: a "models" tag mozgó/felülíródó, ezért minden futás
+        # eltesz egy megváltoztathatatlan másolatot a NYERS és az optimalizált modellekről.
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "models-backup-${{ github.sha }}"
+          name: "Models backup ${{ github.sha }}"
+          files: |
+            uploads/models/*.glb
+            uploads/optimized/*.glb
+          make_latest: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Run Tooling Scripts
         run: |
           node tools/convert_xlsx_to_exhibits.mjs
@@ -62,7 +76,8 @@ jobs:
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           
-          # Remove original large binaries to keep repo size down
+          # A nyers GLB-ket töröljük a repó méretének kordában tartásához.
+          # Biztonságos: fent a "models-backup-<sha>" immutable release megőrzi a nyers + optimalizált másolatot.
           rm -f uploads/models/*.glb
           
           git add assets/exhibits.json CREDITS.html uploads/models/

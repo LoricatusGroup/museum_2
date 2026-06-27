@@ -6,7 +6,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Pixel Art Múzeum</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap');
+    /* Self-hosted fontok (GDPR: nincs külső Google Fonts kérés). A magyar ékezetekhez (ő, ű) a latin-ext kell. */
+    @font-face {
+      font-family: 'Press Start 2P'; font-style: normal; font-weight: 400; font-display: swap;
+      src: url('vendor/fonts/press-start-2p-latin-ext-400-normal.woff2') format('woff2');
+      unicode-range: U+0100-02AF,U+0304,U+0308,U+0329,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20CF,U+2113,U+2C60-2C7F,U+A720-A7FF;
+    }
+    @font-face {
+      font-family: 'Press Start 2P'; font-style: normal; font-weight: 400; font-display: swap;
+      src: url('vendor/fonts/press-start-2p-latin-400-normal.woff2') format('woff2');
+      unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+    }
+    @font-face {
+      font-family: 'VT323'; font-style: normal; font-weight: 400; font-display: swap;
+      src: url('vendor/fonts/vt323-latin-ext-400-normal.woff2') format('woff2');
+      unicode-range: U+0100-02AF,U+0304,U+0308,U+0329,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20CF,U+2113,U+2C60-2C7F,U+A720-A7FF;
+    }
+    @font-face {
+      font-family: 'VT323'; font-style: normal; font-weight: 400; font-display: swap;
+      src: url('vendor/fonts/vt323-latin-400-normal.woff2') format('woff2');
+      unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+    }
 
     * {
       margin: 0;
@@ -701,8 +721,9 @@
     </div>
     <div id="look-area"></div>
   </div>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+  <!-- Self-hosted three.js r128 + GLTFLoader (nincs CDN-egyponti hiba, nincs külső IP-kérés/GDPR). -->
+  <script src="vendor/three/three.min.js"></script>
+  <script src="vendor/three/GLTFLoader.js"></script>
   <script>
     // Ha a three.js a CDN-ről nem töltődött be (hálózati hiba, blokkolás, CDN-kiesés),
     // ne fehér oldal fogadja a látogatót, hanem érthető üzenet.
