@@ -1149,11 +1149,17 @@
       addCeil(60, 20, 40, 0);
       addCeil(60, 20, -40, 0);
 
-      // Floor planks (subtle lines) - slightly raised to avoid z-fighting
+      // Floor planks (subtle lines) - EGY összevont mesh-be (~67 sík helyett) → kevesebb draw call.
       var lineMat = new THREE.MeshStandardMaterial({ color: 0x7a6a58 });
+      var lineGeoms = [];
       for (var z = -70; z <= 10; z += 1.2) {
-        var m = new THREE.Mesh(new THREE.PlaneGeometry(160, 0.03), lineMat);
-        m.rotation.x = -Math.PI / 2; m.position.set(0, 0.005, z); scene.add(m);
+        var lg = new THREE.PlaneGeometry(160, 0.03);
+        lg.rotateX(-Math.PI / 2); lg.translate(0, 0.005, z);
+        lineGeoms.push(lg);
+      }
+      if (lineGeoms.length) {
+        scene.add(new THREE.Mesh(mergeGeoms(lineGeoms), lineMat));
+        for (var lgi = 0; lgi < lineGeoms.length; lgi++) lineGeoms[lgi].dispose();
       }
 
       // ── WALLS ──
@@ -1650,22 +1656,47 @@
     }
 
     // ── SCULPTURES (VOXEL) ──
+    // Minimális, függőségmentes geometria-összevonás (position+normal+uv, nem-indexelt):
+    // sok azonos anyagú mesh helyett egyetlen mesh → kevesebb draw call.
+    function mergeGeoms(geoms) {
+      var pos = [], nor = [], uv = [];
+      for (var g = 0; g < geoms.length; g++) {
+        var ng = geoms[g].index ? geoms[g].toNonIndexed() : geoms[g];
+        var pp = ng.attributes.position.array, nn = ng.attributes.normal.array, uu = ng.attributes.uv.array;
+        for (var a = 0; a < pp.length; a++) pos.push(pp[a]);
+        for (var a = 0; a < nn.length; a++) nor.push(nn[a]);
+        for (var a = 0; a < uu.length; a++) uv.push(uu[a]);
+      }
+      var merged = new THREE.BufferGeometry();
+      merged.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+      merged.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3));
+      merged.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+      return merged;
+    }
     function buildVoxelSculpture(x, z, ry, name, artist, year, stringLayers, hOff) {
       var voxels = stringLayers.map(function (layer) { return layer.map(function (row) { return row.split('').map(function (c) { return c === '1' ? 1 : 0; }); }); });
       var grp = new THREE.Group();
       var mat = new THREE.MeshStandardMaterial({ color: 0xddeeee, roughness: 0.2, metalness: 0.1 });
       var vs = 0.12; // Adjusted voxel size for higher resolution (12 layers = 1.44h)
+      // A voxeleket EGYETLEN geometriává olvasztjuk (közös anyag) → 1 draw call szobronként,
+      // sok száz külön box helyett. A csoport interaktív marad (a raycast a csoportig fut fel).
+      var voxelGeoms = [];
       for (var i = 0; i < voxels.length; i++) {
         for (var j = 0; j < voxels[i].length; j++) {
           var row = voxels[i][j];
           for (var k = 0; k < row.length; k++) {
             if (row[k]) {
-              var m = new THREE.Mesh(new THREE.BoxGeometry(vs, vs, vs), mat);
-              m.position.set(k * vs - row.length / 2 * vs, (voxels.length - i) * vs, j * vs - voxels[i].length / 2 * vs);
-              m.castShadow = true; m.receiveShadow = true; grp.add(m);
+              var bg = new THREE.BoxGeometry(vs, vs, vs);
+              bg.translate(k * vs - row.length / 2 * vs, (voxels.length - i) * vs, j * vs - voxels[i].length / 2 * vs);
+              voxelGeoms.push(bg);
             }
           }
         }
+      }
+      if (voxelGeoms.length) {
+        var voxMesh = new THREE.Mesh(mergeGeoms(voxelGeoms), mat);
+        voxMesh.castShadow = true; voxMesh.receiveShadow = true; grp.add(voxMesh);
+        for (var vg = 0; vg < voxelGeoms.length; vg++) voxelGeoms[vg].dispose();
       }
       // Pedestal
       var pedMat = new THREE.MeshStandardMaterial({ color: 0x3a2a1a });
