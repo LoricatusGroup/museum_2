@@ -827,6 +827,28 @@
       return I18N[n] ? n : 'hu';
     })();
     function t(k) { return (I18N[LANG] && I18N[LANG][k] != null) ? I18N[LANG][k] : (I18N.hu[k] != null ? I18N.hu[k] : k); }
+    // Műtárgy- és néhány adat-string fordítása (a magyar a kulcs). Ismeretlen nevet változatlanul ad vissza.
+    var ARTNAMES = {
+      'Mona Lisa': { en: 'Mona Lisa', it: 'Monna Lisa' },
+      'Lány Gyöngy Fülbevalóval': { en: 'Girl with a Pearl Earring', it: 'Ragazza con l\'orecchino di perla' },
+      'A Teremtés': { en: 'The Creation of Adam', it: 'La Creazione di Adamo' },
+      'Vénusz Születése': { en: 'The Birth of Venus', it: 'La Nascita di Venere' },
+      'Csillagos Éj': { en: 'The Starry Night', it: 'Notte stellata' },
+      'Vízililiomok': { en: 'Water Lilies', it: 'Ninfee' },
+      'A Kiáltás': { en: 'The Scream', it: 'L\'urlo' },
+      'Az Emlék Állandósága': { en: 'The Persistence of Memory', it: 'La persistenza della memoria' },
+      'A Nagy Hullám': { en: 'The Great Wave off Kanagawa', it: 'La grande onda di Kanagawa' },
+      'Kompozíció Pirossal': { en: 'Composition with Red', it: 'Composizione con rosso' },
+      'Amerikai Gótika': { en: 'American Gothic', it: 'Gotico americano' },
+      'Guernica': { en: 'Guernica', it: 'Guernica' },
+      'Rosette-i kő': { en: 'Rosetta Stone', it: 'Stele di Rosetta' },
+      'Nofertiti mellszobra': { en: 'Bust of Nefertiti', it: 'Busto di Nefertiti' },
+      'Szamothrakéi Niké': { en: 'Winged Victory of Samothrace', it: 'Nike di Samotracia' },
+      'Dávid (Voxel Mása)': { en: 'David (Voxel Copy)', it: 'David (Copia Voxel)' },
+      'Milói Vénusz (Voxel)': { en: 'Venus de Milo (Voxel)', it: 'Venere di Milo (Voxel)' },
+      'Ismeretlen': { en: 'Unknown', it: 'Sconosciuto' }
+    };
+    function tName(s) { var e = ARTNAMES[s]; return (e && e[LANG]) ? e[LANG] : s; }
     function applyStaticI18n() {
       document.documentElement.lang = LANG;
       document.title = t('docTitle');
@@ -1696,13 +1718,13 @@
       for (var i = 0; i < artMeshes.length; i++) { var d = camera.position.distanceTo(artMeshes[i].position); if (d < closestD) { closestD = d; closest = artMeshes[i]; } }
       if (closest && closestD < 6) {
         panel.classList.add('visible');
-        var uT = closest.userData.name;
+        var uT = tName(closest.userData.name);
         if (closest.userData.sourceLink) {
           uiCache.iT.innerHTML = "<a href='" + safeUrl(closest.userData.sourceLink) + "' target='_blank' rel='noopener' style='color:#aa9060; text-decoration:none;'>" + escHtml(uT) + "</a>";
         } else {
           uiCache.iT.textContent = uT;
         }
-        uiCache.iA.textContent = closest.userData.artist;
+        uiCache.iA.textContent = tName(closest.userData.artist);
         uiCache.iY.textContent = closest.userData.year;
       }
       else panel.classList.remove('visible');
@@ -1919,8 +1941,8 @@
       var ud = obj.userData;
 
       var titleHtml = ud.sourceLink
-        ? "<a href='" + safeUrl(ud.sourceLink) + "' target='_blank' rel='noopener' style='color:inherit;text-decoration:underline;'>" + escHtml(ud.name) + "</a> <br><span style='font-size:0.6em;color:#da0'>" + escHtml(ud.year) + "</span>"
-        : escHtml(ud.name) + " <br><span style='font-size:0.6em;color:#da0'>" + escHtml(ud.year) + "</span>";
+        ? "<a href='" + safeUrl(ud.sourceLink) + "' target='_blank' rel='noopener' style='color:inherit;text-decoration:underline;'>" + escHtml(tName(ud.name)) + "</a> <br><span style='font-size:0.6em;color:#da0'>" + escHtml(ud.year) + "</span>"
+        : escHtml(tName(ud.name)) + " <br><span style='font-size:0.6em;color:#da0'>" + escHtml(ud.year) + "</span>";
 
       document.getElementById('art-title').innerHTML = titleHtml;
 
@@ -1931,27 +1953,27 @@
       var sfViewer = document.getElementById('sketchfab-viewer');
 
       if (ud.glbUrl) {
-        document.getElementById('art-desc').innerHTML = t('byMaker') + escHtml(ud.artist) + "<p>" + t('descGlb') + "</p><p style='font-size:0.7em;color:#aaa'>" + t('dragMouse') + "</p>";
+        document.getElementById('art-desc').innerHTML = t('byMaker') + escHtml(tName(ud.artist)) + "<p>" + t('descGlb') + "</p><p style='font-size:0.7em;color:#aaa'>" + t('dragMouse') + "</p>";
         zc.style.display = 'none';
         sfViewer.style.display = 'none';
         sfViewer.src = "";
         activeSculpture = obj;
         viewer.classList.add('sculpture-mode');
       } else if (ud.sketchfabId) {
-        document.getElementById('art-desc').innerHTML = t('byMaker') + escHtml(ud.artist) + "<br><span style='font-size:0.75em'>" + escHtml(ud.year) + "</span><p>" + t('descSketchfab') + "</p>";
+        document.getElementById('art-desc').innerHTML = t('byMaker') + escHtml(tName(ud.artist)) + "<br><span style='font-size:0.75em'>" + escHtml(ud.year) + "</span><p>" + t('descSketchfab') + "</p>";
         zc.style.display = 'none';
         sfViewer.src = "https://sketchfab.com/models/" + ud.sketchfabId + "/embed?autostart=1&ui_theme=dark&ui_infos=0&ui_watermark=0&ui_annotations=0";
         sfViewer.style.display = 'block';
         viewer.classList.add('sculpture-mode'); // Use same transparent style
       } else if (ud.isSculpture) {
-        document.getElementById('art-desc').innerHTML = t('byMaker') + escHtml(ud.artist) + "<p>" + t('descSculpture') + "</p><p style='font-size:0.7em;color:#aaa'>" + t('dragWindow') + "</p>";
+        document.getElementById('art-desc').innerHTML = t('byMaker') + escHtml(tName(ud.artist)) + "<p>" + t('descSculpture') + "</p><p style='font-size:0.7em;color:#aaa'>" + t('dragWindow') + "</p>";
         zc.style.display = 'none';
         sfViewer.style.display = 'none';
         sfViewer.src = "";
         activeSculpture = obj;
         viewer.classList.add('sculpture-mode');
       } else {
-        document.getElementById('art-desc').innerHTML = t('byPainter') + escHtml(ud.artist) + "<p>" + t('descPainting') + "</p>";
+        document.getElementById('art-desc').innerHTML = t('byPainter') + escHtml(tName(ud.artist)) + "<p>" + t('descPainting') + "</p>";
         zc.style.display = 'block';
         sfViewer.style.display = 'none';
         sfViewer.src = "";
