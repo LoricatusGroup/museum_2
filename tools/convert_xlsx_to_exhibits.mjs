@@ -65,7 +65,8 @@ for (const row of data) {
         title: row.Title || 'Ismeretlen',
         author: row.Author || 'Ismeretlen',
         license: row.License || 'Ismeretlen',
-        sourceLink: row.SourceLink || ''
+        sourceLink: row.SourceLink || '',
+        year: row.Year || ''   // opcionális Year oszlop; ha nincs, üres (nem a megtévesztő "Sketchfab")
     });
 
     creditsHTML += `

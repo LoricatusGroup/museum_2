@@ -5,6 +5,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Pixel Art Múzeum</title>
+  <meta name="description" content="Pixel Art Múzeum — böngészőben bejárható 3D virtuális kiállítótér.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Pixel Art Múzeum">
+  <meta property="og:description" content="Böngészőben bejárható 3D virtuális kiállítótér.">
+  <meta property="og:image" content="https://loricatusgroup.github.io/museum_2/assets/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
   <style>
     /* Self-hosted fontok (GDPR: nincs külső Google Fonts kérés). A magyar ékezetekhez (ő, ű) a latin-ext kell. */
     @font-face {
@@ -690,10 +696,11 @@
 </head>
 
 <body>
+  <noscript><div style="color:#eee;background:#222;font-family:sans-serif;padding:2em;text-align:center;line-height:1.6">Ehhez a 3D kiállítótérhez JavaScript szükséges. Kérjük, engedélyezd a böngésződben.</div></noscript>
   <div id="overlay">
     <h1>PIXEL ART<br>MÚZEUM</h1>
     <div class="subtitle">─ 4 Szárny · PRÉMIUM KIADÁS ─</div>
-    <div class="start-btn" id="startBtn">▶ BELÉPÉS</div>
+    <div class="start-btn" id="startBtn" role="button" tabindex="0" aria-label="Belépés a múzeumba">▶ BELÉPÉS</div>
     <div class="controls-info" id="hint"></div>
   </div>
   <div id="vignette"></div>
@@ -711,9 +718,9 @@
     </div>
   </div>
 
-  <div id="wing-label" id="wL"></div>
-  <div id="fs-btn">🔲 TELJES KÉPERNYŐ</div>
-  <div id="mute-btn" title="Hang ki/be">🔊</div>
+  <div id="wing-label"></div>
+  <div id="fs-btn" role="button" tabindex="0" aria-label="Teljes képernyő váltás">🔲 TELJES KÉPERNYŐ</div>
+  <div id="mute-btn" title="Hang ki/be" role="button" tabindex="0" aria-label="Hang ki- és bekapcsolása">🔊</div>
   <div id="info-panel">
     <div class="t" id="iT"></div>
     <div class="a" id="iA"></div>
@@ -980,7 +987,23 @@
       return "Központi Csarnok";
     }
 
+    function webglOK() {
+      try { var c = document.createElement('canvas'); return !!(window.WebGLRenderingContext && (c.getContext('webgl') || c.getContext('experimental-webgl'))); }
+      catch (e) { return false; }
+    }
+    function showFallback() {
+      // 2D tartalmi fallback WebGL nélküli / nagyon gyenge eszközre (akadálymentes szöveges lista).
+      var items = (sketchfabModels || []).map(function (m) {
+        var label = m.sourceLink ? '<a href="' + safeUrl(m.sourceLink) + '" target="_blank" rel="noopener" style="color:#e0c070">' + escHtml(m.name) + '</a>' : escHtml(m.name);
+        return '<li style="margin:.4em 0">' + label + (m.artist ? ' <span style="color:#aaa">— ' + escHtml(m.artist) + '</span>' : '') + '</li>';
+      }).join('');
+      document.body.innerHTML = '<div style="max-width:640px;margin:0 auto;color:#eee;background:#1a1a1a;min-height:100vh;font-family:sans-serif;padding:2.5em 1.5em;line-height:1.6">'
+        + '<h1 style="color:#e0c070">Pixel Art Múzeum</h1>'
+        + '<p>Az eszközöd vagy böngésződ nem támogatja a 3D (WebGL) nézetet, ezért a kiállított műveket egyszerű listában mutatjuk.</p>'
+        + '<ul>' + (items || '<li>(Nincs megjeleníthető tétel.)</li>') + '</ul></div>';
+    }
     function setup() {
+      if (!webglOK()) { showFallback(); return; }
       scene = new THREE.Scene();
       scene.background = new THREE.Color(0xf5f0e8);
       scene.fog = new THREE.Fog(0xf5f0e8, 30, 80);
@@ -1202,8 +1225,7 @@
 
       // Hub columns at wing entrances (decorative)
       var colMat = new THREE.MeshStandardMaterial({ color: 0xd8d0c0, roughness: 0.5 });
-      var colPositions = [[-10, -10], [10, -10], [10, -10], [10, 10], [-10, -10], [-10, 10]];
-      // Simplified: 4 corner columns at hub
+      // 4 corner columns at hub
       [[-9, 2.5, -9], [9, 2.5, -9], [9, 2.5, 9], [-9, 2.5, 9]].forEach(function (p) {
         addBox(0.6, 5, 0.6, colMat, p[0], p[1], p[2]);
       });
@@ -1288,6 +1310,7 @@
       var plaqueMat = new THREE.MeshStandardMaterial({ color: 0xccaa44, roughness: 0.3, metalness: 0.6 });
       var ropeMat = new THREE.MeshStandardMaterial({ color: 0x8a1111, roughness: 0.4, metalness: 0.2 });
       var poleMat = new THREE.MeshStandardMaterial({ color: 0xccaa44, roughness: 0.3, metalness: 0.7 });
+      var poleGeoms = [], ropeGeoms = []; // kordon-elemek gyűjtése → a loop végén 1-1 mesh-be olvasztva
 
       for (var i = 0; i < spots.length; i++) {
         var art = paintings[i % paintings.length], sp = spots[i];
@@ -1327,25 +1350,29 @@
         var plaque = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.3, 0.03), plaqueMat);
         plaque.position.set(sp.x, 1.2, sp.z); plaque.rotation.y = sp.ry; scene.add(plaque);
 
-        // Ropes
+        // Ropes (kordon) — geometriákat gyűjtünk, a loop után EGY mesh-be olvasztjuk (draw-call csökkentés)
         var isVert = (Math.abs(sp.ry) === Math.PI / 2); // vertical wing (north) vs horizontal
         if (isVert) {
           var px = sp.x < 0 ? sp.x + 1.5 : sp.x - 1.5;
           for (var dz = -1.5; dz <= 1.5; dz += 3) {
-            var pole = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.9, 8), poleMat); pole.position.set(px, 0.45, sp.z + dz); scene.add(pole);
-            var ball = new THREE.Mesh(new THREE.SphereGeometry(0.05, 8, 8), poleMat); ball.position.set(px, 0.92, sp.z + dz); scene.add(ball);
+            poleGeoms.push(new THREE.CylinderGeometry(0.03, 0.03, 0.9, 8).translate(px, 0.45, sp.z + dz));
+            poleGeoms.push(new THREE.SphereGeometry(0.05, 8, 8).translate(px, 0.92, sp.z + dz));
           }
-          var rope = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 3, 6), ropeMat); rope.rotation.x = Math.PI / 2; rope.position.set(px, 0.78, sp.z); scene.add(rope);
+          ropeGeoms.push(new THREE.CylinderGeometry(0.012, 0.012, 3, 6).rotateX(Math.PI / 2).translate(px, 0.78, sp.z));
         } else {
           var pz = sp.z < 0 ? sp.z + 1.5 : sp.z - 1.5;
           for (var dx = -1.5; dx <= 1.5; dx += 3) {
-            var pole = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.9, 8), poleMat); pole.position.set(sp.x + dx, 0.45, pz); scene.add(pole);
-            var ball = new THREE.Mesh(new THREE.SphereGeometry(0.05, 8, 8), poleMat); ball.position.set(sp.x + dx, 0.92, pz); scene.add(ball);
+            poleGeoms.push(new THREE.CylinderGeometry(0.03, 0.03, 0.9, 8).translate(sp.x + dx, 0.45, pz));
+            poleGeoms.push(new THREE.SphereGeometry(0.05, 8, 8).translate(sp.x + dx, 0.92, pz));
           }
-          var rope = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 3, 6), ropeMat); rope.rotation.z = Math.PI / 2; rope.position.set(sp.x, 0.78, pz); scene.add(rope);
+          ropeGeoms.push(new THREE.CylinderGeometry(0.012, 0.012, 3, 6).rotateZ(Math.PI / 2).translate(sp.x, 0.78, pz));
         }
 
       } // Correctly close the paintings loop
+
+      // Kordon-elemek összevonása: a sok henger/gömb helyett 1-1 mesh (poleMat / ropeMat).
+      if (poleGeoms.length) { scene.add(new THREE.Mesh(mergeGeoms(poleGeoms), poleMat)); for (var pgi = 0; pgi < poleGeoms.length; pgi++) poleGeoms[pgi].dispose(); }
+      if (ropeGeoms.length) { scene.add(new THREE.Mesh(mergeGeoms(ropeGeoms), ropeMat)); for (var rgi = 0; rgi < ropeGeoms.length; rgi++) ropeGeoms[rgi].dispose(); }
 
       // ── SKETCHFAB 3D MODELS (VITRINEK / GLB) ──
       var sfSpots = [];
@@ -1515,9 +1542,15 @@
     }
 
     // ── GAME LOOP ──
+    var uiCache = null;
     function loop() {
       requestAnimationFrame(loop);
       updateLazyModels();
+      if (!uiCache) uiCache = {
+        panel: document.getElementById('info-panel'), iT: document.getElementById('iT'),
+        iA: document.getElementById('iA'), iY: document.getElementById('iY'),
+        wing: document.getElementById('wing-label'), mini: document.getElementById('minimap')
+      };
       var dt = Math.min(clock.getDelta(), 0.05), speed = 6;
       camera.quaternion.setFromEuler(new THREE.Euler(pitch, yaw, 0, 'YXZ'));
 
@@ -1557,29 +1590,29 @@
       if (!isSitting) camera.position.y = 2.5;
 
       // Info panel
-      var panel = document.getElementById('info-panel');
+      var panel = uiCache.panel;
       var closest = null, closestD = 999;
       for (var i = 0; i < artMeshes.length; i++) { var d = camera.position.distanceTo(artMeshes[i].position); if (d < closestD) { closestD = d; closest = artMeshes[i]; } }
       if (closest && closestD < 6) {
         panel.classList.add('visible');
         var uT = closest.userData.name;
         if (closest.userData.sourceLink) {
-          document.getElementById('iT').innerHTML = "<a href='" + safeUrl(closest.userData.sourceLink) + "' target='_blank' rel='noopener' style='color:#aa9060; text-decoration:none;'>" + escHtml(uT) + "</a>";
+          uiCache.iT.innerHTML = "<a href='" + safeUrl(closest.userData.sourceLink) + "' target='_blank' rel='noopener' style='color:#aa9060; text-decoration:none;'>" + escHtml(uT) + "</a>";
         } else {
-          document.getElementById('iT').textContent = uT;
+          uiCache.iT.textContent = uT;
         }
-        document.getElementById('iA').textContent = closest.userData.artist;
-        document.getElementById('iY').textContent = closest.userData.year;
+        uiCache.iA.textContent = closest.userData.artist;
+        uiCache.iY.textContent = closest.userData.year;
       }
       else panel.classList.remove('visible');
 
       // Wing label
-      var wl = document.getElementById('wing-label');
+      var wl = uiCache.wing;
       wl.textContent = getWing(camera.position.x, camera.position.z);
       wl.classList.add('visible');
 
       // Minimap
-      var mc = document.getElementById('minimap');
+      var mc = uiCache.mini;
       if (mc.style.display !== 'none') {
         var w = mc.clientWidth, h = mc.clientHeight;
         if (mc.width !== w || mc.height !== h) { mc.width = w; mc.height = h; } // csak méretváltáskor, ne minden frame-ben
@@ -1725,7 +1758,7 @@
     var pts;
     function addDust() {
       var geo = new THREE.BufferGeometry();
-      var dustCount = mobile ? 500 : 1500;
+      var dustCount = mobile ? 300 : 1500; // mobilon kevesebb por → olcsóbb per-frame frissítés
       var pos = new Float32Array(dustCount * 3);
       for (var i = 0; i < dustCount * 3; i++) pos[i] = (Math.random() - 0.5) * 140;
       geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
@@ -1848,7 +1881,7 @@
         if (data && data.length > 0) {
           // Ha van generált adatunk, felülírjuk vele a beépített modellek listáját!
           sketchfabModels = data.map(function (d) {
-            return { name: d.title, artist: d.author, year: "Sketchfab", glbUrl: d.modelUrl, sourceLink: d.sourceLink };
+            return { name: d.title, artist: d.author, year: d.year || '', glbUrl: d.modelUrl, sourceLink: d.sourceLink };
           });
         }
         setup();
