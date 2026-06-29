@@ -1245,10 +1245,10 @@
     }
 
     function buildMuseum() {
-      var floorMat = new THREE.MeshStandardMaterial({ color: 0x8a7a68, roughness: 0.7 });
-      var wallMat = new THREE.MeshStandardMaterial({ color: 0xe8e0d4, roughness: 0.85 });
-      var baseMat = new THREE.MeshStandardMaterial({ color: 0x6a5a48 });
-      var accentMat = new THREE.MeshStandardMaterial({ color: 0xaa9060, roughness: 0.5, metalness: 0.2 });
+      var floorMat = new THREE.MeshStandardMaterial({ color: 0x8a6b46, roughness: 0.65 }); // melegebb parketta
+      var wallMat = new THREE.MeshStandardMaterial({ color: 0xeaddbe, roughness: 0.8 });    // meleg elefántcsont
+      var baseMat = new THREE.MeshStandardMaterial({ color: 0x5a4630, roughness: 0.7 });
+      var accentMat = new THREE.MeshStandardMaterial({ color: 0xc7a23a, roughness: 0.35, metalness: 0.55 }); // gazdagabb arany
 
 
       // Floors & Ceilings
@@ -1265,7 +1265,7 @@
       addBox(0.1, 0.25, 60, baseMat, 9.7, 0.125, 40);
 
       // South ceiling beams
-      for (var z = 15; z <= 65; z += 10) { addBox(20, 0.12, 0.3, new THREE.MeshStandardMaterial({ color: 0xc8b898 }), 0, 4.93, z); }
+      for (var z = 15; z <= 65; z += 10) { addBox(20, 0.12, 0.3, new THREE.MeshStandardMaterial({ color: 0xc8a23a }), 0, 4.93, z); }
 
       // South entrance arch
       addBox(1, 0.2, 0.3, accentMat, 0, 4.6, 10);
@@ -1294,6 +1294,24 @@
       addCeil(20, 60, 0, -40);
       addCeil(60, 20, 40, 0);
       addCeil(60, 20, -40, 0);
+
+      // ── Barokk dísz: vörös szőnyeg-futók (egy összevont mesh) + arany kupola-medál ──
+      var carpetMat = new THREE.MeshStandardMaterial({ color: 0x6e1414, roughness: 0.95 });
+      var carpetGeoms = [];
+      function addCarpet(w, d, cx, cz) { var g = new THREE.PlaneGeometry(w, d); g.rotateX(-Math.PI / 2); g.translate(cx, 0.012, cz); carpetGeoms.push(g); }
+      addCarpet(5, 58, 0, 41);    // Déli szárny
+      addCarpet(5, 58, 0, -41);   // Északi szárny
+      addCarpet(58, 5, 41, 0);    // Keleti szárny
+      addCarpet(58, 5, -41, 0);   // Nyugati szárny
+      addCarpet(11, 11, 0, 0);    // Központi csarnok
+      scene.add(new THREE.Mesh(mergeGeoms(carpetGeoms), carpetMat));
+      for (var ci = 0; ci < carpetGeoms.length; ci++) carpetGeoms[ci].dispose();
+      // arany medál a kupola alatt
+      var medalMat = new THREE.MeshStandardMaterial({ color: 0xc7a23a, roughness: 0.3, metalness: 0.7 });
+      var medal = new THREE.Mesh(new THREE.TorusGeometry(3, 0.16, 8, 36), medalMat);
+      medal.rotation.x = Math.PI / 2; medal.position.set(0, 4.88, 0); scene.add(medal);
+      var medal2 = new THREE.Mesh(new THREE.TorusGeometry(2, 0.1, 8, 28), medalMat);
+      medal2.rotation.x = Math.PI / 2; medal2.position.set(0, 4.9, 0); scene.add(medal2);
 
       // Floor planks (subtle lines) - EGY összevont mesh-be (~67 sík helyett) → kevesebb draw call.
       var lineMat = new THREE.MeshStandardMaterial({ color: 0x7a6a58 });
@@ -1342,9 +1360,9 @@
       // Removed south baseboard
 
       // Ceiling beams per wing
-      for (var z = -65; z <= -15; z += 10) { addBox(20, 0.12, 0.3, new THREE.MeshStandardMaterial({ color: 0xc8b898 }), 0, 4.93, z); }
-      for (var x = 15; x <= 65; x += 10) { addBox(0.3, 0.12, 20, new THREE.MeshStandardMaterial({ color: 0xc8b898 }), x, 4.93, 0); }
-      for (var x = -65; x <= -15; x += 10) { addBox(0.3, 0.12, 20, new THREE.MeshStandardMaterial({ color: 0xc8b898 }), x, 4.93, 0); }
+      for (var z = -65; z <= -15; z += 10) { addBox(20, 0.12, 0.3, new THREE.MeshStandardMaterial({ color: 0xc8a23a }), 0, 4.93, z); }
+      for (var x = 15; x <= 65; x += 10) { addBox(0.3, 0.12, 20, new THREE.MeshStandardMaterial({ color: 0xc8a23a }), x, 4.93, 0); }
+      for (var x = -65; x <= -15; x += 10) { addBox(0.3, 0.12, 20, new THREE.MeshStandardMaterial({ color: 0xc8a23a }), x, 4.93, 0); }
 
       // Hub columns at wing entrances (decorative)
       var colMat = new THREE.MeshStandardMaterial({ color: 0xd8d0c0, roughness: 0.5 });
@@ -1528,11 +1546,10 @@
         sfGrp.rotation.y = sp.ry;
         sfGrp.userData = sf;
 
+        // A névtáblát a pódium CSOPORTJÁHOZ kötjük (lokális pozícióval), így mindig vele forog/mozog.
         var sfPlaque = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.2, 0.03), sfPlaqueMat);
-        sfPlaque.position.set(sp.x, hOff * 0.7, sp.z + (sp.ry === 0 ? 0.62 : (sp.ry > 0 ? -0.62 : 0.62)));
-        if (sp.ry !== 0) sfPlaque.position.set(sp.x + (sp.ry > 0 ? 0.62 : -0.62), hOff * 0.7, sp.z);
-        sfPlaque.rotation.y = sp.ry;
-        scene.add(sfPlaque);
+        sfPlaque.position.set(0, -hOff * 0.3, 0.62);
+        sfGrp.add(sfPlaque);
 
         if (!mobile) {
           var sfSpotl = new THREE.SpotLight(0xffffff, 1.5, 10, Math.PI / 6, 0.3, 1);
@@ -1545,7 +1562,7 @@
     function addLights() {
       if (mobile) {
         // Mobile: minimal lights to stay within GPU uniform limits (~7 total)
-        scene.add(new THREE.AmbientLight(0xfff8f0, 1.4));
+        scene.add(new THREE.AmbientLight(0xfff0d8, 1.4));
         var dir = new THREE.DirectionalLight(0xffffff, 0.6);
         dir.position.set(5, 10, 5); scene.add(dir);
         var wingCenters = [[0, 4.8, 0], [0, 4.8, -40], [40, 4.8, 0], [-40, 4.8, 0], [0, 4.8, 40]];
@@ -1557,7 +1574,7 @@
         return;
       }
 
-      scene.add(new THREE.AmbientLight(0xfff8f0, 0.76));
+      scene.add(new THREE.AmbientLight(0xfff0d8, 0.8));
 
       // Hub lights
       for (var x = -5; x <= 5; x += 10)for (var z = -5; z <= 5; z += 10) {
@@ -1660,7 +1677,7 @@
       jZ.addEventListener('touchend', endJ, { passive: false }); jZ.addEventListener('touchcancel', endJ, { passive: false });
       lZ.addEventListener('touchstart', function (e) { e.preventDefault(); var t = e.changedTouches[0]; lTid = t.identifier; lx = t.clientX; ly = t.clientY; lookTap = true; lookX = lx; lookY = ly; lookTime = Date.now(); }, { passive: false });
       lZ.addEventListener('touchmove', function (e) { e.preventDefault(); for (var i = 0; i < e.changedTouches.length; i++) { var t = e.changedTouches[i]; if (t.identifier === lTid) { if (Math.abs(t.clientX - lookX) > 10 || Math.abs(t.clientY - lookY) > 10) lookTap = false; yaw -= (t.clientX - lx) * .005; pitch -= (t.clientY - ly) * .005; pitch = Math.max(-1, Math.min(1, pitch)); lx = t.clientX; ly = t.clientY; } } }, { passive: false });
-      function endL(e) { for (var i = 0; i < e.changedTouches.length; i++)if (e.changedTouches[i].identifier === lTid) { lTid = null; if (lookTap && Date.now() - lookTime < 400 && typeof fireRaycast === 'function') fireRaycast(); } }
+      function endL(e) { for (var i = 0; i < e.changedTouches.length; i++)if (e.changedTouches[i].identifier === lTid) { var _t = e.changedTouches[i]; lTid = null; if (lookTap && Date.now() - lookTime < 400 && typeof fireRaycast === 'function') fireRaycast({ clientX: _t.clientX, clientY: _t.clientY }); } }
       lZ.addEventListener('touchend', endL, { passive: false }); lZ.addEventListener('touchcancel', endL, { passive: false });
     }
 
@@ -2027,8 +2044,17 @@
     viewer.addEventListener('touchmove', onDrag);
     viewer.addEventListener('touchend', endDrag);
 
-    function fireRaycast() {
-      raycaster.setFromCamera(pointer, camera);
+    var rayPointer = new THREE.Vector2();
+    function fireRaycast(ev) {
+      var pt = pointer; // alapból a középső célkereszt
+      if (ev && ev.clientX != null && renderer && renderer.domElement) {
+        // ha van kattintás/koppintás esemény, ONNAN lőjünk — így rá lehet kattintani a padra/műtárgyra
+        var rect = renderer.domElement.getBoundingClientRect();
+        rayPointer.x = ((ev.clientX - rect.left) / rect.width) * 2 - 1;
+        rayPointer.y = -((ev.clientY - rect.top) / rect.height) * 2 + 1;
+        pt = rayPointer;
+      }
+      raycaster.setFromCamera(pt, camera);
       var intersects = raycaster.intersectObjects(artMeshes, true);
       if (intersects.length > 0) {
         var obj = intersects[0].object;
@@ -2066,7 +2092,7 @@
     }, false);
     renderer.domElement.addEventListener('click', function (e) {
       if (dragging && Math.abs(e.clientX - dragX) > 5) return;
-      fireRaycast();
+      fireRaycast(e);
     });
 
     // Mute button logic
