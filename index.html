@@ -686,6 +686,13 @@
       color: #111;
       transform: scale(1.1)
     }
+    #lang-switch { position: fixed; top: 46px; left: 12px; z-index: 100; display: flex; gap: 4px; }
+    #lang-switch .lang-btn {
+      font-family: 'VT323', monospace; font-size: 16px; line-height: 1; color: #ddd;
+      background: rgba(0,0,0,0.55); border: 1px solid #6a5a48; border-radius: 4px;
+      padding: 3px 9px; cursor: pointer; user-select: none; letter-spacing: 1px;
+    }
+    #lang-switch .lang-btn.active { background: #b4541f; color: #fff; border-color: #b4541f; }
     #model-loading {
       position: fixed; bottom: 14px; left: 50%; transform: translateX(-50%);
       background: rgba(0,0,0,0.7); color: #ffe; font-family: 'VT323', monospace;
@@ -696,7 +703,12 @@
 </head>
 
 <body>
-  <noscript><div style="color:#eee;background:#222;font-family:sans-serif;padding:2em;text-align:center;line-height:1.6">Ehhez a 3D kiállítótérhez JavaScript szükséges. Kérjük, engedélyezd a böngésződben.</div></noscript>
+  <noscript><div style="color:#eee;background:#222;font-family:sans-serif;padding:2em;text-align:center;line-height:1.7">Ehhez a 3D kiállítótérhez JavaScript szükséges. Kérjük, engedélyezd a böngésződben.<br>This 3D exhibition requires JavaScript. Please enable it in your browser.<br>Questa mostra 3D richiede JavaScript. Abilitalo nel browser.</div></noscript>
+  <div id="lang-switch">
+    <div class="lang-btn" data-lang="hu" role="button" tabindex="0" aria-label="Magyar">HU</div>
+    <div class="lang-btn" data-lang="en" role="button" tabindex="0" aria-label="English">EN</div>
+    <div class="lang-btn" data-lang="it" role="button" tabindex="0" aria-label="Italiano">IT</div>
+  </div>
   <div id="overlay">
     <h1>PIXEL ART<br>MÚZEUM</h1>
     <div class="subtitle">─ 4 Szárny · PRÉMIUM KIADÁS ─</div>
@@ -743,14 +755,103 @@
     // ne fehér oldal fogadja a látogatót, hanem érthető üzenet.
     // (SRI + self-hosting a hosszú távú, robusztusabb megoldás.)
     if (typeof THREE === 'undefined') {
-      document.body.innerHTML = '<div style="color:#eee;font-family:sans-serif;padding:2em;text-align:center;line-height:1.6">A 3D motor (three.js) nem töltődött be.<br>Ellenőrizd az internetkapcsolatot, majd frissítsd az oldalt.</div>';
-      throw new Error('THREE missing — CDN nem elérhető');
+      document.body.innerHTML = '<div style="color:#eee;font-family:sans-serif;padding:2em;text-align:center;line-height:1.7">A 3D motor (three.js) nem töltődött be — ellenőrizd az internetet, majd frissíts.<br>The 3D engine (three.js) failed to load — check your connection and refresh.<br>Il motore 3D (three.js) non si è caricato — controlla la connessione e aggiorna.</div>';
+      throw new Error('THREE missing — CDN unreachable');
     }
     var mobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
       || ('ontouchstart' in window && innerWidth < 1024)
       || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent)); // iPadOS 13+ "desktop" UA
-    document.getElementById('hint').innerHTML = mobile
-      ? 'Bal: Joystick · Jobb: Húzás = nézés' : 'WASD / Nyilak: Mozgás · Egér húzás: Nézés';
+    // ── i18n: HU / EN / IT ───────────────────────────────────────────────
+    var I18N = {
+      hu: {
+        docTitle: 'Pixel Art Múzeum', museum: 'MÚZEUM', subtitle: '─ 4 Szárny · PRÉMIUM KIADÁS ─',
+        enter: 'BELÉPÉS', ariaEnter: 'Belépés a múzeumba',
+        hintDesktop: 'WASD / Nyilak: Mozgás · Egér húzás: Nézés', hintMobile: 'Bal: Joystick · Jobb: Húzás = nézés',
+        fullscreen: 'TELJES KÉPERNYŐ', ariaFullscreen: 'Teljes képernyő váltás',
+        muteLabel: 'Hang ki/be', ariaMute: 'Hang ki- és bekapcsolása',
+        loading: 'Modell betöltése…', standUp: '[ Nyomj meg egy mozgás gombot a felálláshoz ]',
+        wingNorth: 'Északi Szárny · Klasszikusok', wingEast: 'Keleti Szárny · Impresszionisták',
+        wingWest: 'Nyugati Szárny · Ikonikus Művek', wingSouth: 'Déli Szárny · Szobrok', wingHub: 'Központi Csarnok',
+        byMaker: 'Készítette: ', byPainter: 'Festette: ',
+        descGlb: 'Ez a valós életből vett műtárgy 3D mása a Sketchfabról származik.',
+        descSketchfab: 'Forgasd a 3D modellt az egérrel (vagy érintéssel)! A görgővel nagyíthatsz.',
+        descSculpture: 'Ez a voxel újraalkotás a klasszikus szobrászat előtt tiszteleg.',
+        descPainting: 'Ez a pixel art reprodukció tisztelgés a világ egyik legcsodálatosabb alkotása előtt.',
+        dragMouse: '(Húzd az egeret vagy az ujjad a képernyőn a forgatáshoz)',
+        dragWindow: '(Húzd az egeret vagy az ujjad az ablakon a forgatáshoz)',
+        fbIntro: 'Az eszközöd vagy böngésződ nem támogatja a 3D (WebGL) nézetet, ezért a kiállított műveket egyszerű listában mutatjuk.',
+        fbEmpty: '(Nincs megjeleníthető tétel.)'
+      },
+      en: {
+        docTitle: 'Pixel Art Museum', museum: 'MUSEUM', subtitle: '─ 4 Wings · PREMIUM EDITION ─',
+        enter: 'ENTER', ariaEnter: 'Enter the museum',
+        hintDesktop: 'WASD / Arrows: Move · Mouse drag: Look', hintMobile: 'Left: Joystick · Right: Drag = look',
+        fullscreen: 'FULLSCREEN', ariaFullscreen: 'Toggle fullscreen',
+        muteLabel: 'Toggle sound', ariaMute: 'Toggle sound on/off',
+        loading: 'Loading model…', standUp: '[ Press a movement key to stand up ]',
+        wingNorth: 'North Wing · Classics', wingEast: 'East Wing · Impressionists',
+        wingWest: 'West Wing · Iconic Works', wingSouth: 'South Wing · Sculptures', wingHub: 'Central Hall',
+        byMaker: 'Created by: ', byPainter: 'Painted by: ',
+        descGlb: 'This 3D copy of a real-world artwork comes from Sketchfab.',
+        descSketchfab: 'Rotate the 3D model with your mouse (or touch). Zoom with the scroll wheel.',
+        descSculpture: 'This voxel recreation pays homage to classical sculpture.',
+        descPainting: 'This pixel-art reproduction is a tribute to one of the world\'s most wonderful artworks.',
+        dragMouse: '(Drag the mouse or your finger on the screen to rotate)',
+        dragWindow: '(Drag the mouse or your finger in the window to rotate)',
+        fbIntro: 'Your device or browser does not support the 3D (WebGL) view, so we show the exhibited works as a simple list.',
+        fbEmpty: '(No items to display.)'
+      },
+      it: {
+        docTitle: 'Museo Pixel Art', museum: 'MUSEO', subtitle: '─ 4 Ali · EDIZIONE PREMIUM ─',
+        enter: 'ENTRA', ariaEnter: 'Entra nel museo',
+        hintDesktop: 'WASD / Frecce: Movimento · Trascina il mouse: Guarda', hintMobile: 'Sinistra: Joystick · Destra: Trascina = guarda',
+        fullscreen: 'SCHERMO INTERO', ariaFullscreen: 'Attiva/disattiva schermo intero',
+        muteLabel: 'Attiva/disattiva audio', ariaMute: 'Attiva o disattiva l\'audio',
+        loading: 'Caricamento modello…', standUp: '[ Premi un tasto di movimento per alzarti ]',
+        wingNorth: 'Ala Nord · Classici', wingEast: 'Ala Est · Impressionisti',
+        wingWest: 'Ala Ovest · Opere Iconiche', wingSouth: 'Ala Sud · Sculture', wingHub: 'Sala Centrale',
+        byMaker: 'Realizzato da: ', byPainter: 'Dipinto da: ',
+        descGlb: 'Questa copia 3D di un\'opera reale proviene da Sketchfab.',
+        descSketchfab: 'Ruota il modello 3D con il mouse (o il tocco). Zooma con la rotellina.',
+        descSculpture: 'Questa ricreazione voxel rende omaggio alla scultura classica.',
+        descPainting: 'Questa riproduzione in pixel art è un omaggio a una delle opere più meravigliose del mondo.',
+        dragMouse: '(Trascina il mouse o il dito sullo schermo per ruotare)',
+        dragWindow: '(Trascina il mouse o il dito nella finestra per ruotare)',
+        fbIntro: 'Il tuo dispositivo o browser non supporta la vista 3D (WebGL), quindi mostriamo le opere esposte come un semplice elenco.',
+        fbEmpty: '(Nessun elemento da mostrare.)'
+      }
+    };
+    var LANG = (function () {
+      try { var s = localStorage.getItem('museumLang'); if (s && I18N[s]) return s; } catch (e) {}
+      var n = (navigator.language || 'hu').slice(0, 2).toLowerCase();
+      return I18N[n] ? n : 'hu';
+    })();
+    function t(k) { return (I18N[LANG] && I18N[LANG][k] != null) ? I18N[LANG][k] : (I18N.hu[k] != null ? I18N.hu[k] : k); }
+    function applyStaticI18n() {
+      document.documentElement.lang = LANG;
+      document.title = t('docTitle');
+      var h1 = document.querySelector('#overlay h1'); if (h1) h1.innerHTML = 'PIXEL ART<br>' + t('museum');
+      var sub = document.querySelector('#overlay .subtitle'); if (sub) sub.textContent = t('subtitle');
+      var sb = document.getElementById('startBtn'); if (sb) { sb.textContent = '▶ ' + t('enter'); sb.setAttribute('aria-label', t('ariaEnter')); }
+      var hn = document.getElementById('hint'); if (hn) hn.textContent = mobile ? t('hintMobile') : t('hintDesktop');
+      var fb = document.getElementById('fs-btn'); if (fb) { fb.textContent = '🔲 ' + t('fullscreen'); fb.setAttribute('aria-label', t('ariaFullscreen')); }
+      var mb = document.getElementById('mute-btn'); if (mb) { mb.setAttribute('title', t('muteLabel')); mb.setAttribute('aria-label', t('ariaMute')); }
+      var ml = document.getElementById('model-loading'); if (ml) ml.textContent = '⏳ ' + t('loading');
+      // a látható szárny-feliratot azonnal frissítjük (ne csak a következő render-frame-en)
+      if (typeof camera !== 'undefined' && camera) { var wl0 = document.getElementById('wing-label'); if (wl0) wl0.textContent = getWing(camera.position.x, camera.position.z); }
+      var lbtns = document.querySelectorAll('#lang-switch .lang-btn');
+      for (var i = 0; i < lbtns.length; i++) lbtns[i].classList.toggle('active', lbtns[i].getAttribute('data-lang') === LANG);
+    }
+    function setLang(l) { if (!I18N[l]) return; LANG = l; try { localStorage.setItem('museumLang', l); } catch (e) {} applyStaticI18n(); }
+    (function () {
+      var lbtns = document.querySelectorAll('#lang-switch .lang-btn');
+      for (var i = 0; i < lbtns.length; i++) (function (btn) {
+        var pick = function (e) { e.stopPropagation(); setLang(btn.getAttribute('data-lang')); };
+        btn.addEventListener('click', pick);
+        btn.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(e); } });
+      })(lbtns[i]);
+      applyStaticI18n();
+    })();
 
     function F(x, y, w, h, col, c) { c.fillStyle = col; c.fillRect(x, y, w, h); }
 
@@ -980,11 +1081,11 @@
     }
 
     function getWing(x, z) {
-      if (z < -10) return "Északi Szárny · Klasszikusok";
-      if (x > 10) return "Keleti Szárny · Impresszionisták";
-      if (x < -10) return "Nyugati Szárny · Ikonikus Művek";
-      if (z > 10) return "Déli Szárny · Szobrok";
-      return "Központi Csarnok";
+      if (z < -10) return t('wingNorth');
+      if (x > 10) return t('wingEast');
+      if (x < -10) return t('wingWest');
+      if (z > 10) return t('wingSouth');
+      return t('wingHub');
     }
 
     function webglOK() {
@@ -998,9 +1099,9 @@
         return '<li style="margin:.4em 0">' + label + (m.artist ? ' <span style="color:#aaa">— ' + escHtml(m.artist) + '</span>' : '') + '</li>';
       }).join('');
       document.body.innerHTML = '<div style="max-width:640px;margin:0 auto;color:#eee;background:#1a1a1a;min-height:100vh;font-family:sans-serif;padding:2.5em 1.5em;line-height:1.6">'
-        + '<h1 style="color:#e0c070">Pixel Art Múzeum</h1>'
-        + '<p>Az eszközöd vagy böngésződ nem támogatja a 3D (WebGL) nézetet, ezért a kiállított műveket egyszerű listában mutatjuk.</p>'
-        + '<ul>' + (items || '<li>(Nincs megjeleníthető tétel.)</li>') + '</ul></div>';
+        + '<h1 style="color:#e0c070">' + escHtml(t('docTitle')) + '</h1>'
+        + '<p>' + escHtml(t('fbIntro')) + '</p>'
+        + '<ul>' + (items || '<li>' + escHtml(t('fbEmpty')) + '</li>') + '</ul></div>';
     }
     function setup() {
       if (!webglOK()) { showFallback(); return; }
@@ -1830,27 +1931,27 @@
       var sfViewer = document.getElementById('sketchfab-viewer');
 
       if (ud.glbUrl) {
-        document.getElementById('art-desc').innerHTML = "Készítette: " + escHtml(ud.artist) + "<p>Ez a valós életből vett műtárgy 3D mása a Sketchfabról származik.</p><p style='font-size:0.7em;color:#aaa'>(Húzd az egeret vagy az ujjad a képernyőn a forgatáshoz)</p>";
+        document.getElementById('art-desc').innerHTML = t('byMaker') + escHtml(ud.artist) + "<p>" + t('descGlb') + "</p><p style='font-size:0.7em;color:#aaa'>" + t('dragMouse') + "</p>";
         zc.style.display = 'none';
         sfViewer.style.display = 'none';
         sfViewer.src = "";
         activeSculpture = obj;
         viewer.classList.add('sculpture-mode');
       } else if (ud.sketchfabId) {
-        document.getElementById('art-desc').innerHTML = "Készítette: " + escHtml(ud.artist) + "<br><span style='font-size:0.75em'>" + escHtml(ud.year) + "</span><p>Forgasd a 3D modellt az egérrel (vagy érintéssel)! A görgővel nagyíthatsz.</p>";
+        document.getElementById('art-desc').innerHTML = t('byMaker') + escHtml(ud.artist) + "<br><span style='font-size:0.75em'>" + escHtml(ud.year) + "</span><p>" + t('descSketchfab') + "</p>";
         zc.style.display = 'none';
         sfViewer.src = "https://sketchfab.com/models/" + ud.sketchfabId + "/embed?autostart=1&ui_theme=dark&ui_infos=0&ui_watermark=0&ui_annotations=0";
         sfViewer.style.display = 'block';
         viewer.classList.add('sculpture-mode'); // Use same transparent style
       } else if (ud.isSculpture) {
-        document.getElementById('art-desc').innerHTML = "Készítette: " + escHtml(ud.artist) + "<p>Ez a voxel újraalkotás a klasszikus szobrászat előtt tiszteleg.</p><p style='font-size:0.7em;color:#aaa'>(Húzd az egeret vagy az ujjad az ablakon a forgatáshoz)</p>";
+        document.getElementById('art-desc').innerHTML = t('byMaker') + escHtml(ud.artist) + "<p>" + t('descSculpture') + "</p><p style='font-size:0.7em;color:#aaa'>" + t('dragWindow') + "</p>";
         zc.style.display = 'none';
         sfViewer.style.display = 'none';
         sfViewer.src = "";
         activeSculpture = obj;
         viewer.classList.add('sculpture-mode');
       } else {
-        document.getElementById('art-desc').innerHTML = "Festette: " + escHtml(ud.artist) + "<p>Ez a pixel art reprodukció tisztelgés a világ egyik legcsodálatosabb alkotása előtt.</p>";
+        document.getElementById('art-desc').innerHTML = t('byPainter') + escHtml(ud.artist) + "<p>" + t('descPainting') + "</p>";
         zc.style.display = 'block';
         sfViewer.style.display = 'none';
         sfViewer.src = "";
@@ -1920,7 +2021,7 @@
           obj.getWorldPosition(pos);
           camera.position.set(pos.x, pos.y + 0.8, pos.z);
           isSitting = true;
-          document.getElementById('hint').textContent = "[ Nyomj meg egy mozgás gombot a felálláshoz ]";
+          document.getElementById('hint').textContent = t('standUp');
           return;
         }
 
