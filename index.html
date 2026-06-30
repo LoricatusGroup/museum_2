@@ -686,7 +686,7 @@
       color: #111;
       transform: scale(1.1)
     }
-    #lang-switch { position: fixed; top: 46px; left: 12px; z-index: 100; display: flex; gap: 4px; }
+    #lang-switch { position: fixed; top: 46px; left: 12px; z-index: 110; display: flex; gap: 4px; }
     #lang-switch .lang-btn {
       font-family: 'VT323', monospace; font-size: 16px; line-height: 1; color: #ddd;
       background: rgba(0,0,0,0.55); border: 1px solid #6a5a48; border-radius: 4px;
@@ -698,6 +698,12 @@
       background: rgba(0,0,0,0.7); color: #ffe; font-family: 'VT323', monospace;
       font-size: 20px; padding: 6px 16px; border-radius: 6px; letter-spacing: 1px;
       z-index: 50; display: none; pointer-events: none;
+    }
+    #sit-hint {
+      position: fixed; bottom: 64px; left: 50%; transform: translateX(-50%);
+      background: rgba(0,0,0,0.72); color: #ffe; font-family: 'VT323', monospace;
+      font-size: 20px; padding: 6px 16px; border-radius: 6px; letter-spacing: 1px;
+      z-index: 70; display: none; pointer-events: none; text-align: center;
     }
   </style>
 </head>
@@ -719,8 +725,9 @@
 
   <div id="crosshair"></div>
   <div id="model-loading">⏳ Modell betöltése…</div>
+  <div id="sit-hint"></div>
   <div id="art-viewer">
-    <div id="art-close">X</div>
+    <div id="art-close" role="button" tabindex="0" aria-label="Bezárás">X</div>
     <div id="art-canvas-container">
       <canvas id="art-canvas-zoom"></canvas>
       <iframe id="sketchfab-viewer" allow="autoplay; fullscreen; xr-spatial-tracking" xr-spatial-tracking
@@ -769,7 +776,7 @@
         hintDesktop: 'WASD / Nyilak: Mozgás · Egér húzás: Nézés', hintMobile: 'Bal: Joystick · Jobb: Húzás = nézés',
         fullscreen: 'TELJES KÉPERNYŐ', ariaFullscreen: 'Teljes képernyő váltás',
         muteLabel: 'Hang ki/be', ariaMute: 'Hang ki- és bekapcsolása',
-        loading: 'Modell betöltése…', standUp: '[ Nyomj meg egy mozgás gombot a felálláshoz ]',
+        loading: 'Modell betöltése…', standUp: '[ Mozogj a felálláshoz ]', contextLost: 'A 3D nézet megszakadt — frissítsd az oldalt.',
         wingNorth: 'Északi Szárny · Klasszikusok', wingEast: 'Keleti Szárny · Impresszionisták',
         wingWest: 'Nyugati Szárny · Ikonikus Művek', wingSouth: 'Déli Szárny · Szobrok', wingHub: 'Központi Csarnok',
         byMaker: 'Készítette: ', byPainter: 'Festette: ',
@@ -788,7 +795,7 @@
         hintDesktop: 'WASD / Arrows: Move · Mouse drag: Look', hintMobile: 'Left: Joystick · Right: Drag = look',
         fullscreen: 'FULLSCREEN', ariaFullscreen: 'Toggle fullscreen',
         muteLabel: 'Toggle sound', ariaMute: 'Toggle sound on/off',
-        loading: 'Loading model…', standUp: '[ Press a movement key to stand up ]',
+        loading: 'Loading model…', standUp: '[ Move to stand up ]', contextLost: 'The 3D view was lost — please refresh the page.',
         wingNorth: 'North Wing · Classics', wingEast: 'East Wing · Impressionists',
         wingWest: 'West Wing · Iconic Works', wingSouth: 'South Wing · Sculptures', wingHub: 'Central Hall',
         byMaker: 'Created by: ', byPainter: 'Painted by: ',
@@ -807,7 +814,7 @@
         hintDesktop: 'WASD / Frecce: Movimento · Trascina il mouse: Guarda', hintMobile: 'Sinistra: Joystick · Destra: Trascina = guarda',
         fullscreen: 'SCHERMO INTERO', ariaFullscreen: 'Attiva/disattiva schermo intero',
         muteLabel: 'Attiva/disattiva audio', ariaMute: 'Attiva o disattiva l\'audio',
-        loading: 'Caricamento modello…', standUp: '[ Premi un tasto di movimento per alzarti ]',
+        loading: 'Caricamento modello…', standUp: '[ Muoviti per alzarti ]', contextLost: 'La vista 3D si è interrotta — aggiorna la pagina.',
         wingNorth: 'Ala Nord · Classici', wingEast: 'Ala Est · Impressionisti',
         wingWest: 'Ala Ovest · Opere Iconiche', wingSouth: 'Ala Sud · Sculture', wingHub: 'Sala Centrale',
         byMaker: 'Realizzato da: ', byPainter: 'Dipinto da: ',
@@ -849,6 +856,12 @@
       'Ismeretlen': { en: 'Unknown', it: 'Sconosciuto' }
     };
     function tName(s) { var e = ARTNAMES[s]; return (e && e[LANG]) ? e[LANG] : s; }
+    function yearLabel(y) {
+      y = String(y == null ? '' : y);
+      var m = y.match(/^i\.?\s*e\.?\s*(.+)$/i); // magyar "i.e. NNN" → BC / a.C.
+      if (!m) return y;
+      return LANG === 'en' ? m[1] + ' BC' : LANG === 'it' ? m[1] + ' a.C.' : 'i.e. ' + m[1];
+    }
     function applyStaticI18n() {
       document.documentElement.lang = LANG;
       document.title = t('docTitle');
@@ -863,6 +876,9 @@
       if (typeof camera !== 'undefined' && camera) { var wl0 = document.getElementById('wing-label'); if (wl0) wl0.textContent = getWing(camera.position.x, camera.position.z); }
       var lbtns = document.querySelectorAll('#lang-switch .lang-btn');
       for (var i = 0; i < lbtns.length; i++) lbtns[i].classList.toggle('active', lbtns[i].getAttribute('data-lang') === LANG);
+      // ha épp nyitva a műtárgy-nézegető, frissítsük a benne lévő (lefordítandó) szövegeket
+      var av = document.getElementById('art-viewer');
+      if (av && av.classList.contains('show') && currentArt && typeof openArt === 'function' && !(currentArt.userData && currentArt.userData.sketchfabId)) openArt(currentArt);
     }
     function setLang(l) { if (!I18N[l]) return; LANG = l; try { localStorage.setItem('museumLang', l); } catch (e) {} applyStaticI18n(); }
     (function () {
@@ -1069,7 +1085,8 @@
     var mF = false, mB = false, mL = false, mR = false;
     var yaw = 0, pitch = 0;
     var artMeshes = [];
-    var dragging = false, dragX = 0, dragY = 0;
+    var dragging = false, dragX = 0, dragY = 0, downX = 0, downY = 0, dragMoved = false;
+    var currentArt = null; // épp megnyitott műtárgy (nyelvváltás-újrarajzoláshoz)
     var isSitting = false;
     var activeSculpture = null, viewerDragging = false, vDragX = 0;
     var jActive = false, jVx = 0, jVy = 0, jTid = null;
@@ -1123,15 +1140,17 @@
     function showFallback() {
       // 2D tartalmi fallback WebGL nélküli / nagyon gyenge eszközre (akadálymentes szöveges lista).
       var items = (sketchfabModels || []).map(function (m) {
-        var label = m.sourceLink ? '<a href="' + safeUrl(m.sourceLink) + '" target="_blank" rel="noopener" style="color:#e0c070">' + escHtml(m.name) + '</a>' : escHtml(m.name);
-        return '<li style="margin:.4em 0">' + label + (m.artist ? ' <span style="color:#aaa">— ' + escHtml(m.artist) + '</span>' : '') + '</li>';
+        var label = m.sourceLink ? '<a href="' + safeUrl(m.sourceLink) + '" target="_blank" rel="noopener" style="color:#e0c070">' + escHtml(tName(m.name)) + '</a>' : escHtml(tName(m.name));
+        return '<li style="margin:.4em 0">' + label + (m.artist ? ' <span style="color:#aaa">— ' + escHtml(tName(m.artist)) + '</span>' : '') + '</li>';
       }).join('');
       document.body.innerHTML = '<div style="max-width:640px;margin:0 auto;color:#eee;background:#1a1a1a;min-height:100vh;font-family:sans-serif;padding:2.5em 1.5em;line-height:1.6">'
         + '<h1 style="color:#e0c070">' + escHtml(t('docTitle')) + '</h1>'
         + '<p>' + escHtml(t('fbIntro')) + '</p>'
         + '<ul>' + (items || '<li>' + escHtml(t('fbEmpty')) + '</li>') + '</ul></div>';
     }
+    var didSetup = false;
     function setup() {
+      if (didSetup) return; didSetup = true; // a .then(setup).catch(setup) miatti dupla-hívás ellen
       if (!webglOK()) { showFallback(); return; }
       scene = new THREE.Scene();
       scene.background = new THREE.Color(0xf5f0e8);
@@ -1408,7 +1427,7 @@
         var center = box.getCenter(new THREE.Vector3());
         model.position.sub(center);
         model.position.y += 0.5;
-        if (rec.holo && rec.holo.parent) rec.holo.parent.remove(rec.holo); // holo-placeholder eltávolítása betöltés után
+        if (rec.holo && rec.holo.parent) { rec.holo.parent.remove(rec.holo); if (rec.holo.geometry) rec.holo.geometry.dispose(); } // holo-placeholder eltávolítása + GPU-geometria felszabadítása
         rec.group.add(model);
         rec.loaded = true; modelsLoading--; updateModelLoadingBadge();
       }, undefined, function (err) {
@@ -1567,6 +1586,24 @@
       }
     } // End of placeAllArt
 
+    var lightAnchors = [], lightPool = [], spotAnchors = [], spotPool = [];
+    function updateLights() {
+      if (mobile || !lightPool.length || typeof camera === 'undefined' || !camera) return;
+      var cx = camera.position.x, cz = camera.position.z;
+      lightAnchors.sort(function (a, b) { return ((a.x - cx) * (a.x - cx) + (a.z - cz) * (a.z - cz)) - ((b.x - cx) * (b.x - cx) + (b.z - cz) * (b.z - cz)); });
+      for (var i = 0; i < lightPool.length; i++) {
+        var pl = lightPool[i], an = lightAnchors[i];
+        if (an) { pl.position.set(an.x, an.y, an.z); pl.color.setHex(an.c); pl.intensity = an.i; pl.distance = an.d; }
+      }
+      if (spotPool.length && spotAnchors.length) {
+        spotAnchors.sort(function (a, b) { return ((a.tx - cx) * (a.tx - cx) + (a.tz - cz) * (a.tz - cz)) - ((b.tx - cx) * (b.tx - cx) + (b.tz - cz) * (b.tz - cz)); });
+        for (var i = 0; i < spotPool.length; i++) {
+          var sa = spotAnchors[i];
+          if (sa) { spotPool[i].light.position.set(sa.px, 4.5, sa.pz); spotPool[i].target.position.set(sa.tx, sa.ty, sa.tz); spotPool[i].light.intensity = 1.6; }
+          else spotPool[i].light.intensity = 0;
+        }
+      }
+    }
     function addLights() {
       if (mobile) {
         // Mobile: minimal lights to stay within GPU uniform limits (~7 total)
@@ -1582,55 +1619,30 @@
         return;
       }
 
-      scene.add(new THREE.AmbientLight(0xfff0d8, 0.8));
+      scene.add(new THREE.AmbientLight(0xfff0d8, 0.95));
 
-      // Hub lights
-      for (var x = -5; x <= 5; x += 10)for (var z = -5; z <= 5; z += 10) {
-        var l = new THREE.PointLight(0xffffff, 0.5, 15); l.position.set(x, 4.8, z); scene.add(l);
-      }
+      // Fény-pool: a ~88 statikus pontfény + per-műtárgy spot helyett anchor-pozíciókat tárolunk,
+      // és csak egy fix kis poolt (a kamerához legközelebbi fények) renderelünk — a forward renderer
+      // mindig keveset lát (nincs per-frame shader-újrafordítás), mégis jól megvilágított a környezet.
+      function anchor(x, z, c, inten, dist) { lightAnchors.push({ x: x, y: 4.8, z: z, c: c, i: inten, d: dist }); }
+      for (var hx = -5; hx <= 5; hx += 10) for (var hz = -5; hz <= 5; hz += 10) anchor(hx, hz, 0xffffff, 0.55, 18);
+      for (var z = -15; z >= -65; z -= 8) { anchor(0, z, 0xffffff, 0.6, 20); anchor(-5, z, 0xfff0e0, 0.3, 12); anchor(5, z, 0xfff0e0, 0.3, 12); }
+      for (var z = 15; z <= 65; z += 8) { anchor(0, z, 0xffffff, 0.6, 20); anchor(-5, z, 0xfff0e0, 0.3, 12); anchor(5, z, 0xfff0e0, 0.3, 12); }
+      for (var x = 15; x <= 65; x += 8) { anchor(x, 0, 0xffffff, 0.6, 20); anchor(x, -5, 0xfff0e0, 0.3, 12); anchor(x, 5, 0xfff0e0, 0.3, 12); }
+      for (var x = -15; x >= -65; x -= 8) { anchor(x, 0, 0xffffff, 0.6, 20); anchor(x, -5, 0xfff0e0, 0.3, 12); anchor(x, 5, 0xfff0e0, 0.3, 12); }
+      for (var i = 0; i < 10; i++) { var pl = new THREE.PointLight(0xffffff, 0.5, 18); pl.position.set(0, 4.8, 0); scene.add(pl); lightPool.push(pl); }
 
-      // North wing lights
-      for (var z = -15; z >= -65; z -= 8) {
-        var l = new THREE.PointLight(0xffffff, 0.5, 16); l.position.set(0, 4.8, z); scene.add(l);
-        var l2 = new THREE.PointLight(0xfff8f0, 0.2, 10); l2.position.set(-5, 4.5, z); scene.add(l2);
-        var l3 = new THREE.PointLight(0xfff8f0, 0.2, 10); l3.position.set(5, 4.5, z); scene.add(l3);
-      }
-
-      // East wing lights
-      for (var x = 15; x <= 65; x += 8) {
-        var l = new THREE.PointLight(0xffffff, 0.5, 16); l.position.set(x, 4.8, 0); scene.add(l);
-        var l2 = new THREE.PointLight(0xfff8f0, 0.2, 10); l2.position.set(x, 4.5, -5); scene.add(l2);
-        var l3 = new THREE.PointLight(0xfff8f0, 0.2, 10); l3.position.set(x, 4.5, 5); scene.add(l3);
-      }
-
-      // West wing lights
-      for (var x = -15; x >= -65; x -= 8) {
-        var l = new THREE.PointLight(0xffffff, 0.5, 16); l.position.set(x, 4.8, 0); scene.add(l);
-        var l2 = new THREE.PointLight(0xfff8f0, 0.2, 10); l2.position.set(x, 4.5, -5); scene.add(l2);
-        var l3 = new THREE.PointLight(0xfff8f0, 0.2, 10); l3.position.set(x, 4.5, 5); scene.add(l3);
-      }
-
-
-      // South wing lights
-      for (var z = 15; z <= 65; z += 8) {
-        var l = new THREE.PointLight(0xffffff, 0.5, 16); l.position.set(0, 4.8, z); scene.add(l);
-        var l2 = new THREE.PointLight(0xfff8f0, 0.2, 10); l2.position.set(-5, 4.5, z); scene.add(l2);
-        var l3 = new THREE.PointLight(0xfff8f0, 0.2, 10); l3.position.set(5, 4.5, z); scene.add(l3);
-      }
-
-      // Spotlights on artworks
+      // Spot-anchorok a műtárgyakhoz + kis spot-pool (a 3 legközelebbi tárgyat világítja meg)
       for (var i = 0; i < artMeshes.length; i++) {
         var a = artMeshes[i];
-        if (a.userData.isBench) continue; // Don't add spotlights for benches
-
-        var sl = new THREE.SpotLight(0xffffff, 1.8, 12, Math.PI / 5, 0.4, 1);
-        // Position spotlight in front of painting
-        var dir = new THREE.Vector3(0, 0, 1);
-        dir.applyAxisAngle(new THREE.Vector3(0, 1, 0), a.rotation.y);
-        sl.position.set(a.position.x + dir.x * 3, 4.5, a.position.z + dir.z * 3);
-        sl.target = a;
-        sl.castShadow = false; // Disabled to prevent WebGL MAX_TEXTURE_IMAGE_UNITS crash with 30+ lights
-        scene.add(sl);
+        if (a.userData.isBench) continue;
+        var sd = new THREE.Vector3(0, 0, 1); sd.applyAxisAngle(new THREE.Vector3(0, 1, 0), a.rotation.y);
+        spotAnchors.push({ px: a.position.x + sd.x * 3, pz: a.position.z + sd.z * 3, tx: a.position.x, ty: a.position.y, tz: a.position.z });
+      }
+      for (var i = 0; i < 3; i++) {
+        var sp = new THREE.SpotLight(0xffffff, 0, 12, Math.PI / 5, 0.4, 1); sp.castShadow = false;
+        var tg = new THREE.Object3D(); scene.add(tg); sp.target = tg; sp.position.set(0, 4.5, 0); scene.add(sp);
+        spotPool.push({ light: sp, target: tg });
       }
     }
 
@@ -1653,8 +1665,8 @@
 
     function setupMouse() {
       var cv = renderer.domElement; cv.style.cursor = 'grab';
-      cv.addEventListener('mousedown', function (e) { dragging = true; dragX = e.clientX; dragY = e.clientY; cv.style.cursor = 'grabbing'; });
-      addEventListener('mousemove', function (e) { if (!dragging) return; yaw -= (e.clientX - dragX) * .003; pitch -= (e.clientY - dragY) * .003; pitch = Math.max(-1, Math.min(1, pitch)); dragX = e.clientX; dragY = e.clientY; });
+      cv.addEventListener('mousedown', function (e) { dragging = true; dragX = e.clientX; dragY = e.clientY; downX = e.clientX; downY = e.clientY; dragMoved = false; cv.style.cursor = 'grabbing'; });
+      addEventListener('mousemove', function (e) { if (!dragging) return; if (Math.abs(e.clientX - downX) > 5 || Math.abs(e.clientY - downY) > 5) dragMoved = true; yaw -= (e.clientX - dragX) * .003; pitch -= (e.clientY - dragY) * .003; pitch = Math.max(-1, Math.min(1, pitch)); dragX = e.clientX; dragY = e.clientY; });
       addEventListener('mouseup', function () { dragging = false; renderer.domElement.style.cursor = 'grab'; });
     }
 
@@ -1691,16 +1703,18 @@
 
     // ── GAME LOOP ──
     var uiCache = null;
+    var _eu = new THREE.Euler(0, 0, 0, 'YXZ'), _fw = new THREE.Vector3(), _st = new THREE.Vector3();
     function loop() {
       requestAnimationFrame(loop);
       updateLazyModels();
+      updateLights();
       if (!uiCache) uiCache = {
         panel: document.getElementById('info-panel'), iT: document.getElementById('iT'),
         iA: document.getElementById('iA'), iY: document.getElementById('iY'),
         wing: document.getElementById('wing-label'), mini: document.getElementById('minimap')
       };
       var dt = Math.min(clock.getDelta(), 0.05), speed = 6;
-      camera.quaternion.setFromEuler(new THREE.Euler(pitch, yaw, 0, 'YXZ'));
+      _eu.set(pitch, yaw, 0, 'YXZ'); camera.quaternion.setFromEuler(_eu);
 
       var dz = 0, dx = 0;
       if (mF) dz += 1; if (mB) dz -= 1; if (mR) dx += 1; if (mL) dx -= 1;
@@ -1719,7 +1733,7 @@
       if (isSitting && (dx !== 0 || dz !== 0)) {
         isSitting = false;
         camera.position.y = 2.5;
-        document.getElementById('hint').textContent = "";
+        var sh0 = document.getElementById('sit-hint'); if (sh0) sh0.style.display = 'none';
       }
 
       if (dx !== 0 || dz !== 0) {
@@ -1727,10 +1741,10 @@
       }
 
       if ((dx !== 0 || dz !== 0) && !isSitting) {
-        var fw = new THREE.Vector3(0, 0, -1); fw.applyQuaternion(camera.quaternion); fw.y = 0; fw.normalize();
-        var st = new THREE.Vector3(1, 0, 0); st.applyQuaternion(camera.quaternion); st.y = 0; st.normalize();
-        var nx = camera.position.x + (fw.x * dz + st.x * dx) * speed * dt;
-        var nz = camera.position.z + (fw.z * dz + st.z * dx) * speed * dt;
+        _fw.set(0, 0, -1).applyQuaternion(camera.quaternion); _fw.y = 0; _fw.normalize();
+        _st.set(1, 0, 0).applyQuaternion(camera.quaternion); _st.y = 0; _st.normalize();
+        var nx = camera.position.x + (_fw.x * dz + _st.x * dx) * speed * dt;
+        var nz = camera.position.z + (_fw.z * dz + _st.z * dx) * speed * dt;
         if (inBounds(nx, nz)) { camera.position.x = nx; camera.position.z = nz; }
         else if (inBounds(nx, camera.position.z)) { camera.position.x = nx; }
         else if (inBounds(camera.position.x, nz)) { camera.position.z = nz; }
@@ -1740,7 +1754,7 @@
       // Info panel
       var panel = uiCache.panel;
       var closest = null, closestD = 999;
-      for (var i = 0; i < artMeshes.length; i++) { var d = camera.position.distanceTo(artMeshes[i].position); if (d < closestD) { closestD = d; closest = artMeshes[i]; } }
+      for (var i = 0; i < artMeshes.length; i++) { if (artMeshes[i].userData.isBench || artMeshes[i].userData.name === undefined) continue; var d = camera.position.distanceTo(artMeshes[i].position); if (d < closestD) { closestD = d; closest = artMeshes[i]; } }
       if (closest && closestD < 6) {
         panel.classList.add('visible');
         var uT = tName(closest.userData.name);
@@ -1750,7 +1764,7 @@
           uiCache.iT.textContent = uT;
         }
         uiCache.iA.textContent = tName(closest.userData.artist);
-        uiCache.iY.textContent = closest.userData.year;
+        uiCache.iY.textContent = yearLabel(closest.userData.year);
       }
       else panel.classList.remove('visible');
 
@@ -1915,6 +1929,10 @@
       pts.position.y = 2.5; scene.add(pts);
     }
 
+    // A Fullscreen API-t pl. az iOS Safari nem támogatja — ne kínáljunk olyan gombot, ami nem csinál semmit.
+    var docEl = document.documentElement;
+    var fsSupported = !!(docEl.requestFullscreen || docEl.msRequestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullscreen);
+
     function startMuseum() {
       document.getElementById('overlay').classList.add('hidden');
       document.getElementById('vignette').style.display = 'block';
@@ -1922,12 +1940,16 @@
       document.getElementById('mute-btn').style.display = 'block';
       initAudio();
       document.getElementById('minimap').style.display = 'block';
-      document.getElementById('fs-btn').style.display = 'block';
+      if (fsSupported) document.getElementById('fs-btn').style.display = 'block';
     }
-    document.getElementById('startBtn').addEventListener('click', startMuseum);
-    document.getElementById('startBtn').addEventListener('touchend', function (e) { e.preventDefault(); startMuseum(); });
+    (function () {
+      var sb = document.getElementById('startBtn');
+      sb.addEventListener('click', startMuseum);
+      sb.addEventListener('touchend', function (e) { e.preventDefault(); startMuseum(); });
+      sb.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); startMuseum(); } });
+    })();
 
-    document.getElementById('fs-btn').addEventListener('click', function () {
+    function toggleFullscreen() {
       var elem = document.documentElement;
       if (!document.fullscreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) {
         if (elem.requestFullscreen) { elem.requestFullscreen(); }
@@ -1940,16 +1962,32 @@
         else if (document.mozCancelFullScreen) { document.mozCancelFullScreen(); }
         else if (document.webkitExitFullscreen) { document.webkitExitFullscreen(); }
       }
-    });
+    }
+    (function () {
+      var fb = document.getElementById('fs-btn');
+      fb.addEventListener('click', toggleFullscreen);
+      fb.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleFullscreen(); } });
+    })();
 
     var targetArt = null;
     var raycaster = new THREE.Raycaster();
     var pointer = new THREE.Vector2(0, 0);
     // Listener will be attached in setup
-    document.getElementById('art-close').addEventListener('click', function () {
+    function closeArt() {
       document.getElementById('art-viewer').classList.remove('show');
       document.getElementById('sketchfab-viewer').src = ""; // Állítsuk le a 3D modellt, ha bezárja
-    });
+      currentArt = null;
+    }
+    (function () {
+      var ac = document.getElementById('art-close');
+      ac.addEventListener('click', closeArt);
+      ac.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); closeArt(); } });
+      // a háttérre kattintva is záruljon; Escape billentyűvel is
+      document.getElementById('art-viewer').addEventListener('click', function (e) { if (e.target === this) closeArt(); });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && document.getElementById('art-viewer').classList.contains('show')) closeArt();
+      });
+    })();
     // Biztonsági segédfüggvények: az exhibits.json-ből (külső/generált forrás) jövő
     // szövegek innerHTML-be írása előtt escape-elünk, a linkeket pedig https(s)-re szűrjük,
     // hogy ne legyen tárolt DOM-XSS (pl. <img onerror> a szerző mezőben, vagy javascript: link).
@@ -1960,14 +1998,16 @@
     }
     function safeUrl(u) {
       u = String(u == null ? '' : u);
-      return /^https?:\/\//i.test(u) ? u : '#';
+      // csak http(s), ÉS attribútum-biztosra escape-elve (nehogy az idézőjel kitörjön az href-ből)
+      return /^https?:\/\//i.test(u) ? escHtml(u) : '#';
     }
     function openArt(obj) {
       var ud = obj.userData;
+      currentArt = obj; // nyelvváltáskor újrarajzoláshoz
 
       var titleHtml = ud.sourceLink
-        ? "<a href='" + safeUrl(ud.sourceLink) + "' target='_blank' rel='noopener' style='color:inherit;text-decoration:underline;'>" + escHtml(tName(ud.name)) + "</a> <br><span style='font-size:0.6em;color:#da0'>" + escHtml(ud.year) + "</span>"
-        : escHtml(tName(ud.name)) + " <br><span style='font-size:0.6em;color:#da0'>" + escHtml(ud.year) + "</span>";
+        ? "<a href='" + safeUrl(ud.sourceLink) + "' target='_blank' rel='noopener' style='color:inherit;text-decoration:underline;'>" + escHtml(tName(ud.name)) + "</a> <br><span style='font-size:0.6em;color:#da0'>" + escHtml(yearLabel(ud.year)) + "</span>"
+        : escHtml(tName(ud.name)) + " <br><span style='font-size:0.6em;color:#da0'>" + escHtml(yearLabel(ud.year)) + "</span>";
 
       document.getElementById('art-title').innerHTML = titleHtml;
 
@@ -1985,7 +2025,7 @@
         activeSculpture = obj;
         viewer.classList.add('sculpture-mode');
       } else if (ud.sketchfabId) {
-        document.getElementById('art-desc').innerHTML = t('byMaker') + escHtml(tName(ud.artist)) + "<br><span style='font-size:0.75em'>" + escHtml(ud.year) + "</span><p>" + t('descSketchfab') + "</p>";
+        document.getElementById('art-desc').innerHTML = t('byMaker') + escHtml(tName(ud.artist)) + "<br><span style='font-size:0.75em'>" + escHtml(yearLabel(ud.year)) + "</span><p>" + t('descSketchfab') + "</p>";
         zc.style.display = 'none';
         sfViewer.src = "https://sketchfab.com/models/" + ud.sketchfabId + "/embed?autostart=1&ui_theme=dark&ui_infos=0&ui_watermark=0&ui_annotations=0";
         sfViewer.style.display = 'block';
@@ -2077,7 +2117,7 @@
           obj.getWorldPosition(pos);
           camera.position.set(pos.x, pos.y + 0.8, pos.z);
           isSitting = true;
-          document.getElementById('hint').textContent = t('standUp');
+          var sh1 = document.getElementById('sit-hint'); if (sh1) { sh1.textContent = t('standUp'); sh1.style.display = 'block'; }
           return;
         }
 
@@ -2095,18 +2135,18 @@
     renderer.domElement.addEventListener('webglcontextlost', function (ev) {
       ev.preventDefault();
       console.warn('WebGL context lost');
-      var n = document.getElementById('hint');
-      if (n) n.textContent = 'A 3D nézet megszakadt — kérlek, frissítsd az oldalt.';
+      var n = document.getElementById('sit-hint');
+      if (n) { n.textContent = t('contextLost'); n.style.display = 'block'; }
     }, false);
     renderer.domElement.addEventListener('click', function (e) {
-      if (dragging && Math.abs(e.clientX - dragX) > 5) return;
+      if (dragMoved) { dragMoved = false; return; } // néző-húzás vége ne számítson kattintásnak
       fireRaycast(e);
     });
 
     // Mute button logic
     var muteBtn = document.getElementById('mute-btn');
     if (muteBtn) {
-      muteBtn.addEventListener('click', function () {
+      var toggleMute = function () {
         if (!actx || !pGain || !ambGain) return;
         isMuted = !isMuted;
         if (isMuted) {
@@ -2118,7 +2158,9 @@
           ambGain.gain.value = 0.05;
           muteBtn.innerHTML = '🔊';
         }
-      });
+      };
+      muteBtn.addEventListener('click', toggleMute);
+      muteBtn.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleMute(); } });
     }
     }
   </script>

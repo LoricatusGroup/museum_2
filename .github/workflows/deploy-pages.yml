@@ -42,10 +42,10 @@ jobs:
         # Csak a CI-checkoutból töröljük; a repóban megmaradnak.
         run: |
           rm -rf felmeres_urlap FELMERESI_CHECKLIST.md \
-                 tools uploads .github \
+                 tools uploads .github releases node_modules \
                  package.json package-lock.json .gitignore \
                  errors.log log.txt test_camera.js upgrade.py \
-                 museum.html museum_backup.html
+                 museum.html museum_backup.html README.md
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

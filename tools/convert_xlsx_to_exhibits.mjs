@@ -19,7 +19,8 @@ function escapeHtml(s) {
 }
 function safeUrl(u) {
     u = String(u == null ? '' : u);
-    return /^https?:\/\//i.test(u) ? u : '#';
+    // Csak http(s)-t engedünk, és attribútumba is escape-eljük (idézőjel-kitörés ellen).
+    return /^https?:\/\//i.test(u) ? escapeHtml(u) : '#';
 }
 
 if (!fs.existsSync(xlsxPath)) {

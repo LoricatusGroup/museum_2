@@ -8,6 +8,12 @@ on:
       - 'uploads/models/*.glb'
       - 'uploads/meta.xlsx'
 
+# Egyszerre csak egy modell-publikálás fusson: a párhuzamos futások felülírhatnák
+# a "models" release-t és ütköznének a visszacommitolt exhibits.json push-on.
+concurrency:
+  group: publish-models
+  cancel-in-progress: false
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -82,4 +88,6 @@ jobs:
           
           git add assets/exhibits.json CREDITS.html uploads/models/
           git commit -m "Auto-update exhibits and remote raw models" || echo "No changes to commit"
+          # Húzzuk be időközben érkezett main-commit(ek)et, hogy a push ne forduljon non-fast-forward hibába.
+          git pull --rebase origin main || true
           git push
