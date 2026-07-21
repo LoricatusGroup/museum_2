@@ -779,6 +779,8 @@
         loading: 'Modell betöltése…', standUp: '[ Mozogj a felálláshoz ]', contextLost: 'A 3D nézet megszakadt — frissítsd az oldalt.',
         wingNorth: 'Északi Szárny · Klasszikusok', wingEast: 'Keleti Szárny · Impresszionisták',
         wingWest: 'Nyugati Szárny · Ikonikus Művek', wingSouth: 'Déli Szárny · Szobrok', wingHub: 'Központi Csarnok',
+        wingF1: '1. Emelet · Felső Galéria', wingF2: '2. Emelet · Fénycsarnok',
+        mmF0: 'FSZT', mmF1: '1.EM', mmF2: '2.EM',
         byMaker: 'Készítette: ', byPainter: 'Festette: ',
         descGlb: 'Ez a valós életből vett műtárgy 3D mása a Sketchfabról származik.',
         descSketchfab: 'Forgasd a 3D modellt az egérrel (vagy érintéssel)! A görgővel nagyíthatsz.',
@@ -798,6 +800,8 @@
         loading: 'Loading model…', standUp: '[ Move to stand up ]', contextLost: 'The 3D view was lost — please refresh the page.',
         wingNorth: 'North Wing · Classics', wingEast: 'East Wing · Impressionists',
         wingWest: 'West Wing · Iconic Works', wingSouth: 'South Wing · Sculptures', wingHub: 'Central Hall',
+        wingF1: 'Level 1 · Upper Gallery', wingF2: 'Level 2 · Hall of Light',
+        mmF0: 'GF', mmF1: 'L1', mmF2: 'L2',
         byMaker: 'Created by: ', byPainter: 'Painted by: ',
         descGlb: 'This 3D copy of a real-world artwork comes from Sketchfab.',
         descSketchfab: 'Rotate the 3D model with your mouse (or touch). Zoom with the scroll wheel.',
@@ -817,6 +821,8 @@
         loading: 'Caricamento modello…', standUp: '[ Muoviti per alzarti ]', contextLost: 'La vista 3D si è interrotta — aggiorna la pagina.',
         wingNorth: 'Ala Nord · Classici', wingEast: 'Ala Est · Impressionisti',
         wingWest: 'Ala Ovest · Opere Iconiche', wingSouth: 'Ala Sud · Sculture', wingHub: 'Sala Centrale',
+        wingF1: 'Piano 1 · Galleria Superiore', wingF2: 'Piano 2 · Sala della Luce',
+        mmF0: 'PT', mmF1: 'P1', mmF2: 'P2',
         byMaker: 'Realizzato da: ', byPainter: 'Dipinto da: ',
         descGlb: 'Questa copia 3D di un\'opera reale proviene da Sketchfab.',
         descSketchfab: 'Ruota il modello 3D con il mouse (o il tocco). Zooma con la rotellina.',
@@ -853,7 +859,9 @@
       'Szamothrakéi Niké': { en: 'Winged Victory of Samothrace', it: 'Nike di Samotracia' },
       'Dávid (Voxel Mása)': { en: 'David (Voxel Copy)', it: 'David (Copia Voxel)' },
       'Milói Vénusz (Voxel)': { en: 'Venus de Milo (Voxel)', it: 'Venere di Milo (Voxel)' },
-      'Ismeretlen': { en: 'Unknown', it: 'Sconosciuto' }
+      'Ismeretlen': { en: 'Unknown', it: 'Sconosciuto' },
+      'A Múzeum Makettje': { en: 'Model of the Museum', it: 'Modello del Museo' },
+      'Loricatus Műhely': { en: 'Loricatus Workshop', it: 'Bottega Loricatus' }
     };
     function tName(s) { var e = ARTNAMES[s]; return (e && e[LANG]) ? e[LANG] : s; }
     function yearLabel(y) {
@@ -1105,12 +1113,46 @@
     var SOUTH = { x1: -10, x2: 10, z1: 10, z2: 70 };
     var M = 0.8; // wall margin
 
-    var cordons = []; // bársonykötél-akadályok (x/z téglalapok), amiken nem lehet átsétálni
+    // ── EMELETEK + LIFT ──
+    // Padlószintek: földszint (0), 1. emelet (14 — az üvegkupola teteje 13, e fölé kerül), 2. emelet (21).
+    var FLOORS = [0, 14, 21];
+    var lift = {
+      x: 7.5, z: -7.5,        // az akna középpontja (hub ÉK-i sarka)
+      cab: null, y: 0,         // kabin-csoport és a kabin padlójának világ-Y-ja
+      state: 'open',           // 'open' | 'closing' | 'moving' | 'opening'
+      doorT: 1,                // 0 = zárva, 1 = nyitva (az aktuális szint ajtaja)
+      atFloor: 0, target: 0,
+      riding: false,           // a játékos a kabinban utazik-e
+      doors: [], lamps: []     // szintenkénti ajtópanelek és jelzőlámpák
+    };
+    var liftClickables = [];   // hívógombok + kabin (raycast-célpontok)
+    function nearestFloorIdx(eyeY) {
+      var bi = 0, bd = 1e9;
+      for (var i = 0; i < FLOORS.length; i++) { var d = Math.abs(FLOORS[i] + 2.5 - eyeY); if (d < bd) { bd = d; bi = i; } }
+      return bi;
+    }
+    function curFloorY() { return FLOORS[nearestFloorIdx(camera.position.y)]; }
+
+    var cordons = []; // bársonykötél-akadályok (x/z téglalapok + y szint), amiken nem lehet átsétálni
     function inBounds(x, z) {
-      // Kordonok: a köteleken nem lehet átmenni
+      var fy = (typeof camera !== 'undefined' && camera) ? curFloorY() : 0;
+      // Kordonok: a köteleken nem lehet átmenni (csak az adott szint kordonjai számítanak)
       for (var ci = 0; ci < cordons.length; ci++) {
         var c = cordons[ci];
-        if (x >= c.minX && x <= c.maxX && z >= c.minZ && z <= c.maxZ) return false;
+        if ((c.y || 0) === fy && x >= c.minX && x <= c.maxX && z >= c.minZ && z <= c.maxZ) return false;
+      }
+      // Lift-akna cellája: csak akkor járható, ha a kabin ezen a szinten áll nyitott ajtóval,
+      // és akkor is csak a kabin belseje + az ajtónyílás (a keretfalakon nem lehet átmenni).
+      if (x > 5.8 && x < 9.2 && z > -9.2 && z < -5.8) {
+        var openHere = lift.cab && lift.atFloor === FLOORS.indexOf(fy) && lift.state !== 'moving' && lift.doorT > 0.35;
+        if (!openHere) return false;
+        var inCab = x > 6.4 && x < 8.6 && z > -8.55 && z < -6.45;
+        var inDoor = x <= 6.4 && z > -8.15 && z < -6.85;
+        return inCab || inDoor;
+      }
+      if (fy > 0) {
+        // Emeleti terem: 20x20 a központi csarnok fölött
+        return x >= -9.2 && x <= 9.2 && z >= -9.2 && z <= 9.2;
       }
       // Hub - generous bounds
       if (x >= -9.2 && x <= 9.2 && z >= -9.2 && z <= 9.2) return true;
@@ -1126,6 +1168,11 @@
     }
 
     function getWing(x, z) {
+      if (typeof camera !== 'undefined' && camera) {
+        var fi = nearestFloorIdx(camera.position.y);
+        if (fi === 1) return t('wingF1');
+        if (fi === 2) return t('wingF2');
+      }
       if (z < -10) return t('wingNorth');
       if (x > 10) return t('wingEast');
       if (x < -10) return t('wingWest');
@@ -1167,8 +1214,10 @@
       document.body.insertBefore(renderer.domElement, document.body.firstChild);
       clock = new THREE.Clock();
       buildMuseum();
+      buildUpperFloors();   // az emeleti padok/makett az artMeshes-be kerülnek → az addLights előtt kell
       placeAllArt();
       addLights();
+      buildLift();
 
       addDust();
       // Bust 1
@@ -1238,7 +1287,7 @@
       m.rotation.x = Math.PI / 2; m.position.set(x, 5, z); scene.add(m);
     }
 
-    function buildBench(w, d, x, z) {
+    function buildBench(w, d, x, z, fy) {
       var grp = new THREE.Group();
       var seatMat = new THREE.MeshStandardMaterial({ color: 0x7a6a50, roughness: 0.6 });
       var legMat = new THREE.MeshStandardMaterial({ color: 0x3a3a3a, roughness: 0.8 });
@@ -1263,7 +1312,7 @@
         leg2.position.set(0, 0.275, d / 2 - 0.3);
       }
 
-      grp.position.set(x, 0, z);
+      grp.position.set(x, fy || 0, z);
       grp.userData.isBench = true;
       scene.add(grp);
       artMeshes.push(grp);
@@ -1391,8 +1440,8 @@
 
       // Hub columns at wing entrances (decorative)
       var colMat = new THREE.MeshStandardMaterial({ color: 0xd8d0c0, roughness: 0.5 });
-      // 4 corner columns at hub
-      [[-9, 2.5, -9], [9, 2.5, -9], [9, 2.5, 9], [-9, 2.5, 9]].forEach(function (p) {
+      // Sarok-oszlopok a hubban (az ÉK-i sarokban a lift-akna áll, oda nem kerül oszlop)
+      [[-9, 2.5, -9], [9, 2.5, 9], [-9, 2.5, 9]].forEach(function (p) {
         addBox(0.6, 5, 0.6, colMat, p[0], p[1], p[2]);
       });
 
@@ -1405,6 +1454,255 @@
       [-30, -50].forEach(function (z) { buildBench(3, 1, 0, z); });
       [30, 50].forEach(function (x) { buildBench(1, 3, x, 0); });
       [-30, -50].forEach(function (x) { buildBench(1, 3, x, 0); });
+    }
+
+    // ── EMELETEK (a központi csarnok fölötti torony: 1. emelet 14 m, 2. emelet 21 m) ──
+    function buildUpperFloors() {
+      var floorMat = new THREE.MeshStandardMaterial({ color: 0x8a6b46, roughness: 0.65 });
+      var wall1Mat = new THREE.MeshStandardMaterial({ color: 0x571818, roughness: 0.85 });  // bordó szalon (1. emelet) — sötétebb alap, mert az ACES tone-mapping + ambient kivilágosítja
+      var wall2Mat = new THREE.MeshStandardMaterial({ color: 0xeaddbe, roughness: 0.8 });   // elefántcsont (2. emelet)
+      var ceilMat = new THREE.MeshStandardMaterial({ color: 0xf0e8d8 });
+      var goldMat = new THREE.MeshStandardMaterial({ color: 0xc7a23a, roughness: 0.35, metalness: 0.6 });
+      var colMat = new THREE.MeshStandardMaterial({ color: 0xd8d0c0, roughness: 0.5 });
+      var carpetMat = new THREE.MeshStandardMaterial({ color: 0x6e1414, roughness: 0.95 });
+      var bbMat = new THREE.MeshStandardMaterial({ color: 0x6a5a48 });
+
+      // Födémek és az 1. emelet mennyezete — a lift-akna [5.8..9.2]x[-9.2..-5.8] cellája KIVÁGVA
+      // (4 darabból rakjuk ki, egy-egy összevont mesh-be), különben a kabin átdöfné a födémet.
+      var holePieces = [
+        [16.1, 20.6, -2.25, 0], [4.5, 1.1, 8.05, -9.75], [4.5, 16.1, 8.05, 2.25], [1.1, 3.4, 9.75, -7.5]
+      ];
+      var slabG = [], ceilG = [];
+      [14, 21].forEach(function (fy) {
+        holePieces.forEach(function (p) {
+          var g = new THREE.BoxGeometry(p[0], 0.5, p[1]); g.translate(p[2], fy - 0.25, p[3]); slabG.push(g);
+        });
+      });
+      holePieces.forEach(function (p) {
+        var g = new THREE.BoxGeometry(p[0], 0.1, p[1]); g.translate(p[2], 19.05, p[3]); ceilG.push(g);
+      });
+      scene.add(new THREE.Mesh(mergeGeoms(slabG), floorMat)); for (var gi = 0; gi < slabG.length; gi++) slabG[gi].dispose();
+      scene.add(new THREE.Mesh(mergeGeoms(ceilG), ceilMat)); for (var gi = 0; gi < ceilG.length; gi++) ceilG[gi].dispose();
+
+      // Falak (szintenként 4)
+      [[14, wall1Mat], [21, wall2Mat]].forEach(function (fw) {
+        var fy = fw[0], m = fw[1];
+        addBox(20.3, 5, 0.3, m, 0, fy + 2.5, -10);
+        addBox(20.3, 5, 0.3, m, 0, fy + 2.5, 10);
+        addBox(0.3, 5, 20.3, m, -10, fy + 2.5, 0);
+        addBox(0.3, 5, 20.3, m, 10, fy + 2.5, 0);
+      });
+
+      // Lábazatok + szőnyegek + sarok-oszlopok (az ÉK-i sarokban a lift áll)
+      var bbG = [], cpG = [], colG = [];
+      [14, 21].forEach(function (fy) {
+        [[19.6, 0.1, 0, -9.8], [19.6, 0.1, 0, 9.8], [0.1, 19.6, -9.8, 0], [0.1, 19.6, 9.8, 0]].forEach(function (b) {
+          var g = new THREE.BoxGeometry(b[0], 0.25, b[1]); g.translate(b[2], fy + 0.125, b[3]); bbG.push(g);
+        });
+        var cg = new THREE.PlaneGeometry(11, 11); cg.rotateX(-Math.PI / 2); cg.translate(0, fy + 0.012, 0); cpG.push(cg);
+        [[-9, -9], [-9, 9], [9, 9]].forEach(function (c) {
+          var g = new THREE.BoxGeometry(0.6, 5, 0.6); g.translate(c[0], fy + 2.5, c[1]); colG.push(g);
+        });
+      });
+      scene.add(new THREE.Mesh(mergeGeoms(bbG), bbMat)); for (var gi = 0; gi < bbG.length; gi++) bbG[gi].dispose();
+      scene.add(new THREE.Mesh(mergeGeoms(cpG), carpetMat)); for (var gi = 0; gi < cpG.length; gi++) cpG[gi].dispose();
+      scene.add(new THREE.Mesh(mergeGeoms(colG), colMat)); for (var gi = 0; gi < colG.length; gi++) colG[gi].dispose();
+
+      // Fénycsarnok teteje: világító kazetták (emissive — NEM valódi fényforrás, nem terheli a fény-poolt)
+      // + arany bordák + sötét tetőlap. A lift-akna sarok-kazettáját kihagyjuk.
+      var skyG = [], beamG = [];
+      for (var gx = 0; gx < 4; gx++) for (var gz = 0; gz < 4; gz++) {
+        var cx = -7.5 + gx * 5, cz = -7.5 + gz * 5;
+        if (cx > 5 && cz < -5) continue; // lift-akna
+        var p2 = new THREE.BoxGeometry(4.4, 0.06, 4.4); p2.translate(cx, 26, cz); skyG.push(p2);
+      }
+      [-10, -5, 0, 5, 10].forEach(function (k) {
+        var g1 = new THREE.BoxGeometry(0.16, 0.1, 20.6); g1.translate(k, 26.02, 0); beamG.push(g1);
+        var g2 = new THREE.BoxGeometry(20.6, 0.1, 0.16); g2.translate(0, 26.02, k); beamG.push(g2);
+      });
+      scene.add(new THREE.Mesh(mergeGeoms(skyG), new THREE.MeshBasicMaterial({ color: 0xfff4de })));
+      for (var gi = 0; gi < skyG.length; gi++) skyG[gi].dispose();
+      scene.add(new THREE.Mesh(mergeGeoms(beamG), goldMat)); for (var gi = 0; gi < beamG.length; gi++) beamG[gi].dispose();
+      addBox(21.4, 0.3, 21.4, new THREE.MeshStandardMaterial({ color: 0x3a3226 }), 0, 26.55, 0);
+
+      // Padok az emeleteken
+      buildBench(3, 1, 0, -3, 14); buildBench(3, 1, 0, 3, 14);
+      buildBench(3, 1, 0, 5, 21); buildBench(3, 1, 0, -5, 21);
+
+      // ── "A Múzeum Makettje" — kicsinyített mása talapzaton, a Fénycsarnok közepén ──
+      var mkGrp = new THREE.Group();
+      var mkPed = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1.1, 1.5), new THREE.MeshStandardMaterial({ color: 0x3a2a1a }));
+      mkPed.position.y = -0.55; mkGrp.add(mkPed);
+      var mkBase = new THREE.Mesh(new THREE.BoxGeometry(1.45, 0.04, 1.45), new THREE.MeshStandardMaterial({ color: 0x2e2418, roughness: 0.8 }));
+      mkBase.position.y = 0.02; mkGrp.add(mkBase);
+      var ms2 = 0.0095, mg = [];
+      function mkBox(w, h, d, x, y, z) { var g = new THREE.BoxGeometry(w * ms2, h, d * ms2); g.translate(x * ms2, y, z * ms2); mg.push(g); }
+      mkBox(20, 0.06, 20, 0, 0.07, 0);
+      mkBox(20, 0.05, 60, 0, 0.065, -40); mkBox(20, 0.05, 60, 0, 0.065, 40);
+      mkBox(60, 0.05, 20, -40, 0.065, 0); mkBox(60, 0.05, 20, 40, 0.065, 0);
+      mkGrp.add(new THREE.Mesh(mergeGeoms(mg), new THREE.MeshStandardMaterial({ color: 0xeaddbe, roughness: 0.7 })));
+      for (var mi = 0; mi < mg.length; mi++) mg[mi].dispose();
+      var mkDome = new THREE.Mesh(new THREE.SphereGeometry(0.085, 10, 8, 0, Math.PI * 2, 0, Math.PI / 2),
+        new THREE.MeshStandardMaterial({ color: 0x88aacc, transparent: true, opacity: 0.55 }));
+      mkDome.position.y = 0.1; mkGrp.add(mkDome);
+      var mkTower = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.3, 0.045), goldMat);
+      mkTower.position.set(7.5 * ms2, 0.2, -7.5 * ms2); mkGrp.add(mkTower);
+      var mkPlaque = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.2, 0.03), new THREE.MeshStandardMaterial({ color: 0xccaa44, roughness: 0.3, metalness: 0.6 }));
+      mkPlaque.position.set(0, -0.3, 0.77); mkGrp.add(mkPlaque);
+      mkGrp.position.set(0, 21 + 1.1, 0);
+      mkGrp.userData = { name: 'A Múzeum Makettje', artist: 'Loricatus Műhely', year: '2026', isSculpture: true, fy: 21 };
+      scene.add(mkGrp); artMeshes.push(mkGrp);
+    }
+
+    // ── LIFT (arany felvonó a hub ÉK-i sarkában, 3 megállóval) ──
+    function makeLabelTex(txt, wide) {
+      var c = document.createElement('canvas'); c.width = wide ? 128 : 64; c.height = 64;
+      var x = c.getContext('2d');
+      x.fillStyle = '#241c10'; x.fillRect(0, 0, c.width, 64);
+      x.fillStyle = '#ffd44a'; x.font = 'bold ' + (wide ? 36 : 40) + 'px monospace';
+      x.textAlign = 'center'; x.textBaseline = 'middle';
+      x.fillText(txt, c.width / 2, 35);
+      var t2 = new THREE.CanvasTexture(c); t2.magFilter = THREE.NearestFilter; return t2;
+    }
+    function buildLift() {
+      var LX = lift.x, LZ = lift.z, TOP = FLOORS[2] + 5.3;
+      var shellMat = new THREE.MeshStandardMaterial({ color: 0x4a3a26, roughness: 0.6, metalness: 0.35 });
+      var goldMat = new THREE.MeshStandardMaterial({ color: 0xc7a23a, roughness: 0.35, metalness: 0.6 });
+      var doorMat = new THREE.MeshStandardMaterial({ color: 0xb08c30, roughness: 0.4, metalness: 0.55 });
+
+      // Akna-héj (statikus, egyetlen mesh-be olvasztva): hátfal, oldalfalak, elülső sávok + szemöldökök
+      var sg = [];
+      function shBox(w, h, d, x, y, z) { var g = new THREE.BoxGeometry(w, h, d); g.translate(x, y, z); sg.push(g); }
+      shBox(0.15, TOP, 3.4, LX + 1.7, TOP / 2, LZ);
+      shBox(3.4, TOP, 0.15, LX, TOP / 2, LZ - 1.7);
+      shBox(3.4, TOP, 0.15, LX, TOP / 2, LZ + 1.7);
+      shBox(0.15, TOP, 1.0, LX - 1.7, TOP / 2, LZ - 1.2);
+      shBox(0.15, TOP, 1.0, LX - 1.7, TOP / 2, LZ + 1.2);
+      for (var f = 0; f < FLOORS.length; f++) {
+        var y0 = FLOORS[f] + 2.6, y1 = (f < FLOORS.length - 1 ? FLOORS[f + 1] : TOP);
+        shBox(0.15, y1 - y0, 1.4, LX - 1.7, (y0 + y1) / 2, LZ);
+      }
+      scene.add(new THREE.Mesh(mergeGeoms(sg), shellMat)); for (var gi = 0; gi < sg.length; gi++) sg[gi].dispose();
+
+      // Arany ajtókeretek + küszöblemezek (a födém-kivágás és a kabin közti rést takarják)
+      var gg = [];
+      function gBox(w, h, d, x, y, z) { var g = new THREE.BoxGeometry(w, h, d); g.translate(x, y, z); gg.push(g); }
+      for (var f = 0; f < FLOORS.length; f++) {
+        gBox(0.12, 2.75, 0.12, LX - 1.72, FLOORS[f] + 1.375, LZ - 0.76);
+        gBox(0.12, 2.75, 0.12, LX - 1.72, FLOORS[f] + 1.375, LZ + 0.76);
+        gBox(0.12, 0.12, 1.64, LX - 1.72, FLOORS[f] + 2.69, LZ);
+        gBox(0.5, 0.08, 1.55, LX - 1.45, FLOORS[f] - 0.04, LZ);
+      }
+      scene.add(new THREE.Mesh(mergeGeoms(gg), goldMat)); for (var gi = 0; gi < gg.length; gi++) gg[gi].dispose();
+
+      // Szintenkénti (állomás-) ajtópanelek — a kabin érkezésekor csúsznak szét
+      for (var f = 0; f < FLOORS.length; f++) {
+        var L = new THREE.Mesh(new THREE.BoxGeometry(0.07, 2.55, 0.72), doorMat);
+        var R = new THREE.Mesh(new THREE.BoxGeometry(0.07, 2.55, 0.72), doorMat);
+        L.position.set(LX - 1.55, FLOORS[f] + 1.275, LZ - 0.36);
+        R.position.set(LX - 1.55, FLOORS[f] + 1.275, LZ + 0.36);
+        scene.add(L); scene.add(R);
+        lift.doors.push({ L: L, R: R, f: f });
+        liftClickables.push(L, R); // az ajtóra kattintás ne "essen át" mögöttes műtárgyra
+        // Jelzőlámpák (F/1/2) az ajtó fölött
+        var set = [];
+        for (var k = 0; k < 3; k++) {
+          var lm = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.09, 0.09), new THREE.MeshBasicMaterial({ color: 0x40361f }));
+          lm.position.set(LX - 1.81, FLOORS[f] + 2.95, LZ - 0.18 + k * 0.18);
+          scene.add(lm); set.push(lm.material);
+        }
+        lift.lamps.push(set);
+        // Hívógomb a keret mellett
+        var cb = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.14, 0.14), new THREE.MeshBasicMaterial({ color: 0xffd44a }));
+        cb.position.set(LX - 1.80, FLOORS[f] + 1.45, LZ + 0.95);
+        cb.userData.liftCall = f;
+        scene.add(cb); liftClickables.push(cb);
+      }
+
+      // "LIFT" tábla a földszinti ajtó fölött
+      var pl = new THREE.Mesh(new THREE.PlaneGeometry(0.85, 0.28), new THREE.MeshBasicMaterial({ map: makeLabelTex('LIFT', true) }));
+      pl.position.set(LX - 1.79, 3.35, LZ); pl.rotation.y = -Math.PI / 2; scene.add(pl);
+
+      // Kabin: padló + tető + hátfal + oldalfalak (elöl nyitott — az állomás-ajtók zárnak)
+      var cab = new THREE.Group();
+      var cs = [];
+      function cBox(w, h, d, x, y, z) { var g = new THREE.BoxGeometry(w, h, d); g.translate(x, y, z); cs.push(g); }
+      cBox(2.5, 0.12, 2.5, 0, 0.06, 0);
+      cBox(2.5, 0.1, 2.5, 0, 2.75, 0);
+      cBox(0.1, 2.7, 2.5, 1.2, 1.4, 0);
+      cBox(2.3, 2.7, 0.1, 0, 1.4, -1.2);
+      cBox(2.3, 2.7, 0.1, 0, 1.4, 1.2);
+      cab.add(new THREE.Mesh(mergeGeoms(cs), new THREE.MeshStandardMaterial({ color: 0x6a5638, roughness: 0.5, metalness: 0.3 })));
+      for (var gi = 0; gi < cs.length; gi++) cs[gi].dispose();
+      // bordó bársony hátfal-betét + arany kapaszkodó + meleg mennyezeti fénypanel
+      var velvet = new THREE.Mesh(new THREE.BoxGeometry(0.04, 2.0, 2.0), new THREE.MeshStandardMaterial({ color: 0x6e1414, roughness: 0.95 }));
+      velvet.position.set(1.13, 1.45, 0); cab.add(velvet);
+      var rail = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 2.0, 8), goldMat);
+      rail.rotation.x = Math.PI / 2; rail.position.set(1.08, 1.05, 0); cab.add(rail);
+      var lightPanel = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.03, 1.6), new THREE.MeshBasicMaterial({ color: 0xfff2dc }));
+      lightPanel.position.set(0, 2.69, 0); cab.add(lightPanel);
+      // Belső gombpanel (0/1/2) az ajtó melletti falon
+      for (var f = 0; f < FLOORS.length; f++) {
+        var b = new THREE.Mesh(new THREE.BoxGeometry(0.13, 0.13, 0.03), new THREE.MeshBasicMaterial({ map: makeLabelTex(String(f)) }));
+        b.position.set(-0.85, 1.15 + f * 0.24, -1.13);
+        b.userData.liftGo = f;
+        cab.add(b);
+      }
+      cab.position.set(LX, 0, LZ);
+      scene.add(cab);
+      lift.cab = cab;
+      liftClickables.push(cab);
+    }
+
+    function playerInLiftCab() {
+      return Math.abs(camera.position.x - lift.x) < 1.15 && Math.abs(camera.position.z - lift.z) < 1.15
+        && Math.abs(camera.position.y - 2.5 - lift.y) < 2;
+    }
+    function callLift(f) {
+      if (lift.state !== 'open' || lift.atFloor === f) return;
+      lift.target = f; lift.state = 'closing';
+    }
+    function goLift(f) {
+      if (lift.state !== 'open' || f === lift.atFloor) return;
+      if (!playerInLiftCab()) { callLift(f); return; }
+      lift.target = f; lift.state = 'closing';
+    }
+    function updateLift(dt) {
+      if (!lift.cab) return;
+      var DOOR_T = 0.7, SPEED = 3.5;
+      if (lift.state === 'closing') {
+        lift.doorT -= dt / DOOR_T;
+        if (lift.doorT <= 0) {
+          lift.doorT = 0;
+          lift.riding = playerInLiftCab(); // aki bent áll, az utazik
+          lift.state = 'moving';
+        }
+      } else if (lift.state === 'moving') {
+        var ty = FLOORS[lift.target], dy = ty - lift.y, step = SPEED * dt;
+        if (Math.abs(dy) <= step) {
+          lift.y = ty; lift.atFloor = lift.target; lift.state = 'opening'; playDing();
+        } else lift.y += (dy > 0 ? step : -step);
+        lift.cab.position.y = lift.y;
+        if (lift.riding) {
+          camera.position.y = lift.y + 2.5;
+          camera.position.x = Math.max(lift.x - 1.0, Math.min(lift.x + 1.0, camera.position.x));
+          camera.position.z = Math.max(lift.z - 1.0, Math.min(lift.z + 1.0, camera.position.z));
+        }
+      } else if (lift.state === 'opening') {
+        lift.doorT += dt / DOOR_T;
+        if (lift.doorT >= 1) { lift.doorT = 1; lift.state = 'open'; lift.riding = false; }
+      }
+      // Ajtópanelek + jelzőlámpák frissítése
+      var li = 0, bd = 1e9;
+      for (var k = 0; k < FLOORS.length; k++) { var d2 = Math.abs(FLOORS[k] - lift.y); if (d2 < bd) { bd = d2; li = k; } }
+      for (var i = 0; i < lift.doors.length; i++) {
+        var d = lift.doors[i];
+        var tt = (d.f === lift.atFloor) ? lift.doorT : 0;
+        d.L.position.z = lift.z - (0.36 + tt * 0.74);
+        d.R.position.z = lift.z + (0.36 + tt * 0.74);
+        var lamps = lift.lamps[i];
+        for (var k = 0; k < lamps.length; k++) lamps[k].color.setHex(k === li ? 0xffd44a : 0x40361f);
+      }
     }
 
     var pendingModels = [];   // lazy-betöltendő GLB modellek (közelség alapján)
@@ -1467,8 +1765,16 @@
         { x: -48, z: -9.7, ry: 0 }, { x: -48, z: 9.7, ry: Math.PI },
         { x: -62, z: -9.7, ry: 0 }, { x: -62, z: 9.7, ry: Math.PI },
         // South wing (alongside sculptures)
-        { x: -9.7, z: 15, ry: Math.PI / 2 }, { x: 9.7, z: 15, ry: -Math.PI / 2 }
+        { x: -9.7, z: 15, ry: Math.PI / 2 }, { x: 9.7, z: 15, ry: -Math.PI / 2 },
         // The further spots in South wing will be reserved for Sketchfab 3D models
+        // ── 1. EMELET · Felső Galéria (fy = padlószint; az ÉK-i lift-akna mellől eltolva) ──
+        { x: -5, z: -9.7, ry: 0, fy: 14 }, { x: 4, z: -9.7, ry: 0, fy: 14 },
+        { x: -5, z: 9.7, ry: Math.PI, fy: 14 }, { x: 5, z: 9.7, ry: Math.PI, fy: 14 },
+        { x: -9.7, z: -5, ry: Math.PI / 2, fy: 14 }, { x: -9.7, z: 5, ry: Math.PI / 2, fy: 14 },
+        { x: 9.7, z: -3.6, ry: -Math.PI / 2, fy: 14 }, { x: 9.7, z: 5, ry: -Math.PI / 2, fy: 14 },
+        // ── 2. EMELET · Fénycsarnok ──
+        { x: -4, z: -9.7, ry: 0, fy: 21 }, { x: 4, z: 9.7, ry: Math.PI, fy: 21 },
+        { x: -9.7, z: 0, ry: Math.PI / 2, fy: 21 }, { x: 9.7, z: 0.5, ry: -Math.PI / 2, fy: 21 }
       ];
 
       var frameMat = new THREE.MeshStandardMaterial({ color: 0xaa8833, roughness: 0.4, metalness: 0.5 });
@@ -1480,6 +1786,7 @@
 
       for (var i = 0; i < spots.length; i++) {
         var art = paintings[i % paintings.length], sp = spots[i];
+        var fy = sp.fy || 0; // emeleti kép-helyeknél a padlószint
 
         // Texture
         var tmp = document.createElement('canvas'); tmp.width = art.pw; tmp.height = art.ph;
@@ -1506,34 +1813,34 @@
         var pt = new THREE.Mesh(new THREE.PlaneGeometry(aW, aH), new THREE.MeshStandardMaterial({ map: tex, roughness: 0.8 }));
         pt.position.z = 0.01; group.add(pt);
 
-        group.position.set(sp.x, 2.6, sp.z);
+        group.position.set(sp.x, 2.6 + fy, sp.z);
         group.rotation.y = sp.ry;
-        group.userData = { name: art.name, artist: art.artist, year: art.year };
+        group.userData = { name: art.name, artist: art.artist, year: art.year, fy: fy };
         scene.add(group);
         artMeshes.push(group);
 
         // Plaque
         var plaque = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.3, 0.03), plaqueMat);
-        plaque.position.set(sp.x, 1.2, sp.z); plaque.rotation.y = sp.ry; scene.add(plaque);
+        plaque.position.set(sp.x, 1.2 + fy, sp.z); plaque.rotation.y = sp.ry; scene.add(plaque);
 
         // Ropes (kordon) — geometriákat gyűjtünk, a loop után EGY mesh-be olvasztjuk (draw-call csökkentés)
         var isVert = (Math.abs(sp.ry) === Math.PI / 2); // vertical wing (north) vs horizontal
         if (isVert) {
           var px = sp.x < 0 ? sp.x + 1.5 : sp.x - 1.5;
           for (var dz = -1.5; dz <= 1.5; dz += 3) {
-            poleGeoms.push(new THREE.CylinderGeometry(0.03, 0.03, 0.9, 8).translate(px, 0.45, sp.z + dz));
-            poleGeoms.push(new THREE.SphereGeometry(0.05, 8, 8).translate(px, 0.92, sp.z + dz));
+            poleGeoms.push(new THREE.CylinderGeometry(0.03, 0.03, 0.9, 8).translate(px, 0.45 + fy, sp.z + dz));
+            poleGeoms.push(new THREE.SphereGeometry(0.05, 8, 8).translate(px, 0.92 + fy, sp.z + dz));
           }
-          ropeGeoms.push(new THREE.CylinderGeometry(0.012, 0.012, 3, 6).rotateX(Math.PI / 2).translate(px, 0.78, sp.z));
-          cordons.push({ minX: px - 0.4, maxX: px + 0.4, minZ: sp.z - 1.7, maxZ: sp.z + 1.7 });
+          ropeGeoms.push(new THREE.CylinderGeometry(0.012, 0.012, 3, 6).rotateX(Math.PI / 2).translate(px, 0.78 + fy, sp.z));
+          cordons.push({ minX: px - 0.4, maxX: px + 0.4, minZ: sp.z - 1.7, maxZ: sp.z + 1.7, y: fy });
         } else {
           var pz = sp.z < 0 ? sp.z + 1.5 : sp.z - 1.5;
           for (var dx = -1.5; dx <= 1.5; dx += 3) {
-            poleGeoms.push(new THREE.CylinderGeometry(0.03, 0.03, 0.9, 8).translate(sp.x + dx, 0.45, pz));
-            poleGeoms.push(new THREE.SphereGeometry(0.05, 8, 8).translate(sp.x + dx, 0.92, pz));
+            poleGeoms.push(new THREE.CylinderGeometry(0.03, 0.03, 0.9, 8).translate(sp.x + dx, 0.45 + fy, pz));
+            poleGeoms.push(new THREE.SphereGeometry(0.05, 8, 8).translate(sp.x + dx, 0.92 + fy, pz));
           }
-          ropeGeoms.push(new THREE.CylinderGeometry(0.012, 0.012, 3, 6).rotateZ(Math.PI / 2).translate(sp.x, 0.78, pz));
-          cordons.push({ minX: sp.x - 1.7, maxX: sp.x + 1.7, minZ: pz - 0.4, maxZ: pz + 0.4 });
+          ropeGeoms.push(new THREE.CylinderGeometry(0.012, 0.012, 3, 6).rotateZ(Math.PI / 2).translate(sp.x, 0.78 + fy, pz));
+          cordons.push({ minX: sp.x - 1.7, maxX: sp.x + 1.7, minZ: pz - 0.4, maxZ: pz + 0.4, y: fy });
         }
 
       } // Correctly close the paintings loop
@@ -1589,17 +1896,25 @@
     var lightAnchors = [], lightPool = [], spotAnchors = [], spotPool = [];
     function updateLights() {
       if (mobile || !lightPool.length || typeof camera === 'undefined' || !camera) return;
-      var cx = camera.position.x, cz = camera.position.z;
-      lightAnchors.sort(function (a, b) { return ((a.x - cx) * (a.x - cx) + (a.z - cz) * (a.z - cz)) - ((b.x - cx) * (b.x - cx) + (b.z - cz) * (b.z - cz)); });
+      // 3D távolság (az y is számít!): emeletes épületben a saját szint fényei nyerjenek,
+      // ne az egy szinttel lejjebb/feljebb lévő, vízszintesen közelebbi anchorok.
+      var cx = camera.position.x, cy = camera.position.y, cz = camera.position.z;
+      lightAnchors.sort(function (a, b) {
+        return ((a.x - cx) * (a.x - cx) + (a.y - cy) * (a.y - cy) + (a.z - cz) * (a.z - cz))
+          - ((b.x - cx) * (b.x - cx) + (b.y - cy) * (b.y - cy) + (b.z - cz) * (b.z - cz));
+      });
       for (var i = 0; i < lightPool.length; i++) {
         var pl = lightPool[i], an = lightAnchors[i];
         if (an) { pl.position.set(an.x, an.y, an.z); pl.color.setHex(an.c); pl.intensity = an.i; pl.distance = an.d; }
       }
       if (spotPool.length && spotAnchors.length) {
-        spotAnchors.sort(function (a, b) { return ((a.tx - cx) * (a.tx - cx) + (a.tz - cz) * (a.tz - cz)) - ((b.tx - cx) * (b.tx - cx) + (b.tz - cz) * (b.tz - cz)); });
+        spotAnchors.sort(function (a, b) {
+          return ((a.tx - cx) * (a.tx - cx) + (a.ty - cy) * (a.ty - cy) + (a.tz - cz) * (a.tz - cz))
+            - ((b.tx - cx) * (b.tx - cx) + (b.ty - cy) * (b.ty - cy) + (b.tz - cz) * (b.tz - cz));
+        });
         for (var i = 0; i < spotPool.length; i++) {
           var sa = spotAnchors[i];
-          if (sa) { spotPool[i].light.position.set(sa.px, 4.5, sa.pz); spotPool[i].target.position.set(sa.tx, sa.ty, sa.tz); spotPool[i].light.intensity = 1.6; }
+          if (sa) { spotPool[i].light.position.set(sa.px, sa.py, sa.pz); spotPool[i].target.position.set(sa.tx, sa.ty, sa.tz); spotPool[i].light.intensity = 1.6; }
           else spotPool[i].light.intensity = 0;
         }
       }
@@ -1624,12 +1939,18 @@
       // Fény-pool: a ~88 statikus pontfény + per-műtárgy spot helyett anchor-pozíciókat tárolunk,
       // és csak egy fix kis poolt (a kamerához legközelebbi fények) renderelünk — a forward renderer
       // mindig keveset lát (nincs per-frame shader-újrafordítás), mégis jól megvilágított a környezet.
-      function anchor(x, z, c, inten, dist) { lightAnchors.push({ x: x, y: 4.8, z: z, c: c, i: inten, d: dist }); }
+      function anchor(x, z, c, inten, dist, fy) { lightAnchors.push({ x: x, y: 4.8 + (fy || 0), z: z, c: c, i: inten, d: dist }); }
       for (var hx = -5; hx <= 5; hx += 10) for (var hz = -5; hz <= 5; hz += 10) anchor(hx, hz, 0xffffff, 0.55, 18);
       for (var z = -15; z >= -65; z -= 8) { anchor(0, z, 0xffffff, 0.6, 20); anchor(-5, z, 0xfff0e0, 0.3, 12); anchor(5, z, 0xfff0e0, 0.3, 12); }
       for (var z = 15; z <= 65; z += 8) { anchor(0, z, 0xffffff, 0.6, 20); anchor(-5, z, 0xfff0e0, 0.3, 12); anchor(5, z, 0xfff0e0, 0.3, 12); }
       for (var x = 15; x <= 65; x += 8) { anchor(x, 0, 0xffffff, 0.6, 20); anchor(x, -5, 0xfff0e0, 0.3, 12); anchor(x, 5, 0xfff0e0, 0.3, 12); }
       for (var x = -15; x >= -65; x -= 8) { anchor(x, 0, 0xffffff, 0.6, 20); anchor(x, -5, 0xfff0e0, 0.3, 12); anchor(x, 5, 0xfff0e0, 0.3, 12); }
+      // Emeleti anchorok — a pool mérete NEM nő, csak a jelöltek köre bővül
+      [14, 21].forEach(function (fy) {
+        anchor(0, 0, 0xffffff, 0.6, 20, fy);
+        anchor(-5, -5, 0xfff0e0, 0.4, 14, fy); anchor(5, -5, 0xfff0e0, 0.4, 14, fy);
+        anchor(-5, 5, 0xfff0e0, 0.4, 14, fy); anchor(5, 5, 0xfff0e0, 0.4, 14, fy);
+      });
       for (var i = 0; i < 10; i++) { var pl = new THREE.PointLight(0xffffff, 0.5, 18); pl.position.set(0, 4.8, 0); scene.add(pl); lightPool.push(pl); }
 
       // Spot-anchorok a műtárgyakhoz + kis spot-pool (a 3 legközelebbi tárgyat világítja meg)
@@ -1637,7 +1958,7 @@
         var a = artMeshes[i];
         if (a.userData.isBench) continue;
         var sd = new THREE.Vector3(0, 0, 1); sd.applyAxisAngle(new THREE.Vector3(0, 1, 0), a.rotation.y);
-        spotAnchors.push({ px: a.position.x + sd.x * 3, pz: a.position.z + sd.z * 3, tx: a.position.x, ty: a.position.y, tz: a.position.z });
+        spotAnchors.push({ px: a.position.x + sd.x * 3, py: 4.5 + (a.userData.fy || 0), pz: a.position.z + sd.z * 3, tx: a.position.x, ty: a.position.y, tz: a.position.z });
       }
       for (var i = 0; i < 3; i++) {
         var sp = new THREE.SpotLight(0xffffff, 0, 12, Math.PI / 5, 0.4, 1); sp.castShadow = false;
@@ -1714,6 +2035,7 @@
         wing: document.getElementById('wing-label'), mini: document.getElementById('minimap')
       };
       var dt = Math.min(clock.getDelta(), 0.05), speed = 6;
+      updateLift(dt);
       _eu.set(pitch, yaw, 0, 'YXZ'); camera.quaternion.setFromEuler(_eu);
 
       var dz = 0, dx = 0;
@@ -1732,7 +2054,7 @@
 
       if (isSitting && (dx !== 0 || dz !== 0)) {
         isSitting = false;
-        camera.position.y = 2.5;
+        camera.position.y = curFloorY() + 2.5; // az AKTUÁLIS emelet szemmagasságára álljunk fel
         var sh0 = document.getElementById('sit-hint'); if (sh0) sh0.style.display = 'none';
       }
 
@@ -1749,7 +2071,9 @@
         else if (inBounds(nx, camera.position.z)) { camera.position.x = nx; }
         else if (inBounds(camera.position.x, nz)) { camera.position.z = nz; }
       }
-      if (!isSitting) camera.position.y = 2.5;
+      // Szemmagasság az aktuális emelet padlójához igazítva — kivéve liftezés közben,
+      // amikor az updateLift() viszi a kamerát a kabinnal együtt.
+      if (!isSitting && !(lift.riding && lift.state === 'moving')) camera.position.y = curFloorY() + 2.5;
 
       // Info panel
       var panel = uiCache.panel;
@@ -1773,37 +2097,53 @@
       wl.textContent = getWing(camera.position.x, camera.position.z);
       wl.classList.add('visible');
 
-      // Minimap
+      // Minimap (emelet-tudatos: a földszinten a kereszt, emeleten a 20x20 terem nagyítva)
       var mc = uiCache.mini;
       if (mc.style.display !== 'none') {
         var w = mc.clientWidth, h = mc.clientHeight;
         if (mc.width !== w || mc.height !== h) { mc.width = w; mc.height = h; } // csak méretváltáskor, ne minden frame-ben
         var mx = mc.getContext('2d');
         mx.fillStyle = '#f0e8d8'; mx.fillRect(0, 0, w, h);
-        var s = w / 160, ox = w / 2, oy = h / 2;
+        var mFi = nearestFloorIdx(camera.position.y), mFy = FLOORS[mFi];
+        var s = (mFi === 0 ? w / 160 : w / 44), ox = w / 2, oy = h / 2;
         mx.fillStyle = '#e0d8c8';
-        // Draw wing shapes
-        mx.fillRect(ox - 10 * s, oy - 70 * s, 20 * s, 60 * s); // North
-        mx.fillRect(ox + 10 * s, oy - 10 * s, 60 * s, 20 * s); // East
-        mx.fillRect(ox - 70 * s, oy - 10 * s, 60 * s, 20 * s); // West
-        mx.fillRect(ox - 10 * s, oy - 10 * s, 20 * s, 20 * s); // Hub
+        if (mFi === 0) {
+          // Draw wing shapes
+          mx.fillRect(ox - 10 * s, oy - 70 * s, 20 * s, 60 * s); // North
+          mx.fillRect(ox + 10 * s, oy - 10 * s, 60 * s, 20 * s); // East
+          mx.fillRect(ox - 70 * s, oy - 10 * s, 60 * s, 20 * s); // West
+          mx.fillRect(ox - 10 * s, oy - 10 * s, 20 * s, 20 * s); // Hub
 
-        mx.fillRect(ox - 10 * s, oy + 10 * s, 20 * s, 60 * s); // South
-        mx.strokeRect(ox - 10 * s, oy + 10 * s, 20 * s, 60 * s);
+          mx.fillRect(ox - 10 * s, oy + 10 * s, 20 * s, 60 * s); // South
+          mx.strokeRect(ox - 10 * s, oy + 10 * s, 20 * s, 60 * s);
 
-        mx.strokeStyle = '#aa9060'; mx.lineWidth = 1;
-        mx.strokeRect(ox - 10 * s, oy - 70 * s, 20 * s, 60 * s);
-        mx.strokeRect(ox + 10 * s, oy - 10 * s, 60 * s, 20 * s);
-        mx.strokeRect(ox - 70 * s, oy - 10 * s, 60 * s, 20 * s);
-        mx.strokeRect(ox - 10 * s, oy - 10 * s, 20 * s, 20 * s);
-        // Paintings
+          mx.strokeStyle = '#aa9060'; mx.lineWidth = 1;
+          mx.strokeRect(ox - 10 * s, oy - 70 * s, 20 * s, 60 * s);
+          mx.strokeRect(ox + 10 * s, oy - 10 * s, 60 * s, 20 * s);
+          mx.strokeRect(ox - 70 * s, oy - 10 * s, 60 * s, 20 * s);
+          mx.strokeRect(ox - 10 * s, oy - 10 * s, 20 * s, 20 * s);
+        } else {
+          mx.fillRect(ox - 10 * s, oy - 10 * s, 20 * s, 20 * s);
+          mx.strokeStyle = '#aa9060'; mx.lineWidth = 1;
+          mx.strokeRect(ox - 10 * s, oy - 10 * s, 20 * s, 20 * s);
+        }
+        // Lift (arany négyzet az ÉK-i sarokban)
+        mx.fillStyle = '#c7a23a';
+        mx.fillRect(ox + 5.8 * s, oy - 9.2 * s, 3.4 * s, 3.4 * s);
+        // Paintings — csak az aktuális szint műtárgyai
         mx.fillStyle = '#cc8822';
-        for (var i = 0; i < artMeshes.length; i++) { mx.fillRect(ox + artMeshes[i].position.x * s - 1, oy + artMeshes[i].position.z * s - 1, 2, 2); }
+        for (var i = 0; i < artMeshes.length; i++) {
+          if (Math.abs(artMeshes[i].position.y - mFy) > 6.5) continue;
+          mx.fillRect(ox + artMeshes[i].position.x * s - 1, oy + artMeshes[i].position.z * s - 1, 2, 2);
+        }
         // Player
         var px = ox + camera.position.x * s, pz = oy + camera.position.z * s;
         mx.fillStyle = '#dd3333'; mx.beginPath(); mx.arc(px, pz, 2.5, 0, Math.PI * 2); mx.fill();
         mx.strokeStyle = '#dd5555'; mx.lineWidth = 1; mx.beginPath(); mx.moveTo(px, pz);
         mx.lineTo(px + Math.sin(yaw) * -5, pz + Math.cos(yaw) * -5); mx.stroke();
+        // Szint-címke
+        mx.fillStyle = '#5a4630'; mx.font = 'bold 9px monospace'; mx.textAlign = 'left'; mx.textBaseline = 'top';
+        mx.fillText(t(mFi === 0 ? 'mmF0' : mFi === 1 ? 'mmF1' : 'mmF2'), 3, 3);
       }
 
       renderer.render(scene, camera);
@@ -1835,6 +2175,21 @@
       // Az autoplay-policy miatt a friss AudioContext "suspended" lehet (főleg iOS Safari) —
       // user-gesztusból (Start gomb) hívva fel kell oldani, különben néma marad.
       if (actx.state === 'suspended' && actx.resume) actx.resume();
+    }
+
+    function playDing() {
+      // Lift-érkezés "ding-dong" (a pGain-en át megy → némításkor ez is elhallgat)
+      if (!actx) return;
+      var tN = actx.currentTime;
+      [880, 659.25].forEach(function (fq, k) {
+        var o = actx.createOscillator(), gn = actx.createGain();
+        o.type = 'sine'; o.frequency.setValueAtTime(fq, tN + k * 0.18);
+        gn.gain.setValueAtTime(0.0001, tN + k * 0.18);
+        gn.gain.exponentialRampToValueAtTime(0.5, tN + k * 0.18 + 0.02);
+        gn.gain.exponentialRampToValueAtTime(0.001, tN + k * 0.18 + 0.8);
+        o.connect(gn); gn.connect(pGain);
+        o.start(tN + k * 0.18); o.stop(tN + k * 0.18 + 0.85);
+      });
     }
 
     function playStep() {
@@ -2103,8 +2458,19 @@
         pt = rayPointer;
       }
       raycaster.setFromCamera(pt, camera);
+      // Lift: a hívógombok / kabin-belső gombok elsőbbséget élveznek a műtárgyakkal szemben
+      if (liftClickables.length) {
+        var lhits = raycaster.intersectObjects(liftClickables, true);
+        if (lhits.length && lhits[0].distance < 5) {
+          var lo = lhits[0].object;
+          if (lo.userData.liftCall !== undefined) { callLift(lo.userData.liftCall); return; }
+          if (lo.userData.liftGo !== undefined) { goLift(lo.userData.liftGo); return; }
+          return; // a kabin testére / ajtóra kattintás ne "essen át" mögöttes műtárgyra
+        }
+      }
       var intersects = raycaster.intersectObjects(artMeshes, true);
       if (intersects.length > 0) {
+        if (intersects[0].distance > 12) return; // túl távoli (pl. födémen átnyúló) találat nem kattintható
         var obj = intersects[0].object;
         while (obj.parent && (obj.userData.isBench === undefined && obj.userData.name === undefined)) {
           obj = obj.parent;
