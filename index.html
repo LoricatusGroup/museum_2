@@ -1776,15 +1776,15 @@
       return (q && q.length) ? q.shift() : null;
     }
 
-    // A textúrát "cover" módon igazítjuk a kerethez: kitölti, a fölösleget levágja
-    // (így a különböző képarányú céges fotók sem torzulnak el).
-    function coverFit(tx, imgAspect, frameAspect) {
-      if (!isFinite(imgAspect) || imgAspect <= 0) return;
-      if (imgAspect > frameAspect) {
-        tx.repeat.x = frameAspect / imgAspect; tx.offset.x = (1 - tx.repeat.x) / 2;
-      } else {
-        tx.repeat.y = imgAspect / frameAspect; tx.offset.y = (1 - tx.repeat.y) / 2;
-      }
+    // A keret a média VALÓDI képarányához igazodik: a tartalom egy megengedett
+    // maximális dobozba illeszkedik, arány tartásával. Így se torzítás, se levágás
+    // nincs — céges fotón/videón a szélső felirat sem sérül.
+    var MEDIA_MAXW = 3.6, MEDIA_MAXH = 2.4;
+    function fitBox(aspect) {
+      if (!isFinite(aspect) || aspect <= 0) aspect = 16 / 9;
+      var w = MEDIA_MAXW, h = MEDIA_MAXW / aspect;
+      if (h > MEDIA_MAXH) { h = MEDIA_MAXH; w = MEDIA_MAXH * aspect; }
+      return { w: w, h: h };
     }
 
     // Nyelvfüggő cím/leírás: a dinamikus tárgyaknál a saját fordítás nyer,
@@ -1822,30 +1822,51 @@
 
     // Egy céges kép/videó falikeretbe helyezése
     function buildMediaFrame(sp, fy, item, frameMat, innerMat, plaqueMat, poleGeoms, ropeGeoms) {
-      var aH = 2.2, aW = 3.35, fp = 0.15;  // szélesvásznú keret (fotó/videó)
+      var fp = 0.15, iw = 0.04;
+      var box = fitBox(16 / 9);            // kiinduló becslés, amíg a valódi méret meg nem jön
+      var aW = box.w, aH = box.h;
       var group = new THREE.Group();
 
-      var t = new THREE.Mesh(new THREE.BoxGeometry(aW + fp * 2, fp, 0.08), frameMat); t.position.y = aH / 2 + fp / 2; group.add(t);
-      var b = new THREE.Mesh(new THREE.BoxGeometry(aW + fp * 2, fp, 0.08), frameMat); b.position.y = -aH / 2 - fp / 2; group.add(b);
-      var l = new THREE.Mesh(new THREE.BoxGeometry(fp, aH + fp * 2, 0.08), frameMat); l.position.x = -aW / 2 - fp / 2; group.add(l);
-      var r = new THREE.Mesh(new THREE.BoxGeometry(fp, aH + fp * 2, 0.08), frameMat); r.position.x = aW / 2 + fp / 2; group.add(r);
-      var iw = 0.04;
-      var it = new THREE.Mesh(new THREE.BoxGeometry(aW, iw, 0.09), innerMat); it.position.y = aH / 2; group.add(it);
-      var ib = new THREE.Mesh(new THREE.BoxGeometry(aW, iw, 0.09), innerMat); ib.position.y = -aH / 2; group.add(ib);
+      var t = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), frameMat); group.add(t);
+      var b = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), frameMat); group.add(b);
+      var l = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), frameMat); group.add(l);
+      var r = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), frameMat); group.add(r);
+      var it = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), innerMat); group.add(it);
+      var ib = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), innerMat); group.add(ib);
 
       // A vászon: amíg tölt, sötét lap áll benne (nem villan fehéret)
       var pt = new THREE.Mesh(
-        new THREE.PlaneGeometry(aW, aH),
+        new THREE.PlaneGeometry(1, 1),
         new THREE.MeshBasicMaterial({ color: 0x14110c })
       );
       pt.position.z = 0.01; group.add(pt);
+
+      function swapGeom(mesh, g) { if (mesh.geometry) mesh.geometry.dispose(); mesh.geometry = g; }
+
+      // A keret újraépítése a tartalom képarányához
+      function applyAspect(aspect) {
+        var f = fitBox(aspect);
+        aW = f.w; aH = f.h;
+        swapGeom(t, new THREE.BoxGeometry(aW + fp * 2, fp, 0.08)); t.position.set(0, aH / 2 + fp / 2, 0);
+        swapGeom(b, new THREE.BoxGeometry(aW + fp * 2, fp, 0.08)); b.position.set(0, -aH / 2 - fp / 2, 0);
+        swapGeom(l, new THREE.BoxGeometry(fp, aH + fp * 2, 0.08)); l.position.set(-aW / 2 - fp / 2, 0, 0);
+        swapGeom(r, new THREE.BoxGeometry(fp, aH + fp * 2, 0.08)); r.position.set(aW / 2 + fp / 2, 0, 0);
+        swapGeom(it, new THREE.BoxGeometry(aW, iw, 0.09)); it.position.set(0, aH / 2, 0);
+        swapGeom(ib, new THREE.BoxGeometry(aW, iw, 0.09)); ib.position.set(0, -aH / 2, 0);
+        swapGeom(pt, new THREE.PlaneGeometry(aW, aH));
+      }
+      applyAspect(16 / 9);
 
       if (item.kind === 'video') {
         // Némán, ciklusban megy a falon; a hang a nagy nézetben kapcsol be.
         var vd = document.createElement('video');
         vd.crossOrigin = 'anonymous';
-        vd.loop = true; vd.muted = true; vd.playsInline = true; vd.preload = 'none';
+        vd.loop = true; vd.muted = true; vd.playsInline = true; vd.preload = 'metadata';
         vd.setAttribute('playsinline', ''); vd.setAttribute('muted', '');
+        // A valódi képarány a metaadatokból derül ki — akkor igazítjuk a keretet.
+        vd.addEventListener('loadedmetadata', function () {
+          if (vd.videoWidth && vd.videoHeight) applyAspect(vd.videoWidth / vd.videoHeight);
+        });
         vd.src = item.public_url;
         var vt = new THREE.VideoTexture(vd);
         vt.minFilter = THREE.LinearFilter; vt.magFilter = THREE.LinearFilter;
@@ -1856,7 +1877,7 @@
         tl.setCrossOrigin('anonymous');
         tl.load(item.public_url, function (tx) {
           var im = tx.image;
-          coverFit(tx, (im && im.width && im.height) ? im.width / im.height : 1, aW / aH);
+          if (im && im.width && im.height) applyAspect(im.width / im.height);
           tx.needsUpdate = true;
           pt.material = new THREE.MeshStandardMaterial({ map: tx, roughness: 0.85 });
         }, undefined, function () {
