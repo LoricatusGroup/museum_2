@@ -111,7 +111,18 @@ Az angol/olasz fordítások nem kötelezők; ha üresen maradnak, a magyar szöv
 |---|---|
 | Drive-ról automatikus átmásolás | **100 MB** / fájl (efölött közvetlen feltöltés) |
 | Közvetlen feltöltés | **500 MB** / fájl |
-| Támogatott formátum | JPEG, PNG, WebP, GIF, AVIF · MP4, WebM, MOV · GLB, glTF |
+| Támogatott formátum | JPEG, PNG, WebP, GIF, AVIF · MP4, WebM, MOV · **GLB, glTF** |
+
+### 3D: csak GLB / glTF
+
+A böngésző (three.js) **nem tud** `.fbx`, `.obj`, `.dae`, `.blend`, `.stl` fájlt betölteni —
+ezeket előbb **GLB-be kell exportálni**. Blenderben: *File → Import* (FBX/OBJ),
+majd *File → Export → glTF 2.0 (.glb)*, „Format: glTF Binary”. A GLB a geometriát és a
+textúrákat **egyetlen fájlba** csomagolja, ezért a `.mtl` és a külön textúra-JPG-k
+(`*_occlusion.jpg`, `*_normal.jpg`, …) nem kellenek — azokat ne is hozd be, mert
+képként kikerülnének a falra.
+
+A Drive mappa listája kiírja, ha egy fájlt nem tud fogadni, és azt is, hogy miért.
 
 A videók a falon **némán, ciklusban** futnak, és csak akkor indulnak el, ha a látogató 22 egységnél
 közelebb van — így egyszerre sosem dekódol sokat a gép. A hang a nagy nézetben kapcsol be

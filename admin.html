@@ -17,7 +17,6 @@
       --shadow: 0 8px 28px rgba(0,0,0,.45);
     }
     * { box-sizing: border-box; }
-    html, body { height: 100%; }
     body {
       margin: 0; background: var(--bg); color: var(--text); line-height: 1.55;
       font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -26,31 +25,36 @@
     h1,h2,h3 { margin: 0; font-weight: 650; letter-spacing: -.01em; }
     button { font: inherit; cursor: pointer; }
     button:disabled { opacity: .45; cursor: not-allowed; }
+    svg { display: block; flex: none; }
     input, select, textarea {
-      font: inherit; width: 100%; padding: .58em .7em; color: var(--text);
+      font: inherit; width: 100%; padding: .55em .7em; color: var(--text);
       background: #100e0c; border: 1px solid var(--line); border-radius: var(--r-sm);
       transition: border-color .15s, box-shadow .15s;
     }
     input:focus, select:focus, textarea:focus {
       outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-glow);
     }
+    input[type=checkbox] { width: auto; accent-color: var(--gold); cursor: pointer; }
     label { display: block; font-size: .78rem; color: var(--muted); margin-bottom: .3em; font-weight: 500; }
     .field { margin-bottom: .85rem; }
     .row { display: flex; gap: .8rem; flex-wrap: wrap; }
     .row > * { flex: 1 1 140px; }
     .hint { font-size: .76rem; color: var(--faint); margin-top: .35em; line-height: 1.45; }
+    .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 
     .btn {
-      display: inline-flex; align-items: center; gap: .45em; justify-content: center;
-      padding: .55em .95em; border-radius: var(--r-sm); border: 1px solid var(--line);
+      display: inline-flex; align-items: center; gap: .4em; justify-content: center;
+      padding: .5em .85em; border-radius: var(--r-sm); border: 1px solid var(--line);
       background: var(--panel-2); color: var(--text); transition: .15s; white-space: nowrap;
     }
     .btn:hover:not(:disabled) { border-color: var(--gold-dim); background: #332c23; }
     .btn.primary { background: var(--gold); border-color: var(--gold); color: #1a1408; font-weight: 650; }
     .btn.primary:hover:not(:disabled) { filter: brightness(1.08); }
     .btn.ghost { background: transparent; }
-    .btn.danger:hover:not(:disabled) { border-color: var(--err); color: #ffb0a6; }
-    .btn.sm { padding: .35em .65em; font-size: .82rem; }
+    .btn.sm { padding: .34em .6em; font-size: .82rem; }
+    .btn.ico { padding: .4em; }
+    .btn.ico:hover:not(:disabled) { color: var(--gold); }
+    .btn.ico.danger:hover:not(:disabled) { color: #ffb0a6; border-color: var(--err); }
 
     /* ───── Bejelentkezés ───── */
     #login-view { display: grid; place-items: center; min-height: 100vh; padding: 1.5rem; }
@@ -58,100 +62,156 @@
       width: 100%; max-width: 380px; background: var(--panel); padding: 2rem;
       border: 1px solid var(--line); border-radius: var(--r); box-shadow: var(--shadow);
     }
-    .brand { display: flex; align-items: center; gap: .6rem; margin-bottom: .4rem; }
+    .brand { display: flex; align-items: center; gap: .6rem; }
     .brand-mark {
       width: 34px; height: 34px; border-radius: 9px; display: grid; place-items: center;
-      background: linear-gradient(140deg, var(--gold), #8d6f2c); color: #191204; font-size: 1.05rem;
+      background: linear-gradient(140deg, var(--gold), #8d6f2c); color: #191204; flex: none;
     }
     .brand h1 { font-size: 1.05rem; }
-    .brand small { display: block; color: var(--muted); font-size: .74rem; font-weight: 400; letter-spacing: .02em; }
+    .brand small { display: block; color: var(--muted); font-size: .72rem; letter-spacing: .06em; }
 
     /* ───── Váz ───── */
     #app-view { display: none; min-height: 100vh; flex-direction: column; }
     .topbar {
-      display: flex; align-items: center; gap: 1rem; padding: .7rem 1.1rem;
-      background: var(--bg-soft); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 20;
+      display: flex; align-items: center; gap: .6rem; padding: .65rem 1.1rem;
+      background: var(--bg-soft); border-bottom: 1px solid var(--line);
+      position: sticky; top: 0; z-index: 30;
     }
     .topbar .spacer { flex: 1; }
     .who { font-size: .8rem; color: var(--muted); }
-    @media (max-width: 640px) { .who { display: none; } }
+    @media (max-width: 780px) { .who, .btn .lbl { display: none; } }
 
-    .tabs { display: flex; gap: .25rem; padding: 0 1.1rem; background: var(--bg-soft); border-bottom: 1px solid var(--line); }
+    .tabs { display: flex; gap: .2rem; padding: 0 1.1rem; background: var(--bg-soft); border-bottom: 1px solid var(--line); position: sticky; top: 51px; z-index: 25; }
     .tab {
-      padding: .7em 1em; background: none; border: none; color: var(--muted);
+      display: flex; align-items: center; gap: .45em;
+      padding: .65em .9em; background: none; border: none; color: var(--muted);
       border-bottom: 2px solid transparent; margin-bottom: -1px; font-weight: 550;
     }
     .tab:hover { color: var(--text); }
     .tab[aria-selected="true"] { color: var(--gold); border-bottom-color: var(--gold); }
 
-    main { flex: 1; padding: 1.2rem; max-width: 1240px; width: 100%; margin: 0 auto; }
+    main { flex: 1; padding: 1.1rem; max-width: 1280px; width: 100%; margin: 0 auto; }
     .view { display: none; }
     .view.active { display: block; }
-    .bar { display: flex; align-items: center; gap: .7rem; margin-bottom: 1rem; flex-wrap: wrap; }
-    .bar h2 { font-size: 1rem; }
-    .count { font-size: .8rem; color: var(--faint); }
 
-    /* ───── Kártyák ───── */
-    .grid { display: grid; gap: .8rem; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); }
+    /* ───── Eszköztár ───── */
+    .toolbar { display: flex; align-items: center; gap: .6rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .search { position: relative; flex: 1 1 220px; max-width: 340px; }
+    .search svg { position: absolute; left: .6rem; top: 50%; transform: translateY(-50%); color: var(--faint); }
+    .search input { padding-left: 2.1rem; }
+    .chips { display: flex; gap: .3rem; flex-wrap: wrap; }
+    .chip {
+      padding: .34em .75em; border-radius: 99px; border: 1px solid var(--line);
+      background: transparent; color: var(--muted); font-size: .84rem; transition: .15s;
+    }
+    .chip:hover { color: var(--text); border-color: var(--gold-dim); }
+    .chip[aria-pressed="true"] { background: var(--gold-glow); border-color: var(--gold); color: var(--gold); }
+    .chip .n { opacity: .6; margin-left: .25em; font-variant-numeric: tabular-nums; }
+
+    /* ───── Szint-szekciók ───── */
+    .floor { margin-bottom: 1.5rem; }
+    .floor-head {
+      display: flex; align-items: center; gap: .55rem; margin-bottom: .6rem;
+      padding-bottom: .4rem; border-bottom: 1px solid var(--line-soft);
+    }
+    .floor-head h3 { font-size: .9rem; letter-spacing: .01em; }
+    .floor-head .n { font-size: .8rem; color: var(--faint); font-variant-numeric: tabular-nums; }
+    .floor-body {
+      display: grid; gap: .8rem; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+      min-height: 88px; border-radius: var(--r); transition: background .15s, outline-color .15s;
+      outline: 2px dashed transparent; outline-offset: 4px;
+    }
+    .floor-body.drop-in { outline-color: var(--gold); background: rgba(212,168,67,.05); }
+    .floor-empty {
+      grid-column: 1/-1; display: grid; place-items: center; color: var(--faint);
+      font-size: .85rem; border: 1px dashed var(--line); border-radius: var(--r); padding: 1.2rem;
+    }
+
+    /* ───── Kártya ───── */
     .card {
       background: var(--panel); border: 1px solid var(--line); border-radius: var(--r);
-      overflow: hidden; display: flex; flex-direction: column; transition: .18s;
+      overflow: hidden; display: flex; flex-direction: column; transition: .16s;
     }
-    .card:hover { border-color: var(--gold-dim); transform: translateY(-2px); box-shadow: var(--shadow); }
-    .card.dragging { opacity: .4; }
-    .card.drop-target { border-color: var(--gold); border-style: dashed; }
+    .card:hover { border-color: var(--gold-dim); }
+    .card.sel { border-color: var(--gold); box-shadow: 0 0 0 2px var(--gold-glow); }
+    .card.dragging { opacity: .35; }
+    .card.drop-before { box-shadow: -3px 0 0 var(--gold); }
     .thumb {
-      position: relative; aspect-ratio: 16/9; background: #0c0a08;
+      position: relative; aspect-ratio: 16/10; background: #0c0a08;
       display: grid; place-items: center; overflow: hidden; border-bottom: 1px solid var(--line-soft);
     }
     .thumb img, .thumb video { width: 100%; height: 100%; object-fit: cover; }
-    .thumb .ico { font-size: 2.2rem; opacity: .5; }
-    .thumb .kind {
-      position: absolute; left: .5rem; top: .5rem; font-size: .68rem; padding: .18em .5em;
-      background: rgba(0,0,0,.72); border-radius: 99px; letter-spacing: .03em;
+    .thumb .ph { color: var(--faint); opacity: .55; }
+    .ovl {
+      position: absolute; display: flex; align-items: center; gap: .3em;
+      background: rgba(12,10,8,.78); border-radius: 6px; padding: .22em .45em;
+      font-size: .7rem; backdrop-filter: blur(3px);
     }
-    .drag-handle {
-      position: absolute; right: .4rem; top: .4rem; cursor: grab; font-size: .95rem;
-      background: rgba(0,0,0,.6); border-radius: 6px; padding: .1em .4em; color: var(--muted);
+    .ovl.tl { left: .45rem; top: .45rem; padding: .3em; }
+    .ovl.bl { left: .45rem; bottom: .45rem; color: var(--text); }
+    .ovl.tr { right: .45rem; top: .45rem; cursor: grab; color: var(--muted); padding: .3em; }
+    .ovl.tr:active { cursor: grabbing; }
+
+    .card-body { padding: .65rem .75rem; flex: 1; display: flex; flex-direction: column; gap: .3rem; }
+    .card-body b { font-size: .93rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .meta { font-size: .77rem; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .card-foot {
+      display: flex; gap: .3rem; align-items: center;
+      padding: .5rem .6rem; border-top: 1px solid var(--line-soft);
     }
-    .card-body { padding: .7rem .8rem; flex: 1; display: flex; flex-direction: column; gap: .35rem; }
-    .card-body b { font-size: .95rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .meta { font-size: .78rem; color: var(--muted); }
-    .card-foot { display: flex; gap: .3rem; padding: .55rem .8rem; border-top: 1px solid var(--line-soft); flex-wrap: wrap; }
+    .card-foot .grow { flex: 1; }
 
     .badge {
       display: inline-flex; align-items: center; gap: .3em; font-size: .7rem;
-      padding: .16em .55em; border-radius: 99px; border: 1px solid currentColor; margin-right: .3em;
+      padding: .14em .5em; border-radius: 99px; border: 1px solid currentColor;
     }
     .b-ready{color:var(--ok)} .b-pending{color:var(--warn)} .b-processing{color:var(--busy)}
     .b-error{color:var(--err)} .b-live{color:var(--gold)} .b-draft{color:var(--faint)}
-    .err-line { font-size: .75rem; color: #f0a79e; background: #2a1613; padding: .4em .55em; border-radius: 6px; }
+    .badges { display: flex; gap: .3rem; flex-wrap: wrap; }
 
-    /* ───── Dropzone ───── */
-    .dropzone {
-      border: 2px dashed var(--line); border-radius: var(--r); padding: 1.6rem 1rem; text-align: center;
-      color: var(--muted); transition: .18s; background: var(--bg-soft); cursor: pointer;
+    .errbox { background: #2a1613; border-radius: 6px; padding: .4em .5em; }
+    .errbox summary { color: #f0a79e; font-size: .76rem; cursor: pointer; list-style: none; display: flex; align-items: center; gap: .35em; }
+    .errbox summary::-webkit-details-marker { display: none; }
+    .errbox p { margin: .45em 0 0; font-size: .74rem; color: #e5b0a8; line-height: 1.45; word-break: break-word; }
+
+    /* ───── Tömeges sáv ───── */
+    #bulk {
+      position: fixed; left: 50%; bottom: 1.1rem; transform: translateX(-50%) translateY(140%);
+      display: flex; align-items: center; gap: .5rem; z-index: 50;
+      background: var(--panel); border: 1px solid var(--gold-dim); border-radius: 99px;
+      padding: .5rem .7rem .5rem 1rem; box-shadow: var(--shadow); transition: transform .22s;
     }
-    .dropzone:hover, .dropzone.over { border-color: var(--gold); background: #211c14; color: var(--text); }
-    .dropzone .big { font-size: 1.6rem; display: block; margin-bottom: .3rem; }
+    #bulk.show { transform: translateX(-50%) translateY(0); }
+    #bulk .cnt { font-size: .85rem; color: var(--gold); font-weight: 600; white-space: nowrap; }
+
+    /* ───── Feltöltés ───── */
+    #drop-overlay {
+      position: fixed; inset: 0; z-index: 90; display: none; place-items: center;
+      background: rgba(12,10,8,.86); backdrop-filter: blur(3px);
+      border: 3px dashed var(--gold); color: var(--gold); font-size: 1.15rem; font-weight: 600;
+    }
+    #drop-overlay.show { display: grid; }
 
     /* ───── Drive böngésző ───── */
-    .crumbs { display: flex; align-items: center; gap: .35rem; flex-wrap: wrap; font-size: .85rem; margin-bottom: .8rem; }
+    .crumbs { display: flex; align-items: center; gap: .3rem; flex-wrap: wrap; font-size: .85rem; margin-bottom: .7rem; color: var(--faint); }
     .crumbs button { background: none; border: none; color: var(--gold); padding: .1em .2em; }
-    .crumbs span { color: var(--faint); }
     .flist { border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
     .frow {
-      display: flex; align-items: center; gap: .75rem; padding: .6rem .85rem;
+      display: flex; align-items: center; gap: .7rem; padding: .58rem .8rem;
       border-bottom: 1px solid var(--line-soft); background: var(--panel);
     }
     .frow:last-child { border-bottom: none; }
     .frow:hover { background: var(--panel-2); }
-    .frow .ico { width: 1.6rem; text-align: center; font-size: 1.15rem; flex: none; }
     .frow .nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .frow .sz { font-size: .78rem; color: var(--faint); flex: none; }
-    .frow input[type=checkbox] { width: auto; flex: none; accent-color: var(--gold); }
+    .frow .sz { font-size: .77rem; color: var(--faint); flex: none; white-space: nowrap; }
     .frow.folder { cursor: pointer; }
-    .frow.done { opacity: .55; }
+    .frow.done { opacity: .5; }
+    .frow .ck { width: 1.15rem; display: grid; place-items: center; flex: none; }
+    .frow.skip { background: #1c1714; }
+    .frow.skip .nm { color: var(--faint); text-decoration: line-through; text-decoration-color: var(--line); }
+    .frow .why { font-size: .75rem; color: var(--warn); flex: none; max-width: 46%; text-align: right; line-height: 1.35; }
+    .tex-tag { font-size: .68rem; color: var(--warn); border: 1px solid currentColor; border-radius: 99px; padding: .05em .45em; margin-left: .4em; }
+    .grp-label { padding: .5rem .8rem; font-size: .76rem; color: var(--faint); background: var(--bg-soft); border-bottom: 1px solid var(--line-soft); }
 
     /* ───── Modal ───── */
     .modal-bg {
@@ -166,13 +226,13 @@
     }
     .modal h3 { margin-bottom: .9rem; font-size: 1.05rem; }
     .modal-foot { display: flex; gap: .5rem; justify-content: flex-end; margin-top: 1rem; }
-    details summary { cursor: pointer; color: var(--muted); font-size: .82rem; padding: .35em 0; }
+    details.more summary { cursor: pointer; color: var(--muted); font-size: .82rem; padding: .35em 0; }
 
     /* ───── Toast ───── */
     #toasts { position: fixed; right: 1rem; bottom: 1rem; z-index: 80; display: flex; flex-direction: column; gap: .5rem; max-width: 380px; }
     .toast {
       background: var(--panel); border: 1px solid var(--line); border-left-width: 3px;
-      border-radius: var(--r-sm); padding: .7rem .9rem; font-size: .87rem; box-shadow: var(--shadow);
+      border-radius: var(--r-sm); padding: .65rem .85rem; font-size: .86rem; box-shadow: var(--shadow);
       animation: slide .22s ease-out; white-space: pre-wrap;
     }
     .toast.ok { border-left-color: var(--ok); }
@@ -180,9 +240,9 @@
     .toast.info { border-left-color: var(--busy); }
     @keyframes slide { from { transform: translateX(14px); opacity: 0; } }
 
-    .empty { text-align: center; color: var(--faint); padding: 3rem 1rem; }
-    .empty .big { font-size: 2.4rem; display: block; margin-bottom: .5rem; opacity: .5; }
-    .progress { height: 4px; background: var(--line); border-radius: 99px; overflow: hidden; margin-top: .6rem; }
+    .empty { text-align: center; color: var(--faint); padding: 2.6rem 1rem; }
+    .empty .ic { display: grid; place-items: center; margin-bottom: .6rem; opacity: .45; }
+    .progress { height: 4px; background: var(--line); border-radius: 99px; overflow: hidden; }
     .progress i { display: block; height: 100%; background: var(--gold); width: 0; transition: width .25s; }
   </style>
 </head>
@@ -191,8 +251,8 @@
   <!-- ══════════ BEJELENTKEZÉS ══════════ -->
   <div id="login-view">
     <div class="login-card">
-      <div class="brand">
-        <div class="brand-mark">◈</div>
+      <div class="brand" style="margin-bottom:.5rem">
+        <div class="brand-mark" id="brand-1"></div>
         <div><h1>Múzeum</h1><small>ADMIN FELÜLET</small></div>
       </div>
       <p style="color:var(--muted);font-size:.87rem;margin:.2rem 0 1.2rem">
@@ -217,48 +277,49 @@
   <div id="app-view">
     <div class="topbar">
       <div class="brand">
-        <div class="brand-mark">◈</div>
+        <div class="brand-mark" id="brand-2"></div>
         <div><h1>Múzeum</h1><small>ADMIN</small></div>
       </div>
       <div class="spacer"></div>
       <span class="who" id="who"></span>
-      <button class="btn sm ghost" id="selftest-btn" title="Google Drive kapcsolat ellenőrzése">Kapcsolat</button>
-      <a href="index.html" target="_blank" rel="noopener"><button class="btn sm ghost">Múzeum ↗</button></a>
-      <button class="btn sm ghost" id="logout-btn">Kilépés</button>
+      <button class="btn sm ghost" id="selftest-btn" title="Google Drive kapcsolat ellenőrzése">
+        <span id="ic-plug"></span><span class="lbl">Kapcsolat</span>
+      </button>
+      <a href="index.html" target="_blank" rel="noopener">
+        <button class="btn sm ghost" title="Múzeum megnyitása"><span id="ic-ext"></span><span class="lbl">Múzeum</span></button>
+      </a>
+      <button class="btn sm ghost" id="logout-btn" title="Kilépés"><span id="ic-out"></span><span class="lbl">Kilépés</span></button>
     </div>
 
     <div class="tabs" role="tablist">
-      <button class="tab" id="tab-items" role="tab" aria-selected="true">Kiállítás</button>
-      <button class="tab" id="tab-drive" role="tab" aria-selected="false">Drive mappa</button>
+      <button class="tab" id="tab-items" role="tab" aria-selected="true"><span id="ic-t1"></span>Kiállítás</button>
+      <button class="tab" id="tab-drive" role="tab" aria-selected="false"><span id="ic-t2"></span>Drive mappa</button>
     </div>
 
     <main>
       <!-- ── Kiállítás ── -->
       <section class="view active" id="view-items">
-        <div class="bar">
-          <h2>Kiállítási tárgyak</h2>
-          <span class="count" id="count"></span>
-          <div class="spacer" style="flex:1"></div>
-          <button class="btn sm ghost" id="refresh-btn">Frissítés</button>
-          <button class="btn primary sm" id="new-btn">+ Új tárgy</button>
-        </div>
-
-        <div class="dropzone" id="dropzone" style="margin-bottom:1rem">
-          <span class="big">⬆</span>
-          <b>Húzd ide a fájlokat</b>
-          <div class="hint" style="margin-top:.2rem">kép · videó · .glb — vagy kattints a tallózáshoz</div>
+        <div class="toolbar">
+          <div class="search">
+            <span id="ic-search"></span>
+            <input id="q" type="search" placeholder="Keresés cím vagy szerző szerint…" aria-label="Keresés">
+          </div>
+          <div class="chips" id="filters"></div>
+          <div style="flex:1"></div>
+          <button class="btn sm ghost" id="refresh-btn" title="Frissítés"><span id="ic-ref"></span><span class="lbl">Frissítés</span></button>
+          <button class="btn sm" id="upload-btn"><span id="ic-up"></span>Feltöltés</button>
+          <button class="btn primary sm" id="new-btn"><span id="ic-plus"></span>Új tárgy</button>
           <input type="file" id="dropfile" multiple accept="image/*,video/*,.glb,.gltf" hidden>
         </div>
-
         <div id="list"><div class="empty">Betöltés…</div></div>
       </section>
 
       <!-- ── Drive mappa ── -->
       <section class="view" id="view-drive">
-        <div class="bar">
-          <h2>Drive mappa</h2>
-          <div class="spacer" style="flex:1"></div>
-          <button class="btn sm ghost" id="drive-reload">Frissítés</button>
+        <div class="toolbar">
+          <h2 style="font-size:1rem">Drive mappa</h2>
+          <div style="flex:1"></div>
+          <button class="btn sm ghost" id="drive-reload"><span id="ic-ref2"></span><span class="lbl">Frissítés</span></button>
         </div>
 
         <div class="field" style="max-width:640px">
@@ -268,36 +329,45 @@
             <button class="btn" id="folder-save">Mentés</button>
           </div>
           <div class="hint">
-            A mappát meg kell osztani a service accounttal (Olvasó jog). A címét a fenti
-            <b>Kapcsolat</b> gomb írja ki. A beállítás közös — a kollégáknak nem kell újra megadniuk.
+            A mappát meg kell osztani a service accounttal (Olvasó jog) — a címét a
+            <b>Kapcsolat</b> gomb írja ki. A beállítás közös, a kollégáknak nem kell újra megadniuk.
           </div>
         </div>
 
         <div id="crumbs" class="crumbs"></div>
-        <div id="drive-list"><div class="empty"><span class="big">🗂</span>Add meg a mappa linkjét, és listázom a tartalmát.</div></div>
+        <div id="drive-list"></div>
 
-        <div id="import-bar" style="display:none;margin-top:1rem;gap:.7rem;align-items:center" class="bar">
+        <div id="import-bar" style="display:none;align-items:center;gap:.7rem;margin-top:1rem">
           <button class="btn primary" id="import-btn">Kijelöltek behozása</button>
-          <span class="count" id="import-info"></span>
-          <div class="progress" style="flex:1;min-width:120px"><i id="import-prog"></i></div>
+          <span style="font-size:.83rem;color:var(--faint);white-space:nowrap" id="import-info"></span>
+          <div class="progress" style="flex:1;min-width:100px"><i id="import-prog"></i></div>
         </div>
       </section>
     </main>
   </div>
 
-  <!-- ══════════ Szerkesztő ablak ══════════ -->
+  <!-- Tömeges műveletek -->
+  <div id="bulk">
+    <span class="cnt" id="bulk-cnt"></span>
+    <button class="btn sm" data-bulk="show">Megjelenít</button>
+    <button class="btn sm" data-bulk="hide">Elrejt</button>
+    <button class="btn sm ico danger" data-bulk="del" title="Törlés"><span id="ic-trash2"></span></button>
+    <button class="btn sm ico ghost" data-bulk="none" title="Kijelölés törlése"><span id="ic-x"></span></button>
+  </div>
+
+  <div id="drop-overlay">Engedd el a feltöltéshez</div>
+
+  <!-- Szerkesztő -->
   <div class="modal-bg" id="modal-bg">
     <div class="modal">
       <h3 id="modal-title">Új kiállítási tárgy</h3>
       <form id="item-form">
         <input type="hidden" id="f-id">
-
         <div class="field" id="f-source-wrap">
           <label for="f-drive">Google Drive link</label>
           <input id="f-drive" type="url" placeholder="https://drive.google.com/file/d/…/view">
           <div class="hint">Egy konkrét <b>fájl</b> linkje. Mentés után átmásolom a saját tárhelyre.</div>
         </div>
-
         <div class="field">
           <label for="f-title">Cím *</label>
           <input id="f-title" required placeholder="pl. Irodaház, Budapest">
@@ -306,23 +376,17 @@
           <div class="field"><label for="f-artist">Szerző / kivitelező</label><input id="f-artist"></div>
           <div class="field"><label for="f-year">Év</label><input id="f-year" placeholder="2026"></div>
         </div>
-        <div class="field">
-          <label for="f-desc">Leírás</label>
-          <textarea id="f-desc" rows="2"></textarea>
-        </div>
+        <div class="field"><label for="f-desc">Leírás</label><textarea id="f-desc" rows="2"></textarea></div>
         <div class="row">
           <div class="field">
             <label for="f-floor">Szint</label>
             <select id="f-floor">
-              <option value="0">Földszint</option>
-              <option value="1">1. emelet</option>
-              <option value="2">2. emelet</option>
+              <option value="0">Földszint</option><option value="1">1. emelet</option><option value="2">2. emelet</option>
             </select>
           </div>
           <div class="field"><label for="f-order">Sorrend</label><input id="f-order" type="number" value="0"></div>
         </div>
-
-        <details>
+        <details class="more">
           <summary>Fordítások (angol / olasz)</summary>
           <div class="row">
             <div class="field"><label for="f-title-en">Cím (EN)</label><input id="f-title-en"></div>
@@ -333,14 +397,11 @@
             <div class="field"><label for="f-desc-it">Leírás (IT)</label><input id="f-desc-it"></div>
           </div>
         </details>
-
         <div class="field">
           <label style="display:flex;gap:.5em;align-items:center;color:var(--text)">
-            <input type="checkbox" id="f-pub" style="width:auto;accent-color:var(--gold)" checked>
-            Megjelenjen a múzeumban
+            <input type="checkbox" id="f-pub" checked> Megjelenjen a múzeumban
           </label>
         </div>
-
         <div class="modal-foot">
           <button type="button" class="btn ghost" id="modal-cancel">Mégse</button>
           <button type="submit" class="btn primary" id="modal-save">Mentés</button>
@@ -364,9 +425,9 @@
     var session = null;
     try { session = JSON.parse(localStorage.getItem(STORE) || 'null'); } catch (e) { session = null; }
 
-    var items = [];                 // kiállítási tárgyak
-    var drivePath = [];             // mappa-morzsa: [{id,name}]
-    var driveFiles = [], driveFolders = [];
+    var items = [], selected = {}, filterFloor = 'all', query = '';
+    var drivePath = [], driveFiles = [], driveFolders = [], driveSkipped = [];
+    var FLOORS = ['Földszint', '1. emelet', '2. emelet'];
 
     function el(id) { return document.getElementById(id); }
     function esc(s) {
@@ -376,6 +437,48 @@
     }
     function mb(n) { return n ? (n / 1048576).toFixed(1) + ' MB' : ''; }
 
+    // ── Ikonok: vonalas SVG (nem emoji) — skálázódik és színt vesz fel ──
+    function svg(d, size) {
+      return '<svg width="' + (size || 16) + '" height="' + (size || 16) + '" viewBox="0 0 24 24" fill="none" ' +
+        'stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' + d + '</svg>';
+    }
+    var IC = {
+      image: svg('<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 15l-5-4-4.5 4.5"/>'),
+      video: svg('<rect x="2.5" y="5" width="14" height="14" rx="2"/><path d="M16.5 10l5-3v10l-5-3z"/>'),
+      model: svg('<path d="M12 2.8l8 4.4v9.6l-8 4.4-8-4.4V7.2z"/><path d="M4 7.2l8 4.4 8-4.4M12 11.6V21"/>'),
+      folder: svg('<path d="M3 7a2 2 0 012-2h4l2 2.5h8a2 2 0 012 2V18a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>'),
+      search: svg('<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/>'),
+      upload: svg('<path d="M12 16V4M7.5 8.5L12 4l4.5 4.5"/><path d="M4 16v2.5A1.5 1.5 0 005.5 20h13a1.5 1.5 0 001.5-1.5V16"/>'),
+      plus: svg('<path d="M12 5v14M5 12h14"/>'),
+      refresh: svg('<path d="M20 11a8 8 0 10-1.8 6"/><path d="M20 5v6h-6"/>'),
+      pencil: svg('<path d="M4 20h4L19 9a2.1 2.1 0 10-3-3L5 17z"/>'),
+      trash: svg('<path d="M4 7h16M9.5 7V5.5A1.5 1.5 0 0111 4h2a1.5 1.5 0 011.5 1.5V7M6.5 7l.8 12a1.5 1.5 0 001.5 1.4h6.4a1.5 1.5 0 001.5-1.4l.8-12"/>'),
+      eye: svg('<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/>'),
+      eyeOff: svg('<path d="M4 4l16 16"/><path d="M9.9 5.9A9.6 9.6 0 0112 5.5c6 0 9.5 6.5 9.5 6.5a17 17 0 01-3.3 4M6.3 8.2A16.7 16.7 0 002.5 12S6 18.5 12 18.5c1 0 1.9-.2 2.7-.5"/>'),
+      grip: svg('<circle cx="9" cy="6" r="1.1" fill="currentColor" stroke="none"/><circle cx="15" cy="6" r="1.1" fill="currentColor" stroke="none"/><circle cx="9" cy="12" r="1.1" fill="currentColor" stroke="none"/><circle cx="15" cy="12" r="1.1" fill="currentColor" stroke="none"/><circle cx="9" cy="18" r="1.1" fill="currentColor" stroke="none"/><circle cx="15" cy="18" r="1.1" fill="currentColor" stroke="none"/>'),
+      check: svg('<path d="M4.5 12.5l5 5 10-11"/>'),
+      x: svg('<path d="M6 6l12 12M18 6L6 18"/>'),
+      alert: svg('<circle cx="12" cy="12" r="9"/><path d="M12 7.5v5M12 16.2v.2"/>'),
+      chev: svg('<path d="M9 5l7 7-7 7"/>'),
+      plug: svg('<path d="M9 3v6M15 3v6"/><path d="M6.5 9h11v3a5.5 5.5 0 01-11 0z"/><path d="M12 17.5V21"/>'),
+      ext: svg('<path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1.5 1.5 0 01-1.5 1.5h-11A1.5 1.5 0 014 19V8a1.5 1.5 0 011.5-1.5H10"/>'),
+      out: svg('<path d="M10 4H6a2 2 0 00-2 2v12a2 2 0 002 2h4"/><path d="M15 8l4 4-4 4M19 12H9"/>'),
+      layers: svg('<path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/>'),
+      inbox: svg('<path d="M3 13h5l1.5 3h5L16 13h5"/><path d="M5.5 5h13l2.5 8v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5z"/>')
+    };
+    var KIND = { image: { ic: 'image', n: 'Kép' }, video: { ic: 'video', n: 'Videó' }, model: { ic: 'model', n: '3D modell' } };
+    var ST = { ready: 'kész', pending: 'várakozik', processing: 'feldolgozás…', error: 'hiba' };
+
+    function paintIcons() {
+      var m = {
+        'brand-1': 'layers', 'brand-2': 'layers', 'ic-plug': 'plug', 'ic-ext': 'ext', 'ic-out': 'out',
+        'ic-t1': 'layers', 'ic-t2': 'folder', 'ic-search': 'search', 'ic-ref': 'refresh',
+        'ic-ref2': 'refresh', 'ic-up': 'upload', 'ic-plus': 'plus', 'ic-trash2': 'trash', 'ic-x': 'x'
+      };
+      for (var id in m) { var n = el(id); if (n) n.innerHTML = IC[m[id]]; }
+    }
+    paintIcons();
+
     function toast(text, kind, ms) {
       var t = document.createElement('div');
       t.className = 'toast ' + (kind || 'info');
@@ -384,7 +487,7 @@
       setTimeout(function () {
         t.style.opacity = '0'; t.style.transition = 'opacity .3s';
         setTimeout(function () { t.remove(); }, 300);
-      }, ms || (kind === 'err' ? 9000 : 4500));
+      }, ms || (kind === 'err' ? 9000 : 4200));
       return t;
     }
 
@@ -423,6 +526,11 @@
       if (!r.ok || out.error) throw new Error(out.error || ('HTTP ' + r.status));
       return out;
     }
+    function patch(id, body) {
+      return api('/rest/v1/exhibits?id=eq.' + id, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+      });
+    }
 
     // ══════════ Bejelentkezés ══════════
     el('login-form').addEventListener('submit', async function (e) {
@@ -441,100 +549,144 @@
       } catch (err) { el('login-err').textContent = err.message; }
       finally { btn.disabled = false; }
     });
-
     function logout() {
       session = null; localStorage.removeItem(STORE);
-      el('app-view').style.display = 'none';
-      el('login-view').style.display = 'grid';
+      el('app-view').style.display = 'none'; el('login-view').style.display = 'grid';
     }
     el('logout-btn').addEventListener('click', logout);
-
     function showApp() {
       el('login-view').style.display = 'none';
       el('app-view').style.display = 'flex';
       var email = '';
       try { email = JSON.parse(atob(session.access_token.split('.')[1])).email || ''; } catch (e) {}
       el('who').textContent = email;
-      loadItems();
-      loadSettings();
+      loadItems(); loadSettings();
     }
 
     // ══════════ Fülek ══════════
-    function setTab(name) {
-      el('tab-items').setAttribute('aria-selected', name === 'items');
-      el('tab-drive').setAttribute('aria-selected', name === 'drive');
-      el('view-items').classList.toggle('active', name === 'items');
-      el('view-drive').classList.toggle('active', name === 'drive');
+    function setTab(n) {
+      el('tab-items').setAttribute('aria-selected', n === 'items');
+      el('tab-drive').setAttribute('aria-selected', n === 'drive');
+      el('view-items').classList.toggle('active', n === 'items');
+      el('view-drive').classList.toggle('active', n === 'drive');
     }
     el('tab-items').addEventListener('click', function () { setTab('items'); });
     el('tab-drive').addEventListener('click', function () { setTab('drive'); });
 
-    // ══════════ Kiállítási tárgyak ══════════
-    var KIND = { image: { i: '🖼', n: 'Kép' }, video: { i: '🎬', n: 'Videó' }, model: { i: '🧊', n: '3D modell' } };
-    var ST = { ready: 'kész', pending: 'várakozik', processing: 'feldolgozás…', error: 'hiba' };
-    var FLOORS = ['Földszint', '1. emelet', '2. emelet'];
-
+    // ══════════ Lista ══════════
     async function loadItems() {
       try {
         var r = await api('/rest/v1/exhibits?select=*&order=floor.asc,sort_order.asc,created_at.asc');
         if (!r.ok) throw new Error('Lekérdezés sikertelen (HTTP ' + r.status + ')');
         items = await r.json();
         renderItems();
-      } catch (e) {
-        el('list').innerHTML = '<div class="empty">' + esc(e.message) + '</div>';
-      }
+      } catch (e) { el('list').innerHTML = '<div class="empty">' + esc(e.message) + '</div>'; }
     }
     el('refresh-btn').addEventListener('click', loadItems);
 
-    function renderItems() {
-      var box = el('list');
-      el('count').textContent = items.length ? items.length + ' tárgy' : '';
-      if (!items.length) {
-        box.innerHTML = '<div class="empty"><span class="big">🏛</span>Még nincs egy tárgy sem.<br>' +
-          'Húzz ide egy fájlt, vagy hozd be őket a <b>Drive mappa</b> fülről.</div>';
-        return;
-      }
-      box.innerHTML = '<div class="grid">' + items.map(function (x, i) {
-        var k = KIND[x.kind] || { i: '❓', n: x.kind };
-        var thumb = '<span class="ico">' + k.i + '</span>';
-        if (x.status === 'ready' && x.public_url) {
-          if (x.kind === 'image') thumb = '<img src="' + esc(x.public_url) + '" alt="" loading="lazy">';
-          else if (x.kind === 'video') thumb = '<video src="' + esc(x.public_url) + '" muted preload="metadata"></video>';
-        }
-        return '<div class="card" draggable="true" data-i="' + i + '" data-id="' + x.id + '">' +
-          '<div class="thumb">' + thumb +
-            '<span class="kind">' + k.i + ' ' + esc(k.n) + '</span>' +
-            '<span class="drag-handle" title="Húzd a sorrend átrendezéséhez">⠿</span>' +
-          '</div>' +
-          '<div class="card-body">' +
-            '<b>' + esc(x.title) + '</b>' +
-            '<div>' +
-              '<span class="badge b-' + esc(x.status) + '">' + esc(ST[x.status] || x.status) + '</span>' +
-              (x.is_published ? '<span class="badge b-live">látható</span>'
-                              : '<span class="badge b-draft">piszkozat</span>') +
-            '</div>' +
-            '<div class="meta">' + esc(FLOORS[x.floor] || '') +
-              (x.artist ? ' · ' + esc(x.artist) : '') + (x.file_size ? ' · ' + mb(x.file_size) : '') + '</div>' +
-            (x.error_message ? '<div class="err-line">' + esc(x.error_message) + '</div>' : '') +
-          '</div>' +
-          '<div class="card-foot">' +
-            (x.status !== 'ready' && x.drive_url
-              ? '<button class="btn sm" data-act="ingest">Betöltés</button>' : '') +
-            '<button class="btn sm" data-act="edit">Szerkesztés</button>' +
-            '<button class="btn sm" data-act="pub">' + (x.is_published ? 'Elrejt' : 'Megjelenít') + '</button>' +
-            '<div style="flex:1"></div>' +
-            '<button class="btn sm ghost danger" data-act="del">Törlés</button>' +
-          '</div>' +
-        '</div>';
-      }).join('') + '</div>';
+    el('q').addEventListener('input', function () { query = this.value.toLowerCase().trim(); renderItems(); });
+
+    function visible(x) {
+      if (filterFloor !== 'all' && x.floor !== +filterFloor) return false;
+      if (!query) return true;
+      return (String(x.title) + ' ' + String(x.artist || '')).toLowerCase().indexOf(query) >= 0;
     }
 
+    function renderFilters() {
+      var counts = [0, 0, 0];
+      items.forEach(function (x) { if (counts[x.floor] !== undefined) counts[x.floor]++; });
+      var chips = [['all', 'Mind', items.length]];
+      for (var i = 0; i < 3; i++) chips.push([String(i), FLOORS[i], counts[i]]);
+      el('filters').innerHTML = chips.map(function (c) {
+        return '<button class="chip" data-f="' + c[0] + '" aria-pressed="' + (filterFloor === c[0]) + '">' +
+          esc(c[1]) + '<span class="n">' + c[2] + '</span></button>';
+      }).join('');
+    }
+    el('filters').addEventListener('click', function (e) {
+      var b = e.target.closest('.chip'); if (!b) return;
+      filterFloor = b.getAttribute('data-f'); renderItems();
+    });
+
+    function cardHtml(x) {
+      var k = KIND[x.kind] || { ic: 'alert', n: x.kind };
+      var thumb = '<span class="ph">' + IC[k.ic].replace('width="16" height="16"', 'width="40" height="40"') + '</span>';
+      if (x.status === 'ready' && x.public_url) {
+        if (x.kind === 'image') thumb = '<img src="' + esc(x.public_url) + '" alt="" loading="lazy">';
+        else if (x.kind === 'video') thumb = '<video src="' + esc(x.public_url) + '" muted preload="metadata"></video>';
+      }
+      return '<article class="card' + (selected[x.id] ? ' sel' : '') + '" draggable="true" data-id="' + x.id + '">' +
+        '<div class="thumb">' + thumb +
+          '<label class="ovl tl"><input type="checkbox" data-pick' + (selected[x.id] ? ' checked' : '') +
+            '><span class="sr">Kijelölés</span></label>' +
+          '<span class="ovl bl">' + IC[k.ic] + esc(k.n) + '</span>' +
+          '<span class="ovl tr" data-grip title="Húzd át másik szintre vagy pozícióba">' + IC.grip + '</span>' +
+        '</div>' +
+        '<div class="card-body">' +
+          '<b title="' + esc(x.title) + '">' + esc(x.title) + '</b>' +
+          '<div class="badges">' +
+            '<span class="badge b-' + esc(x.status) + '">' + esc(ST[x.status] || x.status) + '</span>' +
+            (x.is_published ? '<span class="badge b-live">látható</span>'
+                            : '<span class="badge b-draft">piszkozat</span>') +
+          '</div>' +
+          '<div class="meta">' + (x.artist ? esc(x.artist) : '<span style="color:var(--faint)">nincs szerző</span>') +
+            (x.file_size ? ' · ' + mb(x.file_size) : '') + '</div>' +
+          (x.error_message
+            ? '<details class="errbox"><summary>' + IC.alert + 'Mi a hiba?</summary><p>' +
+              esc(x.error_message) + '</p></details>' : '') +
+        '</div>' +
+        '<div class="card-foot">' +
+          (x.status !== 'ready' && x.drive_url
+            ? '<button class="btn sm" data-act="ingest">Betöltés</button>' : '') +
+          '<button class="btn sm ico" data-act="edit" title="Szerkesztés">' + IC.pencil + '</button>' +
+          '<button class="btn sm ico" data-act="pub" title="' + (x.is_published ? 'Elrejtés' : 'Megjelenítés') + '">' +
+            (x.is_published ? IC.eye : IC.eyeOff) + '</button>' +
+          '<div class="grow"></div>' +
+          '<button class="btn sm ico danger" data-act="del" title="Törlés">' + IC.trash + '</button>' +
+        '</div>' +
+      '</article>';
+    }
+
+    function renderItems() {
+      renderFilters();
+      var box = el('list');
+      if (!items.length) {
+        box.innerHTML = '<div class="empty"><div class="ic">' +
+          IC.inbox.replace('width="16" height="16"', 'width="44" height="44"') + '</div>' +
+          'Még nincs egy tárgy sem.<br>Húzz ide egy fájlt, vagy hozd be őket a <b>Drive mappa</b> fülről.</div>';
+        syncBulk(); return;
+      }
+      var shown = 0, html = '';
+      for (var f = 0; f < 3; f++) {
+        if (filterFloor !== 'all' && +filterFloor !== f) continue;
+        var list = items.filter(function (x) { return x.floor === f && visible(x); });
+        shown += list.length;
+        html += '<section class="floor">' +
+          '<div class="floor-head"><h3>' + FLOORS[f] + '</h3><span class="n">' + list.length + ' tárgy</span></div>' +
+          '<div class="floor-body" data-floor="' + f + '">' +
+            (list.length ? list.map(cardHtml).join('')
+              : '<div class="floor-empty">Ide húzhatsz tárgyakat</div>') +
+          '</div></section>';
+      }
+      if (!shown && query) {
+        html = '<div class="empty">Nincs találat erre: „' + esc(query) + '”</div>';
+      }
+      box.innerHTML = html;
+      syncBulk();
+    }
+
+    // ── Kártya-műveletek ──
+    el('list').addEventListener('change', function (e) {
+      var c = e.target.closest('input[data-pick]'); if (!c) return;
+      var id = c.closest('.card').getAttribute('data-id');
+      if (c.checked) selected[id] = true; else delete selected[id];
+      c.closest('.card').classList.toggle('sel', !!selected[id]);
+      syncBulk();
+    });
+
     el('list').addEventListener('click', async function (e) {
-      var b = e.target.closest('button[data-act]');
-      if (!b) return;
-      var card = b.closest('.card');
-      var id = card.getAttribute('data-id');
-      var x = items.filter(function (it) { return it.id === id; })[0];
+      var b = e.target.closest('button[data-act]'); if (!b) return;
+      var id = b.closest('.card').getAttribute('data-id');
+      var x = items.filter(function (i) { return i.id === id; })[0];
       var act = b.getAttribute('data-act');
       b.disabled = true;
       try {
@@ -543,66 +695,103 @@
           var out = await fn({ exhibit_id: id });
           toast('Kész: ' + (out.source_name || '') + ' behozva.', 'ok');
         } else if (act === 'pub') {
-          var r = await api('/rest/v1/exhibits?id=eq.' + id, {
-            method: 'PATCH', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ is_published: !x.is_published })
-          });
+          var r = await patch(id, { is_published: !x.is_published });
           if (!r.ok) throw new Error('Módosítás sikertelen.');
-        } else if (act === 'edit') {
-          openModal(x); b.disabled = false; return;
-        } else if (act === 'del') {
+        } else if (act === 'edit') { openModal(x); b.disabled = false; return; }
+        else if (act === 'del') {
           if (!confirm('Biztosan törlöd? A feltöltött fájl is törlődik.')) { b.disabled = false; return; }
           var r2 = await api('/rest/v1/exhibits?id=eq.' + id, { method: 'DELETE' });
           if (!r2.ok) throw new Error('Törlés sikertelen.');
-          toast('Törölve.', 'ok');
+          delete selected[id]; toast('Törölve.', 'ok');
         }
         await loadItems();
       } catch (err) { toast(err.message, 'err'); b.disabled = false; }
     });
 
-    // ── Sorrend húzással ──
-    var dragIdx = null;
-    el('list').addEventListener('dragstart', function (e) {
-      var c = e.target.closest('.card'); if (!c) return;
-      dragIdx = +c.getAttribute('data-i'); c.classList.add('dragging');
-    });
-    el('list').addEventListener('dragend', function (e) {
-      var c = e.target.closest('.card'); if (c) c.classList.remove('dragging');
-      Array.prototype.forEach.call(document.querySelectorAll('.drop-target'),
-        function (n) { n.classList.remove('drop-target'); });
-    });
-    el('list').addEventListener('dragover', function (e) {
-      e.preventDefault();
-      var c = e.target.closest('.card'); if (!c) return;
-      Array.prototype.forEach.call(document.querySelectorAll('.drop-target'),
-        function (n) { n.classList.remove('drop-target'); });
-      c.classList.add('drop-target');
-    });
-    el('list').addEventListener('drop', async function (e) {
-      e.preventDefault();
-      var c = e.target.closest('.card'); if (!c || dragIdx === null) return;
-      var to = +c.getAttribute('data-i');
-      if (to === dragIdx) return;
-      var moved = items.splice(dragIdx, 1)[0];
-      items.splice(to, 0, moved);
-      dragIdx = null;
-      renderItems();
-      // Az érintett sorok új sorszáma
+    // ── Tömeges műveletek ──
+    function syncBulk() {
+      var n = Object.keys(selected).length;
+      el('bulk').classList.toggle('show', n > 0);
+      el('bulk-cnt').textContent = n + ' kijelölve';
+    }
+    el('bulk').addEventListener('click', async function (e) {
+      var b = e.target.closest('button[data-bulk]'); if (!b) return;
+      var act = b.getAttribute('data-bulk');
+      var ids = Object.keys(selected);
+      if (act === 'none') { selected = {}; renderItems(); return; }
+      if (act === 'del' && !confirm(ids.length + ' tárgy törlése. Biztos?')) return;
+      b.disabled = true;
       try {
-        for (var i = 0; i < items.length; i++) {
-          if (items[i].sort_order !== i) {
-            items[i].sort_order = i;
-            await api('/rest/v1/exhibits?id=eq.' + items[i].id, {
-              method: 'PATCH', headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ sort_order: i })
-            });
-          }
+        for (var i = 0; i < ids.length; i++) {
+          if (act === 'del') await api('/rest/v1/exhibits?id=eq.' + ids[i], { method: 'DELETE' });
+          else await patch(ids[i], { is_published: act === 'show' });
         }
-        toast('Sorrend mentve.', 'ok', 2000);
-      } catch (err) { toast('A sorrend mentése nem sikerült: ' + err.message, 'err'); }
+        selected = {};
+        toast(ids.length + ' tárgy frissítve.', 'ok');
+        await loadItems();
+      } catch (err) { toast(err.message, 'err'); }
+      finally { b.disabled = false; }
     });
 
-    // ══════════ Szerkesztő ablak ══════════
+    // ── Húzás: sorrend és szint ──
+    var dragId = null;
+    el('list').addEventListener('dragstart', function (e) {
+      var c = e.target.closest('.card'); if (!c) return;
+      dragId = c.getAttribute('data-id'); c.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    el('list').addEventListener('dragend', function () {
+      dragId = null;
+      Array.prototype.forEach.call(document.querySelectorAll('.dragging,.drop-before,.drop-in'),
+        function (n) { n.classList.remove('dragging', 'drop-before', 'drop-in'); });
+    });
+    el('list').addEventListener('dragover', function (e) {
+      if (!dragId) return;
+      var body = e.target.closest('.floor-body'); if (!body) return;
+      e.preventDefault();
+      Array.prototype.forEach.call(document.querySelectorAll('.drop-before,.drop-in'),
+        function (n) { n.classList.remove('drop-before', 'drop-in'); });
+      body.classList.add('drop-in');
+      var over = e.target.closest('.card');
+      if (over && over.getAttribute('data-id') !== dragId) over.classList.add('drop-before');
+    });
+    el('list').addEventListener('drop', async function (e) {
+      if (!dragId) return;
+      var body = e.target.closest('.floor-body'); if (!body) return;
+      e.preventDefault();
+      var toFloor = +body.getAttribute('data-floor');
+      var over = e.target.closest('.card');
+      var beforeId = over ? over.getAttribute('data-id') : null;
+      var moving = items.filter(function (x) { return x.id === dragId; })[0];
+      var id = dragId; dragId = null;
+      if (!moving) return;
+
+      items = items.filter(function (x) { return x.id !== id; });
+      moving.floor = toFloor;
+      var at = items.length;
+      if (beforeId) {
+        for (var i = 0; i < items.length; i++) if (items[i].id === beforeId) { at = i; break; }
+      } else {
+        for (var j = 0; j < items.length; j++) if (items[j].floor > toFloor) { at = j; break; }
+      }
+      items.splice(at, 0, moving);
+      renderItems();
+
+      try {
+        for (var f = 0; f < 3; f++) {
+          var list = items.filter(function (x) { return x.floor === f; });
+          for (var k = 0; k < list.length; k++) {
+            if (list[k].sort_order !== k || list[k].id === id) {
+              list[k].sort_order = k;
+              await patch(list[k].id, { sort_order: k, floor: f });
+            }
+          }
+        }
+        toast('Elrendezés mentve.', 'ok', 2200);
+      } catch (err) { toast('A mentés nem sikerült: ' + err.message, 'err'); await loadItems(); }
+    });
+
+    // ══════════ Szerkesztő ══════════
     function openModal(x) {
       el('modal-title').textContent = x ? 'Tárgy szerkesztése' : 'Új kiállítási tárgy';
       el('f-id').value = x ? x.id : '';
@@ -615,7 +804,7 @@
       el('f-title-it').value = x ? (x.title_it || '') : '';
       el('f-desc-en').value = x ? (x.description_en || '') : '';
       el('f-desc-it').value = x ? (x.description_it || '') : '';
-      el('f-floor').value = x ? String(x.floor) : '0';
+      el('f-floor').value = x ? String(x.floor) : (filterFloor === 'all' ? '0' : filterFloor);
       el('f-order').value = x ? x.sort_order : items.length;
       el('f-pub').checked = x ? x.is_published : true;
       el('f-source-wrap').style.display = (x && x.status === 'ready') ? 'none' : 'block';
@@ -630,39 +819,31 @@
       if (e.key === 'Escape' && el('modal-bg').classList.contains('show')) closeModal();
     });
 
-    function formPayload() {
-      return {
-        title: el('f-title').value.trim(),
-        title_en: el('f-title-en').value.trim() || null,
-        title_it: el('f-title-it').value.trim() || null,
-        artist: el('f-artist').value.trim() || null,
-        year: el('f-year').value.trim() || null,
-        description: el('f-desc').value.trim() || null,
-        description_en: el('f-desc-en').value.trim() || null,
-        description_it: el('f-desc-it').value.trim() || null,
-        floor: parseInt(el('f-floor').value, 10) || 0,
-        sort_order: parseInt(el('f-order').value, 10) || 0,
-        is_published: el('f-pub').checked
-      };
-    }
-
     el('item-form').addEventListener('submit', async function (e) {
       e.preventDefault();
       var btn = el('modal-save'); btn.disabled = true;
-      var id = el('f-id').value;
-      var drive = el('f-drive').value.trim();
+      var id = el('f-id').value, drive = el('f-drive').value.trim();
       try {
-        var body = formPayload();
+        var body = {
+          title: el('f-title').value.trim(),
+          title_en: el('f-title-en').value.trim() || null,
+          title_it: el('f-title-it').value.trim() || null,
+          artist: el('f-artist').value.trim() || null,
+          year: el('f-year').value.trim() || null,
+          description: el('f-desc').value.trim() || null,
+          description_en: el('f-desc-en').value.trim() || null,
+          description_it: el('f-desc-it').value.trim() || null,
+          floor: parseInt(el('f-floor').value, 10) || 0,
+          sort_order: parseInt(el('f-order').value, 10) || 0,
+          is_published: el('f-pub').checked
+        };
         if (id) {
           if (drive) body.drive_url = drive;
-          var r = await api('/rest/v1/exhibits?id=eq.' + id, {
-            method: 'PATCH', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body)
-          });
+          var r = await patch(id, body);
           if (!r.ok) throw new Error('Mentés sikertelen.');
           toast('Módosítások mentve.', 'ok');
         } else {
-          if (!drive) throw new Error('Adj meg egy Drive linket, vagy húzd be a fájlt a listára.');
+          if (!drive) throw new Error('Adj meg egy Drive linket, vagy húzd be a fájlt az ablakra.');
           body.drive_url = drive; body.kind = 'image'; body.status = 'pending';
           var r2 = await api('/rest/v1/exhibits', {
             method: 'POST',
@@ -675,24 +856,31 @@
           var out = await fn({ exhibit_id: created.id });
           toast('Kész: ' + (out.source_name || '') + ' behozva.', 'ok');
         }
-        closeModal();
-        await loadItems();
+        closeModal(); await loadItems();
       } catch (err) { toast(err.message, 'err'); await loadItems(); }
       finally { btn.disabled = false; }
     });
 
-    // ══════════ Közvetlen feltöltés (drag & drop) ══════════
-    var dz = el('dropzone');
-    dz.addEventListener('click', function () { el('dropfile').click(); });
+    // ══════════ Feltöltés (az egész ablakra ejthető) ══════════
+    el('upload-btn').addEventListener('click', function () { el('dropfile').click(); });
     el('dropfile').addEventListener('change', function () { uploadMany(this.files); this.value = ''; });
-    ['dragenter', 'dragover'].forEach(function (ev) {
-      dz.addEventListener(ev, function (e) { e.preventDefault(); dz.classList.add('over'); });
+
+    var dragDepth = 0;
+    window.addEventListener('dragenter', function (e) {
+      if (!e.dataTransfer || Array.prototype.indexOf.call(e.dataTransfer.types, 'Files') < 0) return;
+      dragDepth++; el('drop-overlay').classList.add('show');
     });
-    ['dragleave', 'drop'].forEach(function (ev) {
-      dz.addEventListener(ev, function (e) { e.preventDefault(); dz.classList.remove('over'); });
+    window.addEventListener('dragleave', function () {
+      if (--dragDepth <= 0) { dragDepth = 0; el('drop-overlay').classList.remove('show'); }
     });
-    dz.addEventListener('drop', function (e) {
-      if (e.dataTransfer && e.dataTransfer.files.length) uploadMany(e.dataTransfer.files);
+    window.addEventListener('dragover', function (e) {
+      if (e.dataTransfer && Array.prototype.indexOf.call(e.dataTransfer.types, 'Files') >= 0) e.preventDefault();
+    });
+    window.addEventListener('drop', function (e) {
+      if (!e.dataTransfer || !e.dataTransfer.files.length) return;
+      e.preventDefault();
+      dragDepth = 0; el('drop-overlay').classList.remove('show');
+      uploadMany(e.dataTransfer.files);
     });
 
     function kindOf(file) {
@@ -705,7 +893,6 @@
       var t = String(name).replace(/\.[a-z0-9]{2,5}$/i, '').replace(/[_-]+/g, ' ').trim();
       return t.charAt(0).toUpperCase() + t.slice(1);
     }
-
     async function uploadMany(files) {
       for (var i = 0; i < files.length; i++) {
         try { await uploadOne(files[i]); }
@@ -716,36 +903,34 @@
     async function uploadOne(file) {
       var kind = kindOf(file);
       if (!kind) throw new Error('Nem támogatott fájltípus (kép, videó vagy .glb kell).');
-      var t = toast('Feltöltés: ' + file.name + ' (' + mb(file.size) + ')…', 'info', 60000);
+      var t = toast('Feltöltés: ' + file.name + ' (' + mb(file.size) + ')…', 'info', 120000);
+      var floor = filterFloor === 'all' ? 0 : +filterFloor;
+      try {
+        var r = await api('/rest/v1/exhibits', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+          body: JSON.stringify({
+            kind: kind, title: niceTitle(file.name), status: 'pending',
+            floor: floor, sort_order: items.length, is_published: true
+          })
+        });
+        if (!r.ok) throw new Error('A tárgy létrehozása sikertelen.');
+        var created = (await r.json())[0];
 
-      var r = await api('/rest/v1/exhibits', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
-        body: JSON.stringify({
-          kind: kind, title: niceTitle(file.name), status: 'pending',
-          floor: 0, sort_order: items.length, is_published: true
-        })
-      });
-      if (!r.ok) { t.remove(); throw new Error('A tárgy létrehozása sikertelen.'); }
-      var created = (await r.json())[0];
+        var ext = (file.name.match(/\.([a-zA-Z0-9]{2,5})$/) || [, 'bin'])[1].toLowerCase();
+        var path = created.id + '/' + Date.now() + '.' + ext;
+        var ct = file.type || (kind === 'model' ? 'model/gltf-binary' : 'application/octet-stream');
+        var up = await api('/storage/v1/object/media/' + path, {
+          method: 'POST', headers: { 'Content-Type': ct, 'x-upsert': 'true' }, body: file
+        });
+        if (!up.ok) throw new Error('Feltöltés sikertelen: ' + (await up.text()).slice(0, 160));
 
-      var ext = (file.name.match(/\.([a-zA-Z0-9]{2,5})$/) || [, 'bin'])[1].toLowerCase();
-      var path = created.id + '/' + Date.now() + '.' + ext;
-      var ct = file.type || (kind === 'model' ? 'model/gltf-binary' : 'application/octet-stream');
-      var up = await api('/storage/v1/object/media/' + path, {
-        method: 'POST', headers: { 'Content-Type': ct, 'x-upsert': 'true' }, body: file
-      });
-      if (!up.ok) { t.remove(); throw new Error('Feltöltés sikertelen: ' + (await up.text()).slice(0, 160)); }
-
-      await api('/rest/v1/exhibits?id=eq.' + created.id, {
-        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+        await patch(created.id, {
           storage_path: path, public_url: SB_URL + '/storage/v1/object/public/media/' + path,
           mime_type: ct, file_size: file.size, status: 'ready', error_message: null
-        })
-      });
-      t.remove();
-      toast(file.name + ' feltöltve.', 'ok');
+        });
+        toast(file.name + ' feltöltve.', 'ok');
+      } finally { t.remove(); }
     }
 
     // ══════════ Beállítások ══════════
@@ -757,12 +942,16 @@
         if (rows.length && rows[0].value && rows[0].value.url) {
           el('folder-url').value = rows[0].value.url;
           openFolder(rows[0].value.url);
-        }
-      } catch (e) { /* nem kritikus */ }
+        } else { showDriveHint(); }
+      } catch (e) { showDriveHint(); }
+    }
+    function showDriveHint() {
+      el('drive-list').innerHTML = '<div class="empty"><div class="ic">' +
+        IC.folder.replace('width="16" height="16"', 'width="44" height="44"') + '</div>' +
+        'Add meg a mappa linkjét, és listázom a tartalmát.</div>';
     }
     el('folder-save').addEventListener('click', async function () {
-      var url = el('folder-url').value.trim();
-      if (!url) return;
+      var url = el('folder-url').value.trim(); if (!url) return;
       try {
         var r = await api('/rest/v1/app_settings', {
           method: 'POST',
@@ -771,24 +960,21 @@
         });
         if (!r.ok) throw new Error((await r.text()).slice(0, 160));
         toast('Mappa elmentve.', 'ok');
-        drivePath = [];
-        openFolder(url);
+        drivePath = []; openFolder(url);
       } catch (e) { toast('Mentés sikertelen: ' + e.message, 'err'); }
     });
 
-    // ══════════ Drive mappa böngésző ══════════
+    // ══════════ Drive böngésző ══════════
     el('drive-reload').addEventListener('click', function () {
       var cur = drivePath.length ? drivePath[drivePath.length - 1].id : el('folder-url').value.trim();
       if (cur) openFolder(cur, true);
     });
-
     async function openFolder(ref, keepPath) {
-      var box = el('drive-list');
-      box.innerHTML = '<div class="empty">Mappa betöltése…</div>';
+      el('drive-list').innerHTML = '<div class="empty">Mappa betöltése…</div>';
       try {
         var out = await fn({ list_folder: ref });
-        driveFolders = out.folders || [];
-        driveFiles = out.files || [];
+        driveFolders = out.folders || []; driveFiles = out.files || [];
+        driveSkipped = out.unsupported || [];
         if (!keepPath) {
           var ix = -1;
           for (var i = 0; i < drivePath.length; i++) if (drivePath[i].id === out.folder.id) ix = i;
@@ -796,68 +982,81 @@
           else drivePath.push({ id: out.folder.id, name: out.folder.name });
         }
         renderDrive();
-      } catch (e) {
-        box.innerHTML = '<div class="empty">' + esc(e.message) + '</div>';
-      }
+      } catch (e) { el('drive-list').innerHTML = '<div class="empty">' + esc(e.message) + '</div>'; }
     }
-
     function renderDrive() {
       el('crumbs').innerHTML = drivePath.map(function (p, i) {
         return (i ? '<span>/</span>' : '') + '<button data-ci="' + i + '">' + esc(p.name) + '</button>';
       }).join('');
-
       var box = el('drive-list');
-      if (!driveFolders.length && !driveFiles.length) {
-        box.innerHTML = '<div class="empty"><span class="big">📭</span>Ez a mappa üres (nincs benne kép, videó vagy 3D fájl).</div>';
-        el('import-bar').style.display = 'none';
-        return;
+      if (!driveFolders.length && !driveFiles.length && !driveSkipped.length) {
+        box.innerHTML = '<div class="empty">Ez a mappa üres.</div>';
+        el('import-bar').style.display = 'none'; return;
       }
       var html = '<div class="flist">';
       html += driveFolders.map(function (f) {
         return '<div class="frow folder" data-fid="' + esc(f.id) + '">' +
-          '<span class="ico">📁</span><span class="nm">' + esc(f.name) + '</span>' +
-          '<span class="sz">mappa ›</span></div>';
+          '<span class="ck"></span><span style="color:var(--gold)">' + IC.folder + '</span>' +
+          '<span class="nm">' + esc(f.name) + '</span><span class="sz">' + IC.chev + '</span></div>';
       }).join('');
       html += driveFiles.map(function (f) {
-        var k = KIND[f.kind] || { i: '❓', n: f.kind };
-        return '<div class="frow' + (f.imported ? ' done' : '') + '" data-file="' + esc(f.id) + '">' +
-          (f.imported ? '<span class="ico">✓</span>'
-                      : '<input type="checkbox" data-pick="' + esc(f.id) + '">') +
-          '<span class="ico">' + k.i + '</span>' +
-          '<span class="nm">' + esc(f.name) + '</span>' +
+        var k = KIND[f.kind] || { ic: 'alert', n: f.kind };
+        return '<div class="frow' + (f.imported ? ' done' : '') + '">' +
+          '<span class="ck">' + (f.imported
+            ? '<span style="color:var(--ok)">' + IC.check + '</span>'
+            : '<input type="checkbox" data-pick="' + esc(f.id) + '">') + '</span>' +
+          '<span style="color:var(--muted)">' + IC[k.ic] + '</span>' +
+          '<span class="nm">' + esc(f.name) +
+            (f.likely_texture ? '<span class="tex-tag">textúra?</span>' : '') + '</span>' +
           '<span class="sz">' + esc(k.n) + (f.size ? ' · ' + mb(f.size) : '') +
-            (f.imported ? ' · behozva' : '') + '</span>' +
-          '</div>';
+            (f.imported ? ' · behozva' : '') + '</span></div>';
       }).join('');
-      html += '</div>';
-      box.innerHTML = html;
+
+      // Amit nem tudunk fogadni — NEM tüntetjük el némán, kiírjuk az okát is
+      if (driveSkipped.length) {
+        html += '<div class="grp-label">' + driveSkipped.length +
+          ' fájl nem használható a kiállításban:</div>';
+        html += driveSkipped.map(function (f) {
+          return '<div class="frow skip">' +
+            '<span class="ck" style="color:var(--warn)">' + IC.alert + '</span>' +
+            '<span class="nm" title="' + esc(f.name) + '">' + esc(f.name) + '</span>' +
+            '<span class="why">' + esc(f.reason) + '</span></div>';
+        }).join('');
+      }
+      box.innerHTML = html + '</div>';
+
+      // Figyelmeztetés, ha textúra-térképek is vannak a mappában
+      var tex = driveFiles.filter(function (f) { return f.likely_texture && !f.imported; });
+      if (tex.length) {
+        box.insertAdjacentHTML('beforeend',
+          '<div class="hint" style="margin-top:.6rem;color:var(--warn)">' +
+          tex.length + ' fájl a neve alapján 3D textúra-térkép (pl. ' + esc(tex[0].name) +
+          '), nem kiállítandó kép — ezeket valószínűleg ne hozd be.</div>');
+      }
 
       var pending = driveFiles.filter(function (f) { return !f.imported; }).length;
       el('import-bar').style.display = pending ? 'flex' : 'none';
       el('import-info').textContent = pending ? pending + ' új fájl' : '';
       el('import-prog').style.width = '0';
     }
-
     el('crumbs').addEventListener('click', function (e) {
       var b = e.target.closest('button[data-ci]'); if (!b) return;
       var i = +b.getAttribute('data-ci');
-      drivePath = drivePath.slice(0, i + 1);
-      openFolder(drivePath[i].id, true);
+      drivePath = drivePath.slice(0, i + 1); openFolder(drivePath[i].id, true);
     });
     el('drive-list').addEventListener('click', function (e) {
       var f = e.target.closest('.frow.folder'); if (!f) return;
       openFolder(f.getAttribute('data-fid'));
     });
 
-    // ── Kijelöltek behozása ──
     el('import-btn').addEventListener('click', async function () {
       var picks = Array.prototype.map.call(
         document.querySelectorAll('#drive-list input[data-pick]:checked'),
         function (n) { return n.getAttribute('data-pick'); });
       if (!picks.length) { toast('Jelölj ki legalább egy fájlt.', 'err', 3000); return; }
-
       var btn = this; btn.disabled = true;
       var done = 0, failed = 0;
+      var floor = filterFloor === 'all' ? 0 : +filterFloor;
       for (var i = 0; i < picks.length; i++) {
         var f = driveFiles.filter(function (x) { return x.id === picks[i]; })[0];
         el('import-info').textContent = (i + 1) + ' / ' + picks.length + ' — ' + f.name;
@@ -868,17 +1067,13 @@
             body: JSON.stringify({
               kind: f.kind, title: niceTitle(f.name), status: 'pending',
               drive_url: 'https://drive.google.com/file/d/' + f.id + '/view',
-              floor: 0, sort_order: items.length + i, is_published: true
+              floor: floor, sort_order: items.length + i, is_published: true
             })
           });
           if (!r.ok) throw new Error((await r.text()).slice(0, 160));
-          var created = (await r.json())[0];
-          await fn({ exhibit_id: created.id });
+          await fn({ exhibit_id: (await r.json())[0].id });
           done++;
-        } catch (e) {
-          failed++;
-          toast(f.name + ': ' + e.message, 'err');
-        }
+        } catch (e) { failed++; toast(f.name + ': ' + e.message, 'err'); }
         el('import-prog').style.width = Math.round((i + 1) / picks.length * 100) + '%';
       }
       el('import-info').textContent = '';
@@ -906,7 +1101,6 @@
       finally { btn.disabled = false; }
     });
 
-    // ══════════ Indulás ══════════
     if (session && session.access_token) showApp();
   </script>
 </body>
