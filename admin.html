@@ -128,6 +128,7 @@
       <h1>Múzeum · Admin</h1>
       <div class="spacer"></div>
       <span class="who" id="who"></span>
+      <button class="small" id="selftest-btn" title="Ellenőrzi a Google Drive kapcsolatot">Kapcsolat ellenőrzése</button>
       <a href="index.html" target="_blank" rel="noopener"><button class="small">Múzeum ↗</button></a>
       <button class="small" id="logout-btn">Kilépés</button>
     </header>
@@ -463,6 +464,45 @@
       if (!up.ok) throw new Error('Az adatok mentése sikertelen.');
       msg('Kész: ' + file.name + ' feltöltve.', 'ok');
     }
+
+    // ══════════ Kapcsolat ellenőrzése (Google Drive) ══════════
+    el('selftest-btn').addEventListener('click', async function () {
+      var btn = el('selftest-btn'); btn.disabled = true;
+      msg('Google Drive kapcsolat ellenőrzése…', 'info');
+      try {
+        var payload = { selftest: true };
+        var link = el('drive_url').value.trim();
+        if (link) payload.file_id = link; // ha van link a mezőben, a fájl olvashatóságát is nézzük
+        var r = await api('/functions/v1/ingest-drive', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        var out = await r.json().catch(function () { return {}; });
+        if (!r.ok || out.error) throw new Error(out.error || ('HTTP ' + r.status));
+
+        var lines = [];
+        lines.push(out.mode === 'service_account'
+          ? '✔ Service account rendben — a Google elfogadta a kulcsot.'
+          : '✔ API kulcsos mód aktív.');
+        if (out.service_account_email) {
+          lines.push('Service account címe: ' + out.service_account_email);
+          lines.push(out.hint || '');
+        }
+        if (out.file_readable === true) {
+          var fi = out.file_info || {};
+          lines.push('✔ A megadott fájl olvasható: ' + (fi.name || '') +
+            ' (' + (fi.mimeType || '') + (fi.size ? ', ' + (fi.size / 1048576).toFixed(1) + ' MB' : '') + ')');
+        } else if (out.file_readable === false) {
+          lines.push('✘ A megadott fájl NEM olvasható (HTTP ' + out.file_http_status + ').');
+          lines.push('Oszd meg a fájlt vagy a mappáját a fenti service account címmel, Olvasó joggal.');
+          lines.push(String(out.file_info || '').slice(0, 200));
+        }
+        msg(lines.filter(Boolean).join('\n'), out.file_readable === false ? 'err' : 'ok');
+      } catch (e) {
+        msg('Kapcsolat-ellenőrzés sikertelen:\n' + e.message, 'err');
+      } finally { btn.disabled = false; }
+    });
 
     // ══════════ Új tárgy létrehozása ══════════
     el('new-form').addEventListener('submit', async function (e) {

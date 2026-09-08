@@ -63,6 +63,17 @@ Csak a „bárki a linkkel" módon megosztott fájlokra működik.
 
 ---
 
+## 3. lépés — Kapcsolat ellenőrzése
+
+Jelentkezz be az adminba, és nyomd meg a **„Kapcsolat ellenőrzése”** gombot a fejlécben.
+Megmondja, elfogadta-e a Google a kulcsot, és **kiírja a service account e-mail címét** —
+ezzel a címmel kell megosztani a Drive-mappát (Olvasó joggal).
+
+Ha előtte beillesztesz egy Drive linket a bal oldali mezőbe, azt is leteszteli:
+megnézi, tényleg olvasható-e az a konkrét fájl.
+
+---
+
 ## Napi használat
 
 1. Nyisd meg az `admin.html`-t, jelentkezz be.
