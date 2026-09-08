@@ -113,16 +113,31 @@ Az angol/olasz fordítások nem kötelezők; ha üresen maradnak, a magyar szöv
 | Közvetlen feltöltés | **500 MB** / fájl |
 | Támogatott formátum | JPEG, PNG, WebP, GIF, AVIF · MP4, WebM, MOV · **GLB, glTF** |
 
-### 3D: csak GLB / glTF
+### 3D: az FBX és az OBJ automatikusan GLB lesz
 
-A böngésző (three.js) **nem tud** `.fbx`, `.obj`, `.dae`, `.blend`, `.stl` fájlt betölteni —
-ezeket előbb **GLB-be kell exportálni**. Blenderben: *File → Import* (FBX/OBJ),
-majd *File → Export → glTF 2.0 (.glb)*, „Format: glTF Binary”. A GLB a geometriát és a
-textúrákat **egyetlen fájlba** csomagolja, ezért a `.mtl` és a külön textúra-JPG-k
-(`*_occlusion.jpg`, `*_normal.jpg`, …) nem kellenek — azokat ne is hozd be, mert
-képként kikerülnének a falra.
+A böngésző (three.js) csak **glTF/GLB**-t tud megjeleníteni, a tervezőktől viszont
+jellemzően FBX vagy OBJ érkezik. Ezt nem kell kézzel megoldani:
 
-A Drive mappa listája kiírja, ha egy fájlt nem tud fogadni, és azt is, hogy miért.
+- **Drive mappából:** az `.fbx` / `.obj` sor mellett ott a **„Konvertálás GLB-be”** gomb.
+  A rendszer letölti a modellt *és a hozzá tartozó anyagleírót/textúrákat* (ugyanabból a
+  mappából), a böngészőben átalakítja, feltölti a kész GLB-t, majd a nyers fájlokat törli.
+- **Feltöltéskor:** húzd be az `.fbx`-et — vagy OBJ esetén az `.obj` + `.mtl` + textúrák
+  fájlokat **egyszerre** —, és ugyanez történik. A kísérőfájlok nem lesznek külön
+  kiállítási tárgyak.
+
+A konvertálás **a te böngésződben** fut (nincs hozzá szerver, Blender vagy külön
+szolgáltatás). A geometria és a textúrák egyetlen `.glb`-be kerülnek.
+
+| | Határ |
+|---|---|
+| Konvertálandó modell | 100 MB |
+| Modell + textúrái együtt | 180 MB, legfeljebb 16 fájl |
+
+Nagy modellnél a konvertálás eltarthat egy percig — hagyd nyitva az oldalt.
+Amit így sem tud fogadni (`.dae`, `.blend`, `.max`, `.stl`), azt a lista kiírja, indoklással.
+
+> A külön textúra-JPG-ket (`*_occlusion.jpg`, `*_normal.jpg`, …) **ne** hozd be külön
+> tárgyként — a GLB már tartalmazza őket. Az admin meg is jelöli ezeket „textúra?” címkével.
 
 A videók a falon **némán, ciklusban** futnak, és csak akkor indulnak el, ha a látogató 22 egységnél
 közelebb van — így egyszerre sosem dekódol sokat a gép. A hang a nagy nézetben kapcsol be
