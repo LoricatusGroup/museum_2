@@ -76,12 +76,29 @@ megnézi, tényleg olvasható-e az a konkrét fájl.
 
 ## Napi használat
 
-1. Nyisd meg az `admin.html`-t, jelentkezz be.
-2. **Google Drive link** fül: illeszd be egy *konkrét fájl* linkjét (nem mappáét), töltsd ki a
-   címet és a többi mezőt, majd **Hozzáadás és betöltés**.
-   Vagy **Fájl feltöltése** fül: húzd be a fájlt közvetlenül.
-3. A tárgy állapota `várakozik → feldolgozás → kész`. Ha `kész` és „látható", már benne van a
-   múzeumban (frissítsd az oldalt).
+Az admin két fülből áll.
+
+### „Drive mappa” — a legegyszerűbb út
+
+1. Egyszer beilleszted a mappa linkjét, és **Mentés**. Ez közös beállítás: a kollégáknak
+   nem kell újra megadniuk.
+2. A rendszer listázza a mappa tartalmát — az almappákba bele lehet kattintani.
+   Amit már behoztál, azt **✓ „behozva”** jelöléssel, halványan mutatja, így nem lesz duplikátum.
+3. Kipipálod, ami kell, és **Kijelöltek behozása**. A cím a fájlnévből jön, utólag szerkeszthető.
+
+> **Fontos:** a mappa megosztása önmagában még nem teszi ki az anyagot a múzeumba —
+> csak a *hozzáférést* adja meg. A behozás mindig tudatos lépés, hogy ne kerüljön ki
+> véletlenül olyasmi, amit valaki csak odamásolt.
+
+### „Kiállítás” — a kikerült anyag kezelése
+
+- **Húzd be a fájlt** a szaggatott mezőbe (vagy kattints rá) — Google nélkül, közvetlenül.
+- **+ Új tárgy**: egyetlen Drive fájl linkjéből.
+- Kártyánként: **Szerkesztés** (cím, szerző, év, leírás, fordítások, szint),
+  **Megjelenít / Elrejt**, **Törlés**.
+- A kártyákat **húzással átrendezheted** — ez adja a falakon a sorrendet.
+- Az állapot `várakozik → feldolgozás → kész`. Ha `kész` és „látható”, már benne van a
+  múzeumban (frissítsd az oldalt).
 
 **Mezők:** a *Szint* dönti el, melyik emeleten jelenik meg (földszint / 1. / 2.), a *Sorrend*
 pedig a falhelyek kiosztásának sorrendjét. A feltöltött anyag **elsőbbséget élvez** a beépített
