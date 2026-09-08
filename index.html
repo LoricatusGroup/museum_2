@@ -609,6 +609,20 @@
       align-items: center
     }
 
+    /* Céges kép / videó nagy nézete — a festmény-vászonnal azonos keretezéssel */
+    #art-media-img, #art-video {
+      display: none;
+      max-width: 100%;
+      max-height: 62vh;
+      border-radius: 3px;
+      object-fit: contain;
+      background: #0d0b07;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9), 0 0 0 6px #886622, 0 0 0 10px #1a1005;
+      transform: scale(0.9);
+      transition: transform 0.5s;
+    }
+    #art-viewer.show #art-media-img, #art-viewer.show #art-video { transform: scale(1); }
+
     #art-canvas-zoom {
       box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9), 0 0 0 6px #886622, 0 0 0 10px #1a1005;
       max-width: 100%;
@@ -730,6 +744,8 @@
     <div id="art-close" role="button" tabindex="0" aria-label="Bezárás">X</div>
     <div id="art-canvas-container">
       <canvas id="art-canvas-zoom"></canvas>
+      <img id="art-media-img" alt="">
+      <video id="art-video" controls playsinline preload="metadata"></video>
       <iframe id="sketchfab-viewer" allow="autoplay; fullscreen; xr-spatial-tracking" xr-spatial-tracking
         execution-while-out-of-viewport execution-while-not-rendered web-share src=""></iframe>
       <div id="art-title"></div>
@@ -1742,6 +1758,129 @@
         if (camera.position.distanceTo(rec.group.position) < LAZY_DIST) loadPendingModel(rec);
       }
     }
+    // ══════════════════════════════════════
+    //  CÉGES MÉDIA (Supabase) — kép / videó falikeretek
+    // ══════════════════════════════════════
+    //  A Supabase Storage stabil, CORS-os URL-t ad; a nyers Google Drive
+    //  linkről a böngésző NEM tudná betölteni (nincs rajta CORS-fejléc).
+    var mediaItems = [];                       // a betöltött kép/videó tárgyak
+    // A sor kulcsa a PADLÓ VILÁG-Y értéke (0 / 14 / 21) — a helykiosztás is ezzel dolgozik,
+    // nem az emelet sorszámával. (Az adatbázisban 0/1/2 szerepel, azt itt váltjuk át.)
+    var mediaQueue = { 0: [], 14: [], 21: [] };
+    var videoScreens = [];                     // a teremben futó videók (közelség alapján indulnak)
+
+    // A feltöltött média ELSŐBBSÉGET élvez a demó festményekkel szemben:
+    // sorban elveszi a falhelyeket azon a szinten, ahová szánták.
+    function takeMediaFor(fy) {
+      var q = mediaQueue[fy];
+      return (q && q.length) ? q.shift() : null;
+    }
+
+    // A textúrát "cover" módon igazítjuk a kerethez: kitölti, a fölösleget levágja
+    // (így a különböző képarányú céges fotók sem torzulnak el).
+    function coverFit(tx, imgAspect, frameAspect) {
+      if (!isFinite(imgAspect) || imgAspect <= 0) return;
+      if (imgAspect > frameAspect) {
+        tx.repeat.x = frameAspect / imgAspect; tx.offset.x = (1 - tx.repeat.x) / 2;
+      } else {
+        tx.repeat.y = imgAspect / frameAspect; tx.offset.y = (1 - tx.repeat.y) / 2;
+      }
+    }
+
+    // Nyelvfüggő cím/leírás: a dinamikus tárgyaknál a saját fordítás nyer,
+    // a beépítetteknél marad a régi ARTNAMES-alapú keresés.
+    function mTitle(ud) {
+      if (ud && ud.t18 && ud.t18[LANG]) return ud.t18[LANG];
+      return tName(ud ? ud.name : '');
+    }
+    function mDesc(ud) {
+      if (ud && ud.d18) return ud.d18[LANG] || ud.d18.hu || '';
+      return '';
+    }
+
+    // Kordon a fal elé (a festményeknél és a médiánál is ugyanaz)
+    function addCordonAt(sp, fy, poleGeoms, ropeGeoms) {
+      var isVert = (Math.abs(sp.ry) === Math.PI / 2);
+      if (isVert) {
+        var px = sp.x < 0 ? sp.x + 1.5 : sp.x - 1.5;
+        for (var dz = -1.5; dz <= 1.5; dz += 3) {
+          poleGeoms.push(new THREE.CylinderGeometry(0.03, 0.03, 0.9, 8).translate(px, 0.45 + fy, sp.z + dz));
+          poleGeoms.push(new THREE.SphereGeometry(0.05, 8, 8).translate(px, 0.92 + fy, sp.z + dz));
+        }
+        ropeGeoms.push(new THREE.CylinderGeometry(0.012, 0.012, 3, 6).rotateX(Math.PI / 2).translate(px, 0.78 + fy, sp.z));
+        cordons.push({ minX: px - 0.4, maxX: px + 0.4, minZ: sp.z - 1.7, maxZ: sp.z + 1.7, y: fy });
+      } else {
+        var pz = sp.z < 0 ? sp.z + 1.5 : sp.z - 1.5;
+        for (var dx = -1.5; dx <= 1.5; dx += 3) {
+          poleGeoms.push(new THREE.CylinderGeometry(0.03, 0.03, 0.9, 8).translate(sp.x + dx, 0.45 + fy, pz));
+          poleGeoms.push(new THREE.SphereGeometry(0.05, 8, 8).translate(sp.x + dx, 0.92 + fy, pz));
+        }
+        ropeGeoms.push(new THREE.CylinderGeometry(0.012, 0.012, 3, 6).rotateZ(Math.PI / 2).translate(sp.x, 0.78 + fy, pz));
+        cordons.push({ minX: sp.x - 1.7, maxX: sp.x + 1.7, minZ: pz - 0.4, maxZ: pz + 0.4, y: fy });
+      }
+    }
+
+    // Egy céges kép/videó falikeretbe helyezése
+    function buildMediaFrame(sp, fy, item, frameMat, innerMat, plaqueMat, poleGeoms, ropeGeoms) {
+      var aH = 2.2, aW = 3.35, fp = 0.15;  // szélesvásznú keret (fotó/videó)
+      var group = new THREE.Group();
+
+      var t = new THREE.Mesh(new THREE.BoxGeometry(aW + fp * 2, fp, 0.08), frameMat); t.position.y = aH / 2 + fp / 2; group.add(t);
+      var b = new THREE.Mesh(new THREE.BoxGeometry(aW + fp * 2, fp, 0.08), frameMat); b.position.y = -aH / 2 - fp / 2; group.add(b);
+      var l = new THREE.Mesh(new THREE.BoxGeometry(fp, aH + fp * 2, 0.08), frameMat); l.position.x = -aW / 2 - fp / 2; group.add(l);
+      var r = new THREE.Mesh(new THREE.BoxGeometry(fp, aH + fp * 2, 0.08), frameMat); r.position.x = aW / 2 + fp / 2; group.add(r);
+      var iw = 0.04;
+      var it = new THREE.Mesh(new THREE.BoxGeometry(aW, iw, 0.09), innerMat); it.position.y = aH / 2; group.add(it);
+      var ib = new THREE.Mesh(new THREE.BoxGeometry(aW, iw, 0.09), innerMat); ib.position.y = -aH / 2; group.add(ib);
+
+      // A vászon: amíg tölt, sötét lap áll benne (nem villan fehéret)
+      var pt = new THREE.Mesh(
+        new THREE.PlaneGeometry(aW, aH),
+        new THREE.MeshBasicMaterial({ color: 0x14110c })
+      );
+      pt.position.z = 0.01; group.add(pt);
+
+      if (item.kind === 'video') {
+        // Némán, ciklusban megy a falon; a hang a nagy nézetben kapcsol be.
+        var vd = document.createElement('video');
+        vd.crossOrigin = 'anonymous';
+        vd.loop = true; vd.muted = true; vd.playsInline = true; vd.preload = 'none';
+        vd.setAttribute('playsinline', ''); vd.setAttribute('muted', '');
+        vd.src = item.public_url;
+        var vt = new THREE.VideoTexture(vd);
+        vt.minFilter = THREE.LinearFilter; vt.magFilter = THREE.LinearFilter;
+        pt.material = new THREE.MeshBasicMaterial({ map: vt }); // a videó adja a saját fényét
+        videoScreens.push({ el: vd, group: group, started: false });
+      } else {
+        var tl = new THREE.TextureLoader();
+        tl.setCrossOrigin('anonymous');
+        tl.load(item.public_url, function (tx) {
+          var im = tx.image;
+          coverFit(tx, (im && im.width && im.height) ? im.width / im.height : 1, aW / aH);
+          tx.needsUpdate = true;
+          pt.material = new THREE.MeshStandardMaterial({ map: tx, roughness: 0.85 });
+        }, undefined, function () {
+          console.warn('Kép betöltése sikertelen:', item.public_url);
+        });
+      }
+
+      group.position.set(sp.x, 2.6 + fy, sp.z);
+      group.rotation.y = sp.ry;
+      group.userData = {
+        name: item.title, artist: item.artist || '', year: item.year || '', fy: fy,
+        isMedia: true, mediaKind: item.kind, mediaUrl: item.public_url,
+        sourceLink: item.source_link || '',
+        t18: { hu: item.title, en: item.title_en || item.title, it: item.title_it || item.title },
+        d18: { hu: item.description || '', en: item.description_en || item.description || '', it: item.description_it || item.description || '' }
+      };
+      scene.add(group); artMeshes.push(group);
+
+      var plaque = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.3, 0.03), plaqueMat);
+      plaque.position.set(sp.x, 1.2 + fy, sp.z); plaque.rotation.y = sp.ry; scene.add(plaque);
+
+      addCordonAt(sp, fy, poleGeoms, ropeGeoms);
+    }
+
     function placeAllArt() {
       pendingModels.length = 0; cordons.length = 0; // tiszta listák minden felépítéskor
       // Artwork spots per wing
@@ -1788,6 +1927,14 @@
         var art = paintings[i % paintings.length], sp = spots[i];
         var fy = sp.fy || 0; // emeleti kép-helyeknél a padlószint
 
+        // A cég feltöltött anyaga elsőbbséget élvez: ha erre a szintre maradt még
+        // kiosztatlan kép/videó, az kerül ide a demó pixel-art festmény helyett.
+        var mItem = takeMediaFor(fy);
+        if (mItem) {
+          buildMediaFrame(sp, fy, mItem, frameMat, innerMat, plaqueMat, poleGeoms, ropeGeoms);
+          continue;
+        }
+
         // Texture
         var tmp = document.createElement('canvas'); tmp.width = art.pw; tmp.height = art.ph;
         art.paint(tmp.getContext('2d'));
@@ -1823,25 +1970,8 @@
         var plaque = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.3, 0.03), plaqueMat);
         plaque.position.set(sp.x, 1.2 + fy, sp.z); plaque.rotation.y = sp.ry; scene.add(plaque);
 
-        // Ropes (kordon) — geometriákat gyűjtünk, a loop után EGY mesh-be olvasztjuk (draw-call csökkentés)
-        var isVert = (Math.abs(sp.ry) === Math.PI / 2); // vertical wing (north) vs horizontal
-        if (isVert) {
-          var px = sp.x < 0 ? sp.x + 1.5 : sp.x - 1.5;
-          for (var dz = -1.5; dz <= 1.5; dz += 3) {
-            poleGeoms.push(new THREE.CylinderGeometry(0.03, 0.03, 0.9, 8).translate(px, 0.45 + fy, sp.z + dz));
-            poleGeoms.push(new THREE.SphereGeometry(0.05, 8, 8).translate(px, 0.92 + fy, sp.z + dz));
-          }
-          ropeGeoms.push(new THREE.CylinderGeometry(0.012, 0.012, 3, 6).rotateX(Math.PI / 2).translate(px, 0.78 + fy, sp.z));
-          cordons.push({ minX: px - 0.4, maxX: px + 0.4, minZ: sp.z - 1.7, maxZ: sp.z + 1.7, y: fy });
-        } else {
-          var pz = sp.z < 0 ? sp.z + 1.5 : sp.z - 1.5;
-          for (var dx = -1.5; dx <= 1.5; dx += 3) {
-            poleGeoms.push(new THREE.CylinderGeometry(0.03, 0.03, 0.9, 8).translate(sp.x + dx, 0.45 + fy, pz));
-            poleGeoms.push(new THREE.SphereGeometry(0.05, 8, 8).translate(sp.x + dx, 0.92 + fy, pz));
-          }
-          ropeGeoms.push(new THREE.CylinderGeometry(0.012, 0.012, 3, 6).rotateZ(Math.PI / 2).translate(sp.x, 0.78 + fy, pz));
-          cordons.push({ minX: sp.x - 1.7, maxX: sp.x + 1.7, minZ: pz - 0.4, maxZ: pz + 0.4, y: fy });
-        }
+        // Kordon a kép elé (ugyanaz a segédfüggvény, mint a céges médiánál)
+        addCordonAt(sp, fy, poleGeoms, ropeGeoms);
 
       } // Correctly close the paintings loop
 
@@ -1892,6 +2022,26 @@
         scene.add(sfGrp); artMeshes.push(sfGrp);
       }
     } // End of placeAllArt
+
+    // A falra vetített videók csak közelben futnak — távol megállnak,
+    // így egyszerre sosem dekódol sok videót a gép.
+    function updateVideos() {
+      if (!videoScreens.length || typeof camera === 'undefined' || !camera) return;
+      for (var i = 0; i < videoScreens.length; i++) startOrStop(videoScreens[i]);
+    }
+    function startOrStop(v) {
+      var d = camera.position.distanceTo(v.group.position);
+      if (d < 22) {
+        if (v.el.paused && !v.pending) {
+          v.pending = true;
+          var pr = v.el.play();
+          if (pr && pr.then) pr.then(function () { v.pending = false; }, function () { v.pending = false; });
+          else v.pending = false;
+        }
+      } else if (!v.el.paused) {
+        v.el.pause();
+      }
+    }
 
     var lightAnchors = [], lightPool = [], spotAnchors = [], spotPool = [];
     function updateLights() {
@@ -2029,6 +2179,7 @@
       requestAnimationFrame(loop);
       updateLazyModels();
       updateLights();
+      updateVideos();
       if (!uiCache) uiCache = {
         panel: document.getElementById('info-panel'), iT: document.getElementById('iT'),
         iA: document.getElementById('iA'), iY: document.getElementById('iY'),
@@ -2081,7 +2232,7 @@
       for (var i = 0; i < artMeshes.length; i++) { if (artMeshes[i].userData.isBench || artMeshes[i].userData.name === undefined) continue; var d = camera.position.distanceTo(artMeshes[i].position); if (d < closestD) { closestD = d; closest = artMeshes[i]; } }
       if (closest && closestD < 6) {
         panel.classList.add('visible');
-        var uT = tName(closest.userData.name);
+        var uT = mTitle(closest.userData);
         if (closest.userData.sourceLink) {
           uiCache.iT.innerHTML = "<a href='" + safeUrl(closest.userData.sourceLink) + "' target='_blank' rel='noopener' style='color:#aa9060; text-decoration:none;'>" + escHtml(uT) + "</a>";
         } else {
@@ -2331,6 +2482,8 @@
     function closeArt() {
       document.getElementById('art-viewer').classList.remove('show');
       document.getElementById('sketchfab-viewer').src = ""; // Állítsuk le a 3D modellt, ha bezárja
+      var av = document.getElementById('art-video');
+      if (av) { av.pause(); av.removeAttribute('src'); av.load(); } // a videó ne szóljon tovább a háttérben
       currentArt = null;
     }
     (function () {
@@ -2361,8 +2514,8 @@
       currentArt = obj; // nyelvváltáskor újrarajzoláshoz
 
       var titleHtml = ud.sourceLink
-        ? "<a href='" + safeUrl(ud.sourceLink) + "' target='_blank' rel='noopener' style='color:inherit;text-decoration:underline;'>" + escHtml(tName(ud.name)) + "</a> <br><span style='font-size:0.6em;color:#da0'>" + escHtml(yearLabel(ud.year)) + "</span>"
-        : escHtml(tName(ud.name)) + " <br><span style='font-size:0.6em;color:#da0'>" + escHtml(yearLabel(ud.year)) + "</span>";
+        ? "<a href='" + safeUrl(ud.sourceLink) + "' target='_blank' rel='noopener' style='color:inherit;text-decoration:underline;'>" + escHtml(mTitle(ud)) + "</a> <br><span style='font-size:0.6em;color:#da0'>" + escHtml(yearLabel(ud.year)) + "</span>"
+        : escHtml(mTitle(ud)) + " <br><span style='font-size:0.6em;color:#da0'>" + escHtml(yearLabel(ud.year)) + "</span>";
 
       document.getElementById('art-title').innerHTML = titleHtml;
 
@@ -2371,8 +2524,34 @@
 
       var viewer = document.getElementById('art-viewer');
       var sfViewer = document.getElementById('sketchfab-viewer');
+      var mImg = document.getElementById('art-media-img');
+      var mVid = document.getElementById('art-video');
+      // minden nyitáskor alaphelyzet: a céges média elemek rejtve, a videó megállítva
+      mImg.style.display = 'none';
+      mVid.style.display = 'none';
+      mVid.pause();
 
-      if (ud.glbUrl) {
+      if (ud.isMedia) {
+        // A cég feltöltött képe / videója nagy nézetben (a videó itt már hanggal megy)
+        document.getElementById('art-desc').innerHTML =
+          (ud.artist ? t('byMaker') + escHtml(ud.artist) : '')
+          + (mDesc(ud) ? "<p>" + escHtml(mDesc(ud)) + "</p>" : '');
+        zc.style.display = 'none';
+        sfViewer.style.display = 'none';
+        sfViewer.src = "";
+        viewer.classList.remove('sculpture-mode');
+        if (ud.mediaKind === 'video') {
+          mVid.src = ud.mediaUrl;
+          mVid.muted = false;
+          mVid.style.display = 'block';
+          var vp = mVid.play();
+          if (vp && vp.catch) vp.catch(function () { /* az autoplay-tiltás nem hiba: ott a lejátszó gomb */ });
+        } else {
+          mImg.src = ud.mediaUrl;
+          mImg.alt = mTitle(ud);
+          mImg.style.display = 'block';
+        }
+      } else if (ud.glbUrl) {
         document.getElementById('art-desc').innerHTML = t('byMaker') + escHtml(tName(ud.artist)) + "<p>" + t('descGlb') + "</p><p style='font-size:0.7em;color:#aaa'>" + t('dragMouse') + "</p>";
         zc.style.display = 'none';
         sfViewer.style.display = 'none';
@@ -2417,22 +2596,67 @@
       viewer.classList.add('show');
     }
 
-    // Megpróbáljuk betölteni az assets/exhibits.json-t, ha létezik, és utána setup()
-    fetch('assets/exhibits.json')
-      .then(function (res) { return res.ok ? res.json() : Promise.reject('No custom models file.'); })
-      .then(function (data) {
-        if (data && data.length > 0) {
-          // Ha van generált adatunk, felülírjuk vele a beépített modellek listáját!
-          sketchfabModels = data.map(function (d) {
-            return { name: d.title, artist: d.author, year: d.year || '', glbUrl: d.modelUrl, sourceLink: d.sourceLink };
+    // ══════════════════════════════════════
+    //  TARTALOM BETÖLTÉSE
+    // ══════════════════════════════════════
+    //  1) Supabase — a cég az admin felületen feltöltött anyaga (kép/videó/3D).
+    //  2) assets/exhibits.json — a régi, generált modell-lista (tartalék).
+    //  3) beépített demó — ha egyik sem érhető el.
+    //  A kulcs szándékosan publikus ("publishable"): az adatokat a Row Level
+    //  Security védi, és a múzeum csak a publikált, kész tárgyakat látja.
+    var SB_URL = 'https://kdvyewzykodtyqxgnnxa.supabase.co';
+    var SB_KEY = 'sb_publishable_GF_VJz-zwX5uLCRR8pQu6Q_gu-_Vebf';
+
+    function applyExhibits(rows) {
+      var models = [];
+      mediaItems = []; mediaQueue = { 0: [], 14: [], 21: [] };
+      for (var i = 0; i < rows.length; i++) {
+        var d = rows[i];
+        if (!d.public_url) continue;
+        if (d.kind === 'model') {
+          models.push({
+            name: d.title, artist: d.artist || '', year: d.year || '',
+            glbUrl: d.public_url, sourceLink: d.source_link || ''
           });
+        } else if (d.kind === 'image' || d.kind === 'video') {
+          // emelet sorszáma (0/1/2) → padló világ-Y (0/14/21)
+          var fl = FLOORS[(d.floor === 1 || d.floor === 2) ? d.floor : 0];
+          mediaItems.push(d);
+          mediaQueue[fl].push(d);
         }
-        setup();
+      }
+      if (models.length) sketchfabModels = models;
+      console.log('Supabase tartalom: ' + models.length + ' modell, ' + mediaItems.length + ' kép/videó.');
+    }
+
+    function loadFromJson() {
+      return fetch('assets/exhibits.json')
+        .then(function (res) { return res.ok ? res.json() : Promise.reject('nincs exhibits.json'); })
+        .then(function (data) {
+          if (data && data.length > 0) {
+            sketchfabModels = data.map(function (d) {
+              return { name: d.title, artist: d.author, year: d.year || '', glbUrl: d.modelUrl, sourceLink: d.sourceLink };
+            });
+          }
+        });
+    }
+
+    fetch(SB_URL + '/rest/v1/exhibits'
+      + '?select=id,kind,title,title_en,title_it,artist,year,description,description_en,description_it,'
+      + 'public_url,source_link,floor,sort_order'
+      + '&is_published=eq.true&status=eq.ready&public_url=not.is.null'
+      + '&order=floor.asc,sort_order.asc', { headers: { apikey: SB_KEY } })
+      .then(function (res) { return res.ok ? res.json() : Promise.reject('Supabase HTTP ' + res.status); })
+      .then(function (rows) {
+        if (rows && rows.length) { applyExhibits(rows); return; }
+        return loadFromJson(); // üres adatbázis → maradjon a régi lista
       })
       .catch(function (e) {
-        console.log("Using default Sketchfab models logic.", e);
-        setup();
-      });
+        console.warn('Supabase nem elérhető, tartalék forrás következik.', e);
+        return loadFromJson();
+      })
+      .catch(function (e) { console.log('Beépített demó tartalom marad.', e); })
+      .then(function () { setup(); }, function () { setup(); });
 
     var viewer = document.getElementById('art-viewer');
     function startDrag(e) { if (!activeSculpture) return; viewerDragging = true; vDragX = (e.touches ? e.touches[0].clientX : e.clientX); }

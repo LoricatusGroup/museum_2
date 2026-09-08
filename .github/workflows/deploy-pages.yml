@@ -24,16 +24,19 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Validate index.html (ne deployoljunk törött JS-t)
+      - name: Validate HTML (ne deployoljunk törött JS-t)
         run: |
           node -e '
           const fs=require("fs");
-          const h=fs.readFileSync("index.html","utf8");
-          const blocks=[...h.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m=>m[1]);
-          if(!blocks.length){console.error("Nincs inline script az index.html-ben!");process.exit(1);}
-          const body=blocks.sort((a,b)=>b.length-a.length)[0];
-          try{ new Function(body); }catch(e){ console.error("Szintaxis hiba az index.html inline scriptjében:", e.message); process.exit(1); }
-          console.log("index.html inline script szintaxis OK");
+          for (const f of ["index.html","admin.html"]) {
+            if(!fs.existsSync(f)) continue;
+            const h=fs.readFileSync(f,"utf8");
+            const blocks=[...h.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m=>m[1]);
+            if(!blocks.length){console.error("Nincs inline script:",f);process.exit(1);}
+            const body=blocks.sort((a,b)=>b.length-a.length)[0];
+            try{ new Function(body); }catch(e){ console.error("Szintaxis hiba ("+f+"):", e.message); process.exit(1); }
+            console.log(f+" inline script szintaxis OK");
+          }
           '
       - name: Setup Pages
         uses: actions/configure-pages@v5
@@ -45,7 +48,7 @@ jobs:
                  tools uploads .github releases node_modules \
                  package.json package-lock.json .gitignore \
                  errors.log log.txt test_camera.js upgrade.py \
-                 museum.html museum_backup.html README.md
+                 museum.html museum_backup.html README.md ADMIN_SETUP.md
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
