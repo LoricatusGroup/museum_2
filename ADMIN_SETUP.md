@@ -80,8 +80,10 @@ Az admin két fülből áll.
 
 ### „Drive mappa” — a legegyszerűbb út
 
-1. Egyszer beilleszted a mappa linkjét, és **Mentés**. Ez közös beállítás: a kollégáknak
-   nem kell újra megadniuk.
+1. Beilleszted a mappa linkjét, és **Hozzáadás**. **Több mappát is felvehetsz** (pl. külön
+   a fotóknak és a 3D modelleknek) — a felvett mappák gombként jelennek meg, közöttük
+   kattintással váltasz, az `×` pedig kiveszi a listából (a Drive-on nem történik semmi).
+   A lista közös beállítás: a kollégáknak nem kell újra megadniuk.
 2. A rendszer listázza a mappa tartalmát — az almappákba bele lehet kattintani.
    Amit már behoztál, azt **✓ „behozva”** jelöléssel, halványan mutatja, így nem lesz duplikátum.
 3. Kipipálod, ami kell, és **Kijelöltek behozása**. A cím a fájlnévből jön, utólag szerkeszthető.

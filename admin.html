@@ -107,6 +107,12 @@
     .chip:hover { color: var(--text); border-color: var(--gold-dim); }
     .chip[aria-pressed="true"] { background: var(--gold-glow); border-color: var(--gold); color: var(--gold); }
     .chip .n { opacity: .6; margin-left: .25em; font-variant-numeric: tabular-nums; }
+    .chip.folder-chip { display: inline-flex; align-items: center; gap: .4em; padding-right: .4em; }
+    .chip .rm {
+      display: grid; place-items: center; width: 1.15em; height: 1.15em; border-radius: 50%;
+      border: none; background: transparent; color: inherit; opacity: .5; padding: 0;
+    }
+    .chip .rm:hover { opacity: 1; background: rgba(210,104,92,.2); color: #f0a79e; }
 
     /* ───── Szint-szekciók ───── */
     .floor { margin-bottom: 1.5rem; }
@@ -324,18 +330,20 @@
           <button class="btn sm ghost" id="drive-reload"><span id="ic-ref2"></span><span class="lbl">Frissítés</span></button>
         </div>
 
-        <div class="field" style="max-width:640px">
-          <label for="folder-url">A figyelt mappa linkje</label>
+        <div class="field" style="max-width:660px">
+          <label for="folder-url">Új mappa hozzáadása</label>
           <div style="display:flex;gap:.5rem">
             <input id="folder-url" placeholder="https://drive.google.com/drive/folders/…">
-            <button class="btn" id="folder-save">Mentés</button>
+            <button class="btn" id="folder-save">Hozzáadás</button>
           </div>
           <div class="hint">
-            A mappát meg kell osztani a service accounttal (Olvasó jog) — a címét a
-            <b>Kapcsolat</b> gomb írja ki. A beállítás közös, a kollégáknak nem kell újra megadniuk.
+            <b>Több mappát is megadhatsz</b> — mindegyiket meg kell osztani a service accounttal
+            (Olvasó jog), a címét a <b>Kapcsolat</b> gomb írja ki. A lista közös,
+            a kollégáknak nem kell újra megadniuk.
           </div>
         </div>
 
+        <div id="folder-chips" class="chips" style="margin-bottom:.9rem"></div>
         <div id="crumbs" class="crumbs"></div>
         <div id="drive-list"></div>
 
@@ -429,6 +437,7 @@
 
     var items = [], selected = {}, filterFloor = 'all', query = '';
     var drivePath = [], driveFiles = [], driveFolders = [], driveSkipped = [];
+    var savedFolders = [];   // a figyelt Drive-mappák: [{id, name, url}]
     var FLOORS = ['Földszint', '1. emelet', '2. emelet'];
 
     function el(id) { return document.getElementById(id); }
@@ -1053,36 +1062,94 @@
     async function loadSettings() {
       try {
         var r = await api('/rest/v1/app_settings?key=eq.drive_folder&select=value');
-        if (!r.ok) return;
+        if (!r.ok) { showDriveHint(); return; }
         var rows = await r.json();
-        if (rows.length && rows[0].value && rows[0].value.url) {
-          el('folder-url').value = rows[0].value.url;
-          openFolder(rows[0].value.url);
-        } else { showDriveHint(); }
+        var v = rows.length ? rows[0].value : null;
+        // A korábbi egymappás alak ({url: "..."}) is olvasható marad
+        savedFolders = (v && Array.isArray(v.folders)) ? v.folders
+          : (v && v.url) ? [{ url: v.url, name: 'Mappa' }] : [];
+        renderFolderChips();
+        if (savedFolders.length) openFolder(savedFolders[0].id || savedFolders[0].url);
+        else showDriveHint();
       } catch (e) { showDriveHint(); }
     }
     function showDriveHint() {
       el('drive-list').innerHTML = '<div class="empty"><div class="ic">' +
         IC.folder.replace('width="16" height="16"', 'width="44" height="44"') + '</div>' +
-        'Add meg a mappa linkjét, és listázom a tartalmát.</div>';
+        'Add meg egy megosztott mappa linkjét, és listázom a tartalmát.<br>' +
+        'Több mappát is felvehetsz.</div>';
+      el('crumbs').innerHTML = '';
+      el('import-bar').style.display = 'none';
     }
+
+    // A megnyitott mappa hivatkozása (almappában a legutóbbi morzsa, különben az első mentett)
+    function currentFolderRef() {
+      if (drivePath.length) return drivePath[drivePath.length - 1].id;
+      if (savedFolders.length) return savedFolders[0].id || savedFolders[0].url;
+      return '';
+    }
+
+    async function saveFolders() {
+      var r = await api('/rest/v1/app_settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates' },
+        body: JSON.stringify({ key: 'drive_folder', value: { folders: savedFolders } })
+      });
+      if (!r.ok) throw new Error((await r.text()).slice(0, 160));
+    }
+    function renderFolderChips() {
+      var cur = drivePath.length ? drivePath[0].id : null;
+      el('folder-chips').innerHTML = savedFolders.map(function (f, i) {
+        return '<span class="chip folder-chip" data-open="' + i + '"' +
+          ' aria-pressed="' + (!!cur && f.id === cur) + '" role="button" tabindex="0">' +
+          esc(f.name || 'Mappa') +
+          '<button class="rm" data-del="' + i + '" title="Eltávolítás a listából">' + IC.x + '</button>' +
+          '</span>';
+      }).join('');
+    }
+    el('folder-chips').addEventListener('click', async function (e) {
+      var del = e.target.closest('button[data-del]');
+      if (del) {
+        e.stopPropagation();
+        var gone = savedFolders.splice(+del.getAttribute('data-del'), 1)[0];
+        try {
+          await saveFolders();
+          toast((gone.name || 'A mappa') + ' eltávolítva a listából.', 'ok', 2600);
+        } catch (err) { toast('Mentés sikertelen: ' + err.message, 'err'); }
+        drivePath = [];
+        renderFolderChips();
+        if (savedFolders.length) openFolder(savedFolders[0].id || savedFolders[0].url);
+        else showDriveHint();
+        return;
+      }
+      var chip = e.target.closest('[data-open]'); if (!chip) return;
+      drivePath = [];
+      var f = savedFolders[+chip.getAttribute('data-open')];
+      openFolder(f.id || f.url);
+    });
+
     el('folder-save').addEventListener('click', async function () {
       var url = el('folder-url').value.trim(); if (!url) return;
+      var btn = this; btn.disabled = true;
       try {
-        var r = await api('/rest/v1/app_settings', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates' },
-          body: JSON.stringify({ key: 'drive_folder', value: { url: url } })
-        });
-        if (!r.ok) throw new Error((await r.text()).slice(0, 160));
-        toast('Mappa elmentve.', 'ok');
-        drivePath = []; openFolder(url);
-      } catch (e) { toast('Mentés sikertelen: ' + e.message, 'err'); }
+        // Előbb megnyitjuk: így derül ki, elérhető-e, és így tudjuk meg a nevét
+        var out = await fn({ list_folder: url });
+        if (savedFolders.some(function (f) { return f.id === out.folder.id; })) {
+          throw new Error('Ez a mappa már szerepel a listában.');
+        }
+        savedFolders.push({ id: out.folder.id, name: out.folder.name, url: url });
+        await saveFolders();
+        el('folder-url').value = '';
+        toast('Hozzáadva: ' + out.folder.name, 'ok');
+        drivePath = [];
+        openFolder(out.folder.id);
+      } catch (e) { toast('Nem sikerült hozzáadni: ' + e.message, 'err'); }
+      finally { btn.disabled = false; }
     });
 
     // ══════════ Drive böngésző ══════════
     el('drive-reload').addEventListener('click', function () {
-      var cur = drivePath.length ? drivePath[drivePath.length - 1].id : el('folder-url').value.trim();
+      var cur = currentFolderRef();
       if (cur) openFolder(cur, true);
     });
     async function openFolder(ref, keepPath) {
@@ -1098,6 +1165,7 @@
           else drivePath.push({ id: out.folder.id, name: out.folder.name });
         }
         renderDrive();
+        renderFolderChips();
       } catch (e) { el('drive-list').innerHTML = '<div class="empty">' + esc(e.message) + '</div>'; }
     }
     function renderDrive() {
@@ -1215,7 +1283,7 @@
           }
         }
       }
-      var cur = drivePath.length ? drivePath[drivePath.length - 1].id : el('folder-url').value.trim();
+      var cur = currentFolderRef();
       if (cur) openFolder(cur, true);
     }
 
@@ -1250,7 +1318,7 @@
       btn.disabled = false;
       toast(done + ' fájl behozva' + (failed ? ', ' + failed + ' sikertelen' : '') + '.', failed ? 'err' : 'ok');
       await loadItems();
-      var cur = drivePath.length ? drivePath[drivePath.length - 1].id : el('folder-url').value.trim();
+      var cur = currentFolderRef();
       if (cur) openFolder(cur, true);
     });
 
