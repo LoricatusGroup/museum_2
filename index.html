@@ -1768,6 +1768,27 @@
     // nem az emelet sorszámával. (Az adatbázisban 0/1/2 szerepel, azt itt váltjuk át.)
     var mediaQueue = { 0: [], 14: [], 21: [] };
     var videoScreens = [];                     // a teremben futó videók (közelség alapján indulnak)
+    var mediaFrames = [];                      // a falikeretek: a textúrát csak közelben tartjuk a GPU-n
+
+    // A GPU-n a kép NEM tömörítve él: szélesség × magasság × 4 bájt (+~33% mipmap).
+    // Egy 6000×4000-es fotó így ~128 MB — ezért a hosszabb oldalt levágjuk.
+    // A keret a képernyőn ~1100 px (1080p) / ~2200 px (4K) széles, tehát e fölött
+    // úgysem látszana több.
+    var MAX_TEX = 2048;
+    var TEX_LOAD_DIST = 30;    // ennyin belül töltjük be
+    var TEX_DROP_DIST = 48;    // ennyin túl elengedjük (a kettő közti sáv a pattogás ellen)
+    var MAX_TEX_LOADING = 3;   // egyszerre ennyi töltés fusson
+
+    function shrinkImage(img) {
+      var w = img.width, h = img.height, m = Math.max(w, h);
+      if (!m || m <= MAX_TEX) return img;
+      var k = MAX_TEX / m;
+      var c = document.createElement('canvas');
+      c.width = Math.max(1, Math.round(w * k));
+      c.height = Math.max(1, Math.round(h * k));
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      return c;
+    }
 
     // A feltöltött média ELSŐBBSÉGET élvez a demó festményekkel szemben:
     // sorban elveszi a falhelyeket azon a szinten, ahová szánták.
@@ -1873,15 +1894,12 @@
         pt.material = new THREE.MeshBasicMaterial({ map: vt }); // a videó adja a saját fényét
         videoScreens.push({ el: vd, group: group, started: false });
       } else {
-        var tl = new THREE.TextureLoader();
-        tl.setCrossOrigin('anonymous');
-        tl.load(item.public_url, function (tx) {
-          var im = tx.image;
-          if (im && im.width && im.height) applyAspect(im.width / im.height);
-          tx.needsUpdate = true;
-          pt.material = new THREE.MeshStandardMaterial({ map: tx, roughness: 0.85 });
-        }, undefined, function () {
-          console.warn('Kép betöltése sikertelen:', item.public_url);
+        // A képet NEM töltjük be azonnal: csak akkor, ha a látogató a közelébe ér
+        // (lásd updateMediaTextures) — különben minden kép egyszerre foglalná a GPU-t.
+        mediaFrames.push({
+          group: group, plane: pt, url: item.public_url,
+          applyAspect: applyAspect, blank: pt.material,
+          loaded: false, loading: false, failed: false
         });
       }
 
@@ -1904,6 +1922,7 @@
 
     function placeAllArt() {
       pendingModels.length = 0; cordons.length = 0; // tiszta listák minden felépítéskor
+      mediaFrames.length = 0; videoScreens.length = 0;
       // Artwork spots per wing
       var spots = [
         // North wing
@@ -2044,24 +2063,69 @@
       }
     } // End of placeAllArt
 
-    // A falra vetített videók csak közelben futnak — távol megállnak,
-    // így egyszerre sosem dekódol sok videót a gép.
+    // Egyszerre CSAK A LEGKÖZELEBBI videó fut. Több párhuzamos dekódolás
+    // (főleg nagy felbontású felvételeknél) önmagában megakasztja a képkockákat.
     function updateVideos() {
       if (!videoScreens.length || typeof camera === 'undefined' || !camera) return;
-      for (var i = 0; i < videoScreens.length; i++) startOrStop(videoScreens[i]);
-    }
-    function startOrStop(v) {
-      var d = camera.position.distanceTo(v.group.position);
-      if (d < 22) {
-        if (v.el.paused && !v.pending) {
-          v.pending = true;
-          var pr = v.el.play();
-          if (pr && pr.then) pr.then(function () { v.pending = false; }, function () { v.pending = false; });
-          else v.pending = false;
-        }
-      } else if (!v.el.paused) {
-        v.el.pause();
+      var best = -1, bestD = 1e9;
+      for (var i = 0; i < videoScreens.length; i++) {
+        var d = camera.position.distanceTo(videoScreens[i].group.position);
+        videoScreens[i].dist = d;
+        if (d < bestD) { bestD = d; best = i; }
       }
+      for (var i = 0; i < videoScreens.length; i++) {
+        var v = videoScreens[i];
+        if (i === best && bestD < 22) play(v); else stop(v);
+      }
+    }
+    function play(v) {
+      if (!v.el.paused || v.pending) return;
+      v.pending = true;
+      var pr = v.el.play();
+      if (pr && pr.then) pr.then(function () { v.pending = false; }, function () { v.pending = false; });
+      else v.pending = false;
+    }
+    function stop(v) { if (!v.el.paused) v.el.pause(); }
+
+    // A képek textúrája csak a látogató környezetében él a GPU-n; távolabb elengedjük.
+    function updateMediaTextures() {
+      if (!mediaFrames.length || typeof camera === 'undefined' || !camera) return;
+      var loading = 0, i;
+      for (i = 0; i < mediaFrames.length; i++) if (mediaFrames[i].loading) loading++;
+
+      for (i = 0; i < mediaFrames.length; i++) {
+        var f = mediaFrames[i];
+        var d = camera.position.distanceTo(f.group.position);
+
+        if (d < TEX_LOAD_DIST && !f.loaded && !f.loading && !f.failed) {
+          if (loading >= MAX_TEX_LOADING) continue;
+          loading++; loadFrameTexture(f);
+        } else if (d > TEX_DROP_DIST && f.loaded) {
+          // GPU-memória felszabadítása — visszaáll a sötét lap
+          if (f.plane.material && f.plane.material.map) f.plane.material.map.dispose();
+          if (f.plane.material !== f.blank) f.plane.material.dispose();
+          f.plane.material = f.blank;
+          f.loaded = false;
+        }
+      }
+    }
+    function loadFrameTexture(f) {
+      f.loading = true;
+      var tl = new THREE.TextureLoader();
+      tl.setCrossOrigin('anonymous');
+      tl.load(f.url, function (tx) {
+        var im = tx.image;
+        if (im && im.width && im.height) f.applyAspect(im.width / im.height);
+        // A túl nagy fotót lekicsinyítjük, mielőtt a GPU-ra kerülne
+        var small = shrinkImage(im);
+        if (small !== im) tx.image = small;
+        tx.needsUpdate = true;
+        f.plane.material = new THREE.MeshStandardMaterial({ map: tx, roughness: 0.85 });
+        f.loaded = true; f.loading = false;
+      }, undefined, function () {
+        console.warn('Kép betöltése sikertelen:', f.url);
+        f.loading = false; f.failed = true;
+      });
     }
 
     var lightAnchors = [], lightPool = [], spotAnchors = [], spotPool = [];
@@ -2196,11 +2260,14 @@
     // ── GAME LOOP ──
     var uiCache = null;
     var _eu = new THREE.Euler(0, 0, 0, 'YXZ'), _fw = new THREE.Vector3(), _st = new THREE.Vector3();
+    var frameN = 0;   // a drága, de lassan változó munkákat ritkábban végezzük el
     function loop() {
       requestAnimationFrame(loop);
-      updateLazyModels();
-      updateLights();
-      updateVideos();
+      frameN++;
+      // Ezek a látogató mozgásához képest lassan változnak: 60 Hz helyett elég ritkábban.
+      // A fény-pool 98 anchort rendez sorba, ezért külön is megéri visszavenni.
+      if (frameN % 4 === 0) { updateLazyModels(); updateVideos(); updateMediaTextures(); }
+      if (frameN % 6 === 0) updateLights();
       if (!uiCache) uiCache = {
         panel: document.getElementById('info-panel'), iT: document.getElementById('iT'),
         iA: document.getElementById('iA'), iY: document.getElementById('iY'),
@@ -2215,11 +2282,11 @@
       if (jActive) { dx = jVx; dz = -jVy; }
 
 
-      if (pts) {
-        pts.rotation.y += 0.0005;
+      if (pts && frameN % 2 === 0) {
+        pts.rotation.y += 0.001;
         var p = pts.geometry.attributes.position.array;
         for (var i = 1; i < p.length; i += 3) {
-          p[i] -= 0.01; if (p[i] < -2.5) p[i] = 5;
+          p[i] -= 0.02; if (p[i] < -2.5) p[i] = 5;   // fele gyakoriság, dupla lépés
         }
         pts.geometry.attributes.position.needsUpdate = true;
       }
@@ -2271,7 +2338,7 @@
 
       // Minimap (emelet-tudatos: a földszinten a kereszt, emeleten a 20x20 terem nagyítva)
       var mc = uiCache.mini;
-      if (mc.style.display !== 'none') {
+      if (mc.style.display !== 'none' && frameN % 6 === 0) {
         var w = mc.clientWidth, h = mc.clientHeight;
         if (mc.width !== w || mc.height !== h) { mc.width = w; mc.height = h; } // csak méretváltáskor, ne minden frame-ben
         var mx = mc.getContext('2d');

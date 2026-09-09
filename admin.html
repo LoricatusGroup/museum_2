@@ -995,6 +995,37 @@
       var t = String(name).replace(/\.[a-z0-9]{2,5}$/i, '').replace(/[_-]+/g, ' ').trim();
       return t.charAt(0).toUpperCase() + t.slice(1);
     }
+    // A múzeum a képet legfeljebb ~2048 px-en jeleníti meg (a keret 1080p-n ~1100 px
+    // széles), a GPU-n viszont TÖMÖRÍTETLENÜL él: egy 6000×4000-es fotó ~128 MB.
+    // Ezért feltöltés előtt lekicsinyítjük — ez a letöltendő méretet is csökkenti.
+    var UPLOAD_MAX_PX = 2048;
+    function shrinkImageFile(file) {
+      return new Promise(function (resolve) {
+        if (file.type.indexOf('image/') !== 0 || file.type === 'image/gif') return resolve(file);
+        var url = URL.createObjectURL(file);
+        var img = new Image();
+        img.onload = function () {
+          var m = Math.max(img.width, img.height);
+          if (!m || m <= UPLOAD_MAX_PX) { URL.revokeObjectURL(url); return resolve(file); }
+          var k = UPLOAD_MAX_PX / m;
+          var c = document.createElement('canvas');
+          c.width = Math.round(img.width * k);
+          c.height = Math.round(img.height * k);
+          c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+          URL.revokeObjectURL(url);
+          // Az átlátszóságot őrizzük: PNG marad PNG, minden más JPEG lesz
+          var png = file.type === 'image/png' || file.type === 'image/webp';
+          c.toBlob(function (blob) {
+            if (!blob || blob.size >= file.size) return resolve(file);  // ne rontsunk rajta
+            var name = file.name.replace(/\.[^.]+$/, '') + (png ? '.png' : '.jpg');
+            resolve(new File([blob], name, { type: png ? 'image/png' : 'image/jpeg' }));
+          }, png ? 'image/png' : 'image/jpeg', 0.85);
+        };
+        img.onerror = function () { URL.revokeObjectURL(url); resolve(file); };
+        img.src = url;
+      });
+    }
+
     async function uploadMany(files) {
       var arr = Array.prototype.slice.call(files);
       var models = arr.filter(function (f) { return needsConversion(f.name); });
@@ -1028,6 +1059,15 @@
     async function uploadOne(file, titleOverride, extra) {
       var kind = kindOf(file);
       if (!kind) throw new Error('Nem támogatott fájltípus (kép, videó vagy .glb kell).');
+      var title = titleOverride || niceTitle(file.name);
+
+      if (kind === 'image') {
+        var orig = file.size;
+        file = await shrinkImageFile(file);
+        if (file.size < orig) {
+          toast('Kép kicsinyítve a webhez: ' + mb(orig) + ' → ' + mb(file.size), 'ok', 3500);
+        }
+      }
       var t = toast('Feltöltés: ' + file.name + ' (' + mb(file.size) + ')…', 'info', 120000);
       var floor = filterFloor === 'all' ? 0 : +filterFloor;
       try {
@@ -1035,7 +1075,7 @@
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
           body: JSON.stringify(Object.assign({
-            kind: kind, title: titleOverride || niceTitle(file.name), status: 'pending',
+            kind: kind, title: title, status: 'pending',
             floor: floor, sort_order: items.length, is_published: true
           }, extra || {}))
         });
