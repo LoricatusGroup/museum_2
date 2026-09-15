@@ -180,6 +180,35 @@
     .errbox summary::-webkit-details-marker { display: none; }
     .errbox p { margin: .45em 0 0; font-size: .74rem; color: #e5b0a8; line-height: 1.45; word-break: break-word; }
 
+    /* ───── Narráció ───── */
+    .ncard {
+      display: flex; align-items: center; gap: .85rem; padding: .7rem .85rem;
+      background: var(--panel); border: 1px solid var(--line); border-radius: var(--r);
+      margin-bottom: .6rem; flex-wrap: wrap;
+    }
+    .ncard:hover { border-color: var(--gold-dim); }
+    .ncard .play {
+      flex: none; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center;
+      background: var(--panel-2); border: 1px solid var(--line); color: var(--gold);
+    }
+    .ncard .play:hover:not(:disabled) { border-color: var(--gold); }
+    .ncard .main { flex: 1 1 200px; min-width: 0; }
+    .ncard .main b { display: block; font-size: .95rem; }
+    .ncard .acts { display: flex; gap: .3rem; align-items: center; flex: none; }
+    .lpills { display: flex; gap: .35rem; flex: none; flex-wrap: wrap; }
+    .lpill {
+      font-size: .72rem; letter-spacing: .04em; padding: .3em .65em; border-radius: 99px;
+      min-height: 32px;                 /* érintéssel is eltalálható maradjon */
+      border: 1px solid var(--line); background: transparent; color: var(--faint);
+      display: inline-flex; align-items: center; gap: .3em;
+    }
+    .lpill:hover { border-color: var(--gold-dim); color: var(--text); }
+    .lpill.has { color: var(--ok); border-color: currentColor; }
+    .lpill.draft { color: var(--warn); border-color: currentColor; }
+    #narr-player { width: 100%; margin-top: .5rem; }
+    .vtt-ok { color: var(--ok); }
+    .vtt-warn { color: var(--warn); }
+
     /* ───── Tömeges sáv ───── */
     #bulk {
       position: fixed; left: 50%; bottom: 1.1rem; transform: translateX(-50%) translateY(140%);
@@ -302,6 +331,7 @@
     <div class="tabs" role="tablist">
       <button class="tab" id="tab-items" role="tab" aria-selected="true"><span id="ic-t1"></span>Kiállítás</button>
       <button class="tab" id="tab-drive" role="tab" aria-selected="false"><span id="ic-t2"></span>Drive mappa</button>
+      <button class="tab" id="tab-narr" role="tab" aria-selected="false"><span id="ic-t3"></span>Narráció</button>
     </div>
 
     <main>
@@ -352,6 +382,20 @@
           <span style="font-size:.83rem;color:var(--faint);white-space:nowrap" id="import-info"></span>
           <div class="progress" style="flex:1;min-width:100px"><i id="import-prog"></i></div>
         </div>
+      </section>
+
+      <!-- ── Narráció ── -->
+      <section class="view" id="view-narr">
+        <div class="toolbar">
+          <div style="flex:1;min-width:180px;font-size:.83rem;color:var(--faint);line-height:1.45">
+            Hangos tárlatvezetés. A látogató a múzeumban <b style="color:var(--muted)">kézzel</b> választ sávot —
+            semmi nem indul el magától attól, hol áll.
+          </div>
+          <button class="btn sm ghost" id="narr-reload"><span id="ic-ref3"></span><span class="lbl">Frissítés</span></button>
+          <button class="btn primary sm" id="narr-new"><span id="ic-plus2"></span>Új sáv</button>
+        </div>
+        <div id="narr-list"><div class="empty">Betöltés…</div></div>
+        <audio id="narr-player" controls preload="none" hidden></audio>
       </section>
     </main>
   </div>
@@ -420,6 +464,83 @@
     </div>
   </div>
 
+
+  <!-- Narráció-szerkesztő -->
+  <div class="modal-bg" id="nmodal-bg">
+    <div class="modal">
+      <h3 id="nmodal-title">Új narrációs sáv</h3>
+      <form id="narr-form">
+        <input type="hidden" id="n-id">
+        <input type="hidden" id="n-slug">
+        <div class="row">
+          <div class="field">
+            <label for="n-lang">Nyelv</label>
+            <select id="n-lang">
+              <option value="hu">Magyar</option>
+              <option value="en">English</option>
+              <option value="it">Italiano</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="n-floor">Emelet</label>
+            <select id="n-floor">
+              <option value="0">Földszint</option>
+              <option value="1">1. emelet</option>
+              <option value="2">2. emelet</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="n-wing">Szárny (csak címke)</label>
+            <select id="n-wing">
+              <option value="">—</option>
+              <option value="lobby">Aula</option>
+              <option value="north">Északi szárny</option>
+              <option value="east">Keleti szárny</option>
+              <option value="south">Déli szárny</option>
+              <option value="west">Nyugati szárny</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label for="n-title">Sáv címe</label>
+          <input id="n-title" required placeholder="pl. Bevezető – a múzeumról">
+        </div>
+        <div class="field">
+          <label for="n-sub">Rövid alcím (opcionális)</label>
+          <input id="n-sub" placeholder="pl. 2 perc, a beruházás története">
+        </div>
+        <div class="field">
+          <label for="n-file">Hangfájl</label>
+          <input id="n-file" type="file" accept="audio/*,.mp3,.m4a,.aac,.ogg,.opus,.wav,.flac">
+          <div class="hint" id="n-file-now">MP3 ajánlott (mono, 96–128 kbps). Kb. 1 MB percenként.</div>
+        </div>
+        <div class="field">
+          <label for="n-cap">Felirat / átirat</label>
+          <textarea id="n-cap" rows="6" placeholder="WEBVTT&#10;&#10;00:00:00.000 --> 00:00:04.000&#10;Üdvözöljük a múzeumban."></textarea>
+          <div class="hint" id="n-cap-info">Időzített felirathoz WebVTT formátum kell. Időbélyeg nélkül a szöveg átiratként jelenik meg.</div>
+        </div>
+        <div class="row">
+          <div class="field"><label for="n-order">Sorrend</label><input id="n-order" type="number" value="0"></div>
+          <div class="field" style="display:flex;align-items:flex-end">
+            <label style="display:flex;gap:.5em;align-items:center;color:var(--text);margin:0 0 .55em">
+              <input type="checkbox" id="n-intro"> Ez a bevezető sáv
+            </label>
+          </div>
+          <div class="field" style="display:flex;align-items:flex-end">
+            <label style="display:flex;gap:.5em;align-items:center;color:var(--text);margin:0 0 .55em">
+              <input type="checkbox" id="n-pub" checked> Megjelenjen a múzeumban
+            </label>
+          </div>
+        </div>
+        <div class="modal-foot">
+          <button type="button" class="btn ghost danger" id="n-del" style="margin-right:auto">Törlés</button>
+          <button type="button" class="btn ghost" id="nmodal-cancel">Mégse</button>
+          <button type="submit" class="btn primary" id="nmodal-save">Mentés</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <div id="toasts"></div>
 
   <script>
@@ -475,7 +596,9 @@
       ext: svg('<path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1.5 1.5 0 01-1.5 1.5h-11A1.5 1.5 0 014 19V8a1.5 1.5 0 011.5-1.5H10"/>'),
       out: svg('<path d="M10 4H6a2 2 0 00-2 2v12a2 2 0 002 2h4"/><path d="M15 8l4 4-4 4M19 12H9"/>'),
       layers: svg('<path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/>'),
-      inbox: svg('<path d="M3 13h5l1.5 3h5L16 13h5"/><path d="M5.5 5h13l2.5 8v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5z"/>')
+      inbox: svg('<path d="M3 13h5l1.5 3h5L16 13h5"/><path d="M5.5 5h13l2.5 8v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5z"/>'),
+      play: svg('<path d="M8 5.5l10 6.5-10 6.5z"/>'),
+      audio: svg('<path d="M4 9.5v5h3.5L12 19V5L7.5 9.5z"/><path d="M15.5 9a4 4 0 010 6M18 6.5a7.5 7.5 0 010 11"/>')
     };
     var KIND = { image: { ic: 'image', n: 'Kép' }, video: { ic: 'video', n: 'Videó' }, model: { ic: 'model', n: '3D modell' } };
     var ST = { ready: 'kész', pending: 'várakozik', processing: 'feldolgozás…', error: 'hiba' };
@@ -484,7 +607,8 @@
       var m = {
         'brand-1': 'layers', 'brand-2': 'layers', 'ic-plug': 'plug', 'ic-ext': 'ext', 'ic-out': 'out',
         'ic-t1': 'layers', 'ic-t2': 'folder', 'ic-search': 'search', 'ic-ref': 'refresh',
-        'ic-ref2': 'refresh', 'ic-up': 'upload', 'ic-plus': 'plus', 'ic-trash2': 'trash', 'ic-x': 'x'
+        'ic-ref2': 'refresh', 'ic-up': 'upload', 'ic-plus': 'plus', 'ic-trash2': 'trash', 'ic-x': 'x',
+        'ic-t3': 'audio', 'ic-ref3': 'refresh', 'ic-plus2': 'plus'
       };
       for (var id in m) { var n = el(id); if (n) n.innerHTML = IC[m[id]]; }
     }
@@ -571,18 +695,19 @@
       var email = '';
       try { email = JSON.parse(atob(session.access_token.split('.')[1])).email || ''; } catch (e) {}
       el('who').textContent = email;
-      loadItems(); loadSettings();
+      loadItems(); loadSettings(); loadNarr();
     }
 
     // ══════════ Fülek ══════════
     function setTab(n) {
-      el('tab-items').setAttribute('aria-selected', n === 'items');
-      el('tab-drive').setAttribute('aria-selected', n === 'drive');
-      el('view-items').classList.toggle('active', n === 'items');
-      el('view-drive').classList.toggle('active', n === 'drive');
+      ['items', 'drive', 'narr'].forEach(function (k) {
+        el('tab-' + k).setAttribute('aria-selected', String(n === k));
+        el('view-' + k).classList.toggle('active', n === k);
+      });
     }
     el('tab-items').addEventListener('click', function () { setTab('items'); });
     el('tab-drive').addEventListener('click', function () { setTab('drive'); });
+    el('tab-narr').addEventListener('click', function () { setTab('narr'); });
 
     // ══════════ Lista ══════════
     async function loadItems() {
@@ -827,7 +952,9 @@
     el('modal-cancel').addEventListener('click', closeModal);
     el('modal-bg').addEventListener('click', function (e) { if (e.target === this) closeModal(); });
     document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && el('modal-bg').classList.contains('show')) closeModal();
+      if (e.key !== 'Escape') return;
+      if (el('nmodal-bg').classList.contains('show')) return closeNarrModal();
+      if (el('modal-bg').classList.contains('show')) closeModal();
     });
 
     el('item-form').addEventListener('submit', async function (e) {
@@ -1380,6 +1507,277 @@
     });
 
     if (session && session.access_token) showApp();
+    // ══════════ Narráció (hangos tárlatvezetés) ══════════
+    //  Egy slug = egy sáv, nyelvenként külön sorral. A múzeumban a látogató
+    //  KÉZZEL választ; a szárny/emelet itt is csak címke.
+    var narrs = [];
+    var NLANG = [['hu', 'HU'], ['en', 'EN'], ['it', 'IT']];
+    var NWING = { lobby: 'Aula', north: 'Északi szárny', east: 'Keleti szárny', south: 'Déli szárny', west: 'Nyugati szárny' };
+    var AUDIO_MIME = {
+      mp3: 'audio/mpeg', m4a: 'audio/mp4', mp4: 'audio/mp4', aac: 'audio/aac',
+      ogg: 'audio/ogg', oga: 'audio/ogg', opus: 'audio/ogg',
+      wav: 'audio/wav', flac: 'audio/flac', webm: 'audio/webm'
+    };
+
+    function nsec(s) {
+      if (!s) return '';
+      s = Math.round(s);
+      return Math.floor(s / 60) + ':' + (s % 60 < 10 ? '0' : '') + (s % 60);
+    }
+    // Ékezet nélküli, URL-barát azonosító. A tábla is ezt a mintát várja.
+    function slugify(s) {
+      var t = String(s || '').toLowerCase()
+        .replace(/[áàâä]/g, 'a').replace(/[éèêë]/g, 'e').replace(/[íìîï]/g, 'i')
+        .replace(/[óòôöőõ]/g, 'o').replace(/[úùûüű]/g, 'u').replace(/[ç]/g, 'c').replace(/[ñ]/g, 'n')
+        .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60);
+      return /^[a-z0-9]/.test(t) ? t : ('sav-' + Date.now().toString(36));
+    }
+    function vttCueCount(txt) {
+      if (!txt || txt.indexOf('-->') < 0) return 0;
+      var n = 0, lines = String(txt).replace(/\r/g, '').split('\n');
+      for (var i = 0; i < lines.length; i++) {
+        if (lines[i].indexOf('-->') < 0) continue;
+        var p = lines[i].split('-->');
+        if (/\d/.test(p[0]) && /\d/.test(p[1])) n++;
+      }
+      return n;
+    }
+
+    async function loadNarr() {
+      try {
+        var r = await api('/rest/v1/narrations?select=*&order=is_intro.desc,floor.asc,sort_order.asc,slug.asc');
+        if (!r.ok) throw new Error('Lekérdezés sikertelen (HTTP ' + r.status + ')');
+        narrs = await r.json();
+        renderNarr();
+      } catch (e) { el('narr-list').innerHTML = '<div class="empty">' + esc(e.message) + '</div>'; }
+    }
+
+    function narrGroups() {
+      var by = {}, order = [];
+      narrs.forEach(function (n) {
+        if (!by[n.slug]) { by[n.slug] = { slug: n.slug, langs: {} }; order.push(n.slug); }
+        by[n.slug].langs[n.lang] = n;
+      });
+      return order.map(function (s) {
+        var g = by[s];
+        g.base = g.langs.hu || g.langs.en || g.langs.it;
+        return g;
+      });
+    }
+
+    function renderNarr() {
+      var groups = narrGroups();
+      if (!groups.length) {
+        el('narr-list').innerHTML = '<div class="empty">Még nincs narrációs sáv. Az „Új sáv” gombbal vehetsz fel egyet.</div>';
+        return;
+      }
+      el('narr-list').innerHTML = groups.map(function (g) {
+        var b = g.base;
+        var bits = [FLOORS[b.floor] || FLOORS[0]];
+        if (b.wing && NWING[b.wing]) bits.push(NWING[b.wing]);
+        if (b.duration_sec) bits.push(nsec(b.duration_sec));
+        var live = NLANG.some(function (l) { return g.langs[l[0]] && g.langs[l[0]].is_published && g.langs[l[0]].audio_url; });
+        var pills = NLANG.map(function (l) {
+          var n = g.langs[l[0]];
+          var cls = !n ? '' : (n.audio_url ? (n.is_published ? 'has' : 'draft') : 'draft');
+          var tip = !n ? 'Nincs ' + l[1] + ' változat — kattints a felvételhez'
+            : !n.audio_url ? l[1] + ': nincs hangfájl'
+              : (n.is_published ? l[1] + ': él a múzeumban' : l[1] + ': nincs publikálva');
+          return '<button class="lpill ' + cls + '" data-nlang="' + l[0] + '" data-nslug="' + esc(g.slug) +
+            '" title="' + esc(tip) + '">' + l[1] + (n ? (n.audio_url ? ' ✓' : ' ○') : ' +') + '</button>';
+        }).join('');
+        return '<div class="ncard">' +
+          '<button class="play" data-nplay="' + esc(b.audio_url || '') + '" ' + (b.audio_url ? '' : 'disabled') +
+          ' title="Meghallgatás">' + IC.play + '</button>' +
+          '<div class="main"><b>' + esc(b.title) + '</b>' +
+          '<div class="meta">' + esc(bits.join(' · ')) + (b.subtitle ? ' — ' + esc(b.subtitle) : '') + '</div></div>' +
+          '<div class="badges">' + (b.is_intro ? '<span class="badge b-live">Bevezető</span>' : '') +
+          '<span class="badge ' + (live ? 'b-ready' : 'b-draft') + '">' + (live ? 'él' : 'vázlat') + '</span></div>' +
+          '<div class="lpills">' + pills + '</div>' +
+          '<div class="acts"><button class="btn sm ico ghost" data-nedit="' + esc(g.slug) + '" title="Szerkesztés">' + IC.pencil + '</button>' +
+          '<button class="btn sm ico ghost danger" data-ndelall="' + esc(g.slug) + '" title="Sáv törlése minden nyelven">' + IC.trash + '</button></div>' +
+          '</div>';
+      }).join('');
+    }
+
+    el('narr-list').addEventListener('click', async function (e) {
+      var pl = e.target.closest('[data-nplay]');
+      if (pl) {
+        var pv = el('narr-player');
+        pv.hidden = false; pv.src = pl.getAttribute('data-nplay'); pv.play();
+        return;
+      }
+      var pill = e.target.closest('[data-nlang]');
+      if (pill) return openNarrModal(pill.getAttribute('data-nslug'), pill.getAttribute('data-nlang'));
+      var ed = e.target.closest('[data-nedit]');
+      if (ed) {
+        var g = narrGroups().filter(function (x) { return x.slug === ed.getAttribute('data-nedit'); })[0];
+        return openNarrModal(g.slug, g.base.lang);
+      }
+      var da = e.target.closest('[data-ndelall]');
+      if (da) {
+        var slug = da.getAttribute('data-ndelall');
+        if (!confirm('Biztosan törlöd ezt a sávot minden nyelven? A hangfájlok is törlődnek.')) return;
+        try {
+          var rows = narrs.filter(function (n) { return n.slug === slug; });
+          for (var i = 0; i < rows.length; i++) await removeNarrAudio(rows[i].audio_path);
+          var r = await api('/rest/v1/narrations?slug=eq.' + encodeURIComponent(slug), { method: 'DELETE' });
+          if (!r.ok) throw new Error('Törlés sikertelen.');
+          toast('Sáv törölve.', 'ok'); await loadNarr();
+        } catch (err) { toast(err.message, 'err'); }
+      }
+    });
+
+    function removeNarrAudio(path) {
+      if (!path) return Promise.resolve();
+      return api('/storage/v1/object/media/' + path, { method: 'DELETE' }).catch(function () {});
+    }
+
+    // ── Szerkesztő ──
+    var nEditing = null;   // a szerkesztett sor, vagy null (új)
+    function openNarrModal(slug, lang) {
+      var row = slug ? narrs.filter(function (n) { return n.slug === slug && n.lang === lang; })[0] : null;
+      var sib = slug ? narrs.filter(function (n) { return n.slug === slug; })[0] : null;   // testvérnyelv mint minta
+      nEditing = row || null;
+      el('nmodal-title').textContent = row ? 'Sáv szerkesztése' : (slug ? 'Új nyelvi változat' : 'Új narrációs sáv');
+      el('n-id').value = row ? row.id : '';
+      el('n-slug').value = slug || '';
+      el('n-lang').value = lang || 'hu';
+      el('n-lang').disabled = !!row;
+      el('n-title').value = row ? row.title : '';
+      el('n-sub').value = row ? (row.subtitle || '') : '';
+      el('n-cap').value = row ? (row.captions || '') : '';
+      el('n-floor').value = String((row || sib || {}).floor || 0);
+      el('n-wing').value = (row || sib || {}).wing || '';
+      el('n-order').value = (row || sib || {}).sort_order || 0;
+      el('n-intro').checked = !!(row || sib || {}).is_intro;
+      el('n-pub').checked = row ? row.is_published : true;
+      el('n-file').value = '';
+      el('n-del').style.display = row ? 'inline-flex' : 'none';
+      el('n-file-now').innerHTML = row && row.audio_url
+        ? 'Jelenlegi felvétel: ' + esc(nsec(row.duration_sec) || '?') + (row.file_size ? ' · ' + mb(row.file_size) : '') +
+          ' — új fájl választása lecseréli.'
+        : 'MP3 ajánlott (mono, 96–128 kbps). Kb. 1 MB percenként. Hangfájl nélkül a sáv nem jelenik meg a múzeumban.';
+      narrCapInfo();
+      el('nmodal-bg').classList.add('show');
+      setTimeout(function () { el('n-title').focus(); }, 50);
+    }
+    function closeNarrModal() { el('nmodal-bg').classList.remove('show'); nEditing = null; }
+    el('narr-new').addEventListener('click', function () { openNarrModal('', 'hu'); });
+    el('narr-reload').addEventListener('click', loadNarr);
+    el('nmodal-cancel').addEventListener('click', closeNarrModal);
+    el('nmodal-bg').addEventListener('click', function (e) { if (e.target === this) closeNarrModal(); });
+
+    function narrCapInfo() {
+      var v = el('n-cap').value, n = vttCueCount(v), info = el('n-cap-info');
+      if (!v.trim()) {
+        info.className = 'hint';
+        info.textContent = 'Időzített felirathoz WebVTT formátum kell. Időbélyeg nélkül a szöveg átiratként jelenik meg.';
+      } else if (n > 0) {
+        info.className = 'hint vtt-ok';
+        info.textContent = n + ' időzített felirat felismerve — a múzeumban a hanggal együtt fut.';
+      } else if (v.indexOf('-->') >= 0) {
+        info.className = 'hint vtt-warn';
+        info.textContent = 'Van „-->” a szövegben, de egyetlen időbélyeg sem értelmezhető. Formátum: 00:00:00.000 --> 00:00:04.000';
+      } else {
+        info.className = 'hint';
+        info.textContent = 'Időbélyeg nélkül: a szöveg álló átiratként jelenik meg a lejátszó alatt.';
+      }
+    }
+    el('n-cap').addEventListener('input', narrCapInfo);
+
+    function audioDuration(file) {
+      return new Promise(function (res) {
+        var u = URL.createObjectURL(file), a = new Audio();
+        a.preload = 'metadata';
+        a.onloadedmetadata = function () { URL.revokeObjectURL(u); res(isFinite(a.duration) ? Math.round(a.duration) : null); };
+        a.onerror = function () { URL.revokeObjectURL(u); res(null); };
+        a.src = u;
+      });
+    }
+
+    el('narr-form').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      var btn = el('nmodal-save'); btn.disabled = true;
+      var t = null;
+      try {
+        var id = el('n-id').value;
+        var lang = el('n-lang').value;
+        var slug = el('n-slug').value || slugify(el('n-title').value);
+        var file = el('n-file').files[0] || null;
+
+        var body = {
+          slug: slug, lang: lang,
+          title: el('n-title').value.trim(),
+          subtitle: el('n-sub').value.trim() || null,
+          captions: el('n-cap').value.trim() || null,
+          floor: parseInt(el('n-floor').value, 10) || 0,
+          wing: el('n-wing').value || null,
+          sort_order: parseInt(el('n-order').value, 10) || 0,
+          is_intro: el('n-intro').checked,
+          is_published: el('n-pub').checked
+        };
+
+        if (file) {
+          var ext = (file.name.match(/\.([a-zA-Z0-9]{2,5})$/) || [, ''])[1].toLowerCase();
+          var ct = AUDIO_MIME[ext] || (file.type.indexOf('audio/') === 0 ? file.type : '');
+          if (!ct) throw new Error('Nem felismert hangformátum (.' + (ext || '?') + '). MP3, M4A, OGG, WAV vagy FLAC kell.');
+          t = toast('Hangfájl feltöltése (' + mb(file.size) + ')…', 'info', 120000);
+          var dur = await audioDuration(file);
+          var path = 'narration/' + slug + '/' + lang + '-' + Date.now() + '.' + ext;
+          var up = await api('/storage/v1/object/media/' + path, {
+            method: 'POST', headers: { 'Content-Type': ct, 'x-upsert': 'true' }, body: file
+          });
+          if (!up.ok) throw new Error('Feltöltés sikertelen: ' + (await up.text()).slice(0, 160));
+          body.audio_path = path;
+          body.audio_url = SB_URL + '/storage/v1/object/public/media/' + path;
+          body.mime_type = ct; body.file_size = file.size; body.duration_sec = dur;
+          t.remove(); t = null;
+        }
+
+        var oldPath = nEditing && nEditing.audio_path;
+        if (id) {
+          var r = await api('/rest/v1/narrations?id=eq.' + id, {
+            method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+          });
+          if (!r.ok) throw new Error('Mentés sikertelen: ' + (await r.text()).slice(0, 200));
+          if (file && oldPath && oldPath !== body.audio_path) await removeNarrAudio(oldPath);
+        } else {
+          var r2 = await api('/rest/v1/narrations', {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+            body: JSON.stringify(body)
+          });
+          if (!r2.ok) {
+            var txt = await r2.text();
+            throw new Error(/duplicate key/.test(txt)
+              ? 'Ezen a nyelven már van ilyen sáv — szerkeszd a meglévőt.'
+              : 'Mentés sikertelen: ' + txt.slice(0, 200));
+          }
+        }
+
+        // A múzeum csak a publikált, hanggal rendelkező sávokat látja (RLS) — ezt mondjuk is meg.
+        if (body.is_published && !body.audio_url && !(nEditing && nEditing.audio_url)) {
+          toast('Mentve, de hangfájl nélkül a sáv NEM jelenik meg a múzeumban.', 'info', 7000);
+        } else {
+          toast('Narrációs sáv mentve.', 'ok');
+        }
+        closeNarrModal(); await loadNarr();
+      } catch (err) { if (t) t.remove(); toast(err.message, 'err'); }
+      finally { btn.disabled = false; }
+    });
+
+    el('n-del').addEventListener('click', async function () {
+      if (!nEditing) return;
+      if (!confirm('Törlöd ezt a nyelvi változatot? A hangfájl is törlődik.')) return;
+      try {
+        await removeNarrAudio(nEditing.audio_path);
+        var r = await api('/rest/v1/narrations?id=eq.' + nEditing.id, { method: 'DELETE' });
+        if (!r.ok) throw new Error('Törlés sikertelen.');
+        toast('Nyelvi változat törölve.', 'ok');
+        closeNarrModal(); await loadNarr();
+      } catch (err) { toast(err.message, 'err'); }
+    });
+
   </script>
 </body>
 

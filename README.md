@@ -18,7 +18,9 @@ Háromnyelvű felület: **magyar / angol / olasz** (a műtárgynevekkel együtt)
 | `assets/exhibits.json` | A betöltendő GLB-modellek metaadatai (cím, szerző, licensz, év, modell-URL). |
 | `assets/og-image.png` | Közösségi megosztás előnézeti kép. |
 | `uploads/meta.xlsx` | A modellek forrás-táblázata (szerkeszthető Excel). |
+| `admin.html` | Admin felület (Supabase): kiállítási tárgyak, Drive-mappák, **narráció**. |
 | `tools/convert_xlsx_to_exhibits.mjs` | A `meta.xlsx`-ből generálja az `exhibits.json`-t és a `CREDITS.html`-t. |
+| `tools/test_narration_*.mjs` | Headless böngészős tesztek a hangos tárlatvezetéshez. |
 | `releases/` | Helyi modell-másolat (a publikus deploybe **nem** kerül be — a site a GitHub Release abszolút URL-jéről tölt). |
 | `felmeres_urlap/`, `FELMERESI_CHECKLIST.md` | Belső üzleti anyagok (ügyfél-felmérés). A publikus oldalra **nem** kerülnek ki. |
 
@@ -92,3 +94,17 @@ node -e 'const h=require("fs").readFileSync("index.html","utf8");
 const b=[...h.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m=>m[1]).sort((a,c)=>c.length-a.length)[0];
 new Function(b); console.log("inline script OK");'
 ```
+
+### Narráció — böngészős tesztek
+
+A hangos tárlatvezetés végigkattintható headless Chromiumban. Mindkét szkript saját
+statikus szervert indít és **kigúnyolja a Supabase-t**, így sem hálózat, sem éles
+adatbázis nem kell hozzá:
+
+```bash
+npm install                                # puppeteer
+node tools/test_narration_museum.mjs       # sávlista, felirat, lejátszó, nyelvváltás, mobil
+node tools/test_narration_admin.mjs        # admin fül: szerkesztés, hangfeltöltés, törlés
+```
+
+A kilépési kód 0, ha minden eset átment. Képernyőképek helye: `SHOT_DIR` (alapból `/tmp`).

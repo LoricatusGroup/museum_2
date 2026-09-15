@@ -317,7 +317,7 @@
       z-index: 50;
       display: none;
       border-radius: 3px;
-      pointer-events: none
+      pointer-events: auto
     }
 
     @media(min-width:768px) {
@@ -747,6 +747,134 @@
       font-size: 20px; padding: 6px 16px; border-radius: 6px; letter-spacing: 1px;
       z-index: 70; display: none; pointer-events: none; text-align: center;
     }
+
+    /* ── Hangos tárlatvezetés ────────────────────────────────────────
+       A sávokat a látogató választja ki KÉZZEL; szándékosan nincs
+       pozíció-alapú automatikus váltás (a szárny/emelet csak címke). */
+    [hidden] { display: none !important; }
+
+    #narr-btn {
+      position: fixed; top: 82px; left: 12px; z-index: 100;
+      background: rgba(0, 0, 0, .5); color: #fff; border: 1px solid #aa9060;
+      padding: 9px 10px; cursor: pointer; font-size: 16px; line-height: 1;
+      border-radius: 5px; display: none;
+    }
+    #narr-btn.on { border-color: #e0a92f; color: #ffd873; box-shadow: 0 0 0 2px rgba(224, 169, 47, .3); }
+
+    #narr-panel {
+      position: fixed; top: 0; left: 0; height: 100%; width: 330px; max-width: 88vw;
+      z-index: 88; display: flex; flex-direction: column; color: #2a2018;
+      background: rgba(250, 246, 238, .97); border-right: 2px solid #aa9060;
+      box-shadow: 4px 0 26px rgba(0, 0, 0, .3);
+      transform: translateX(-103%); transition: transform .26s ease;
+      font-family: 'VT323', monospace; font-size: 18px;
+    }
+    #narr-panel.show { transform: none; }
+    #narr-panel header {
+      display: flex; align-items: center; gap: 8px; flex: 0 0 auto;
+      padding: 14px 12px 10px; border-bottom: 1px solid #ddd0b0;
+    }
+    #narr-h {
+      flex: 1; font-family: 'Press Start 2P', cursive; font-size: 10px;
+      color: #8a6a22; line-height: 1.6; letter-spacing: 1px; text-transform: uppercase;
+    }
+    #narr-x {
+      flex: 0 0 auto; width: 34px; height: 34px; cursor: pointer;
+      background: none; border: 1px solid #c9b78c; border-radius: 4px;
+      color: #6a5a30; font-size: 17px; line-height: 1;
+    }
+    #narr-x:hover { background: #efe6d2; }
+    #narr-note {
+      margin: 0; padding: 8px 12px; flex: 0 0 auto;
+      color: #6a5a45; font-size: 16px; line-height: 1.35;
+      border-bottom: 1px solid #ede3cd;
+    }
+    #narr-list { flex: 1 1 auto; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 6px 8px 12px; }
+
+    .narr-track {
+      display: flex; align-items: flex-start; gap: 10px; width: 100%;
+      text-align: left; cursor: pointer; margin: 4px 0; padding: 9px 10px;
+      background: #fffdf8; border: 1px solid #ddd0b0; border-radius: 5px;
+      color: inherit; font: inherit;
+    }
+    .narr-track:hover { background: #f6eeda; border-color: #c9ab6a; }
+    .narr-track.active { background: #f3e6c4; border-color: #b4541f; }
+    .narr-track .ic { flex: 0 0 auto; width: 20px; color: #b4541f; font-size: 15px; line-height: 1.5; }
+    .narr-track .tx { flex: 1 1 auto; min-width: 0; }
+    .narr-track .nm { display: block; line-height: 1.25; word-wrap: break-word; }
+    .narr-track .mt { display: block; margin-top: 2px; color: #8a7a62; font-size: 15px; }
+    .narr-track .mt b { color: #8a6a22; font-weight: normal; }
+    #narr-empty { padding: 14px 12px; color: #7a6a55; line-height: 1.4; }
+
+    #narr-now { flex: 0 0 auto; padding: 10px 12px 14px; border-top: 1px solid #ddd0b0; background: #f6f0e2; }
+    #narr-now-title { font-size: 17px; line-height: 1.25; margin-bottom: 6px; color: #4a3a22; }
+    #narr-seek { width: 100%; margin: 0; accent-color: #b4541f; height: 22px; cursor: pointer; }
+    #narr-times { display: flex; justify-content: space-between; color: #8a7a62; font-size: 15px; margin-top: -2px; }
+    #narr-ctl { display: flex; gap: 6px; margin-top: 8px; }
+    #narr-ctl button {
+      flex: 1 1 auto; min-height: 38px; cursor: pointer; color: #3a2e1a;
+      background: #fffdf8; border: 1px solid #c9b78c; border-radius: 4px;
+      font-family: 'VT323', monospace; font-size: 17px; line-height: 1;
+    }
+    #narr-ctl button:hover { background: #efe6d2; }
+    #narr-play { flex: 1.4 1 auto !important; background: #f3e6c4 !important; }
+    #narr-cc-btn[aria-pressed="false"] { opacity: .5; text-decoration: line-through; }
+    #narr-tr { margin-top: 8px; }
+    #narr-tr summary { cursor: pointer; color: #8a6a22; font-size: 16px; }
+    #narr-tr-body { max-height: 26vh; overflow-y: auto; margin-top: 6px; line-height: 1.4; white-space: pre-wrap; color: #4a3a28; }
+    #narr-err { margin-top: 6px; color: #a02a10; font-size: 16px; }
+
+    /* Felirat-sáv: a 3D nézet alján, a modális nagy nézet alatt (z-index 70 < 90) */
+    #narr-cc {
+      position: fixed; left: 50%; bottom: 150px; transform: translateX(-50%);
+      z-index: 70; display: none; max-width: 90vw; text-align: center;
+      background: rgba(0, 0, 0, .74); color: #fff8e8; border-radius: 6px;
+      padding: 8px 16px; font-family: 'VT323', monospace; font-size: 22px;
+      line-height: 1.3; letter-spacing: .5px; pointer-events: none;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, .8); white-space: pre-wrap;
+    }
+    #narr-cc.show { display: block; }
+
+    #narr-offer {
+      position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%);
+      z-index: 100; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+      justify-content: center; max-width: 92vw;
+      background: rgba(250, 246, 238, .97); border: 2px solid #aa9060; border-radius: 6px;
+      padding: 10px 14px; color: #2a2018; font-family: 'VT323', monospace; font-size: 19px;
+      box-shadow: 0 6px 22px rgba(0, 0, 0, .3);
+    }
+    #narr-offer button {
+      cursor: pointer; padding: 7px 12px; min-height: 36px; border-radius: 4px;
+      font-family: 'VT323', monospace; font-size: 18px; line-height: 1;
+      border: 1px solid #c9b78c; background: #fffdf8; color: #3a2e1a;
+    }
+    #narr-offer-yes { background: #b4541f !important; border-color: #b4541f !important; color: #fff !important; }
+
+    /* A panel oldalsávként viselkedik: nyitva a bal felső HUD mellé csúszik,
+       különben a Teljes képernyő / nyelvváltó gomb rátakarna a fejlécére. */
+    #fs-btn, #lang-switch, #narr-btn { transition: left .26s ease; }
+    @media(min-width:768px) {
+      #narr-cc { bottom: 112px; }
+      body.narr-open #fs-btn, body.narr-open #lang-switch, body.narr-open #narr-btn { left: 348px; }
+    }
+    /* Mobilon a panel alsó lap: takarná a feliratsávot és a Teljes képernyő gombot. */
+    @media(max-width:767px) {
+      body.narr-open #narr-cc, body.narr-open #fs-btn { display: none !important; }
+    }
+    @media(max-width:767px) {
+      #narr-btn { top: 78px; left: 10px; }
+      #narr-panel { top: auto; bottom: 0; height: 74vh; width: 100%; max-width: none; border-right: none; border-top: 2px solid #aa9060; border-radius: 10px 10px 0 0; transform: translateY(103%); }
+      #narr-cc { bottom: 150px; font-size: 19px; }
+    }
+    @media(max-height:500px) and (orientation:landscape) {
+      #narr-panel { height: 100%; width: 300px; border-top: none; border-right: 2px solid #aa9060; border-radius: 0; transform: translateX(-103%); }
+      #narr-cc { bottom: 8px; max-width: 56vw; font-size: 18px; padding: 5px 12px; }
+      #narr-offer { bottom: 8px; font-size: 17px; padding: 6px 10px; }
+    }
+    @supports(padding: env(safe-area-inset-bottom)) {
+      #narr-btn { left: calc(12px + env(safe-area-inset-left)); }
+      #narr-panel { padding-bottom: env(safe-area-inset-bottom); }
+    }
   </style>
 </head>
 
@@ -799,6 +927,38 @@
     <div class="y" id="iY"></div>
   </div>
   <canvas id="minimap"></canvas>
+  <!-- Hangos tárlatvezetés: a sávot a látogató választja ki, nem a pozíciója váltja -->
+  <div id="narr-btn" role="button" tabindex="0" aria-expanded="false">🎧</div>
+  <aside id="narr-panel" aria-labelledby="narr-h">
+    <header>
+      <span id="narr-h">HANGOS TÁRLATVEZETÉS</span>
+      <button id="narr-x" type="button">✕</button>
+    </header>
+    <p id="narr-note"></p>
+    <div id="narr-list"></div>
+    <div id="narr-now" hidden>
+      <div id="narr-now-title"></div>
+      <input id="narr-seek" type="range" min="0" max="100" value="0" step="0.1">
+      <div id="narr-times"><span id="narr-t-cur">0:00</span><span id="narr-t-dur">0:00</span></div>
+      <div id="narr-ctl">
+        <button type="button" data-narr="back">↺15</button>
+        <button type="button" data-narr="play" id="narr-play">▶</button>
+        <button type="button" data-narr="fwd">15↻</button>
+        <button type="button" data-narr="cc" id="narr-cc-btn" aria-pressed="true">CC</button>
+      </div>
+      <details id="narr-tr" hidden>
+        <summary id="narr-tr-sum"></summary>
+        <div id="narr-tr-body"></div>
+      </details>
+      <div id="narr-err" hidden></div>
+    </div>
+  </aside>
+  <div id="narr-cc" aria-live="polite"></div>
+  <div id="narr-offer" hidden>
+    <span id="narr-offer-txt"></span>
+    <button type="button" id="narr-offer-yes"></button>
+    <button type="button" id="narr-offer-no"></button>
+  </div>
   <div id="touch-ui">
     <div id="joy-area">
       <div id="joy-bg">
@@ -843,7 +1003,15 @@
         dragMouse: '(Húzd az egeret vagy az ujjad a képernyőn a forgatáshoz)',
         dragWindow: '(Húzd az egeret vagy az ujjad az ablakon a forgatáshoz)',
         fbIntro: 'Az eszközöd vagy böngésződ nem támogatja a 3D (WebGL) nézetet, ezért a kiállított műveket egyszerű listában mutatjuk.',
-        fbEmpty: '(Nincs megjeleníthető tétel.)'
+        fbEmpty: '(Nincs megjeleníthető tétel.)',
+        narrTitle: 'Hangos tárlatvezetés',
+        narrManual: 'A sávot te választod ki — semmi nem indul el magától attól, hol állsz a térben.',
+        narrEmpty: 'Még nincs feltöltött hanganyag.', narrIntro: 'Bevezető', narrTranscript: 'Szöveges átirat',
+        narrClose: 'Bezárás', narrSeek: 'Ugrás a felvételben', narrPlay: 'Lejátszás', narrPause: 'Szünet',
+        narrBack: '15 másodperccel vissza', narrFwd: '15 másodperccel előre', narrCc: 'Felirat ki/be',
+        narrErr: 'Ez a hangsáv most nem tölthető be.', narrOffer: 'Van hangos tárlatvezetés, felirattal.',
+        narrOfferYes: 'Meghallgatom', narrOfferNo: 'Most nem', sLobby: 'Aula', sNorth: 'Északi szárny',
+        sEast: 'Keleti szárny', sSouth: 'Déli szárny', sWest: 'Nyugati szárny'
       },
       en: {
         docTitle: 'Pixel Art Museum', museum: 'MUSEUM', subtitle: '─ 4 Wings · PREMIUM EDITION ─',
@@ -865,7 +1033,15 @@
         dragMouse: '(Drag the mouse or your finger on the screen to rotate)',
         dragWindow: '(Drag the mouse or your finger in the window to rotate)',
         fbIntro: 'Your device or browser does not support the 3D (WebGL) view, so we show the exhibited works as a simple list.',
-        fbEmpty: '(No items to display.)'
+        fbEmpty: '(No items to display.)',
+        narrTitle: 'Audio guide',
+        narrManual: 'You pick the track — nothing starts on its own based on where you stand.',
+        narrEmpty: 'No audio has been uploaded yet.', narrIntro: 'Introduction', narrTranscript: 'Text transcript',
+        narrClose: 'Close', narrSeek: 'Seek within the track', narrPlay: 'Play', narrPause: 'Pause',
+        narrBack: 'Back 15 seconds', narrFwd: 'Forward 15 seconds', narrCc: 'Subtitles on/off',
+        narrErr: 'This track cannot be loaded right now.', narrOffer: 'An audio guide with subtitles is available.',
+        narrOfferYes: 'Listen', narrOfferNo: 'Not now', sLobby: 'Lobby', sNorth: 'North wing', sEast: 'East wing',
+        sSouth: 'South wing', sWest: 'West wing'
       },
       it: {
         docTitle: 'Museo Pixel Art', museum: 'MUSEO', subtitle: '─ 4 Ali · EDIZIONE PREMIUM ─',
@@ -887,7 +1063,15 @@
         dragMouse: '(Trascina il mouse o il dito sullo schermo per ruotare)',
         dragWindow: '(Trascina il mouse o il dito nella finestra per ruotare)',
         fbIntro: 'Il tuo dispositivo o browser non supporta la vista 3D (WebGL), quindi mostriamo le opere esposte come un semplice elenco.',
-        fbEmpty: '(Nessun elemento da mostrare.)'
+        fbEmpty: '(Nessun elemento da mostrare.)',
+        narrTitle: 'Audioguida', narrManual: 'Scegli tu la traccia — nulla parte da solo in base a dove ti trovi.',
+        narrEmpty: 'Non è ancora stato caricato nessun audio.', narrIntro: 'Introduzione',
+        narrTranscript: 'Trascrizione testuale', narrClose: 'Chiudi', narrSeek: 'Sposta nella traccia',
+        narrPlay: 'Riproduci', narrPause: 'Pausa', narrBack: 'Indietro di 15 secondi',
+        narrFwd: 'Avanti di 15 secondi', narrCc: 'Sottotitoli on/off',
+        narrErr: 'Questa traccia non può essere caricata ora.',
+        narrOffer: 'È disponibile un\'audioguida con sottotitoli.', narrOfferYes: 'Ascolta', narrOfferNo: 'Non ora',
+        sLobby: 'Atrio', sNorth: 'Ala nord', sEast: 'Ala est', sSouth: 'Ala sud', sWest: 'Ala ovest'
       }
     };
     var LANG = (function () {
@@ -941,6 +1125,7 @@
       var lbtns = document.querySelectorAll('#lang-switch .lang-btn');
       for (var i = 0; i < lbtns.length; i++) lbtns[i].classList.toggle('active', lbtns[i].getAttribute('data-lang') === LANG);
       // ha épp nyitva a műtárgy-nézegető, frissítsük a benne lévő (lefordítandó) szövegeket
+      if (typeof narrApplyI18n === 'function') narrApplyI18n();
       var av = document.getElementById('art-viewer');
       if (av && av.classList.contains('show') && currentArt && typeof openArt === 'function' && !(currentArt.userData && currentArt.userData.sketchfabId)) openArt(currentArt);
     }
@@ -2244,13 +2429,23 @@
 
     // ── INPUT ──
     function setupInput() {
+      // A narrációs panel vezérlőin (csúszka, gombok) a nyilak/betűk a panelé, ne a járásé.
+      function inUiPanel(e) {
+        var p = document.getElementById('narr-panel');
+        if (!p || !p.classList.contains('show')) return false;
+        var n = e.target;
+        while (n && n !== document) { if (n === p) return true; n = n.parentNode; }
+        return false;
+      }
       document.addEventListener('keydown', function (e) {
+        if (inUiPanel(e)) return;
         if (e.code === 'ArrowUp' || e.code === 'KeyW') mF = true;
         if (e.code === 'ArrowDown' || e.code === 'KeyS') mB = true;
         if (e.code === 'ArrowLeft' || e.code === 'KeyA') mL = true;
         if (e.code === 'ArrowRight' || e.code === 'KeyD') mR = true;
       });
       document.addEventListener('keyup', function (e) {
+        if (inUiPanel(e)) return;
         if (e.code === 'ArrowUp' || e.code === 'KeyW') mF = false;
         if (e.code === 'ArrowDown' || e.code === 'KeyS') mB = false;
         if (e.code === 'ArrowLeft' || e.code === 'KeyA') mL = false;
@@ -2594,6 +2789,9 @@
       initAudio();
       document.getElementById('minimap').style.display = 'block';
       if (fsSupported) document.getElementById('fs-btn').style.display = 'block';
+      museumStarted = true;
+      narrUpdateButton();
+      narrMaybeOffer();
     }
     (function () {
       var sb = document.getElementById('startBtn');
@@ -2803,6 +3001,7 @@
         if (ud.mediaKind === 'video') {
           mVid.src = ud.mediaUrl;
           mVid.muted = false;
+          narrPause(); // ne szóljon egyszerre a narráció és a videó hangja
           mVid.style.display = 'block';
           var vp = mVid.play();
           if (vp && vp.catch) vp.catch(function () { /* az autoplay-tiltás nem hiba: ott a lejátszó gomb */ });
@@ -2857,6 +3056,7 @@
           zx.drawImage(tmp, 0, 0, zc.width, zc.height);
         }
       }
+      narrPanelOpen(false); // a modális nagy nézet takarná a panelt (a hang tovább szól)
       viewer.classList.add('show');
     }
 
@@ -2921,6 +3121,413 @@
       })
       .catch(function (e) { console.log('Beépített demó tartalom marad.', e); })
       .then(function () { setup(); }, function () { setup(); });
+
+    // ══════════════════════════════════════
+    //  HANGOS TÁRLATVEZETÉS
+    // ══════════════════════════════════════
+    //  Szándékos tervezési döntés: a sávok között a LÁTOGATÓ vált, kézzel.
+    //  NINCS pozíció-alapú automatikus indítás/váltás — az emelet és a szárny
+    //  csak tájékoztató címke a listában, hogy meg lehessen találni a sávot.
+    var NARR_ALL = [];         // minden publikált sáv, minden nyelven
+    var narrAudio = null;      // egyetlen újrahasznosított <audio>
+    var narrCur = null;        // épp betöltött sáv
+    var narrCues = null;       // időzített feliratok, ha a captions WebVTT
+    var narrCueIdx = -1;
+    var narrCcOn = true;
+    var narrSeekDrag = false;
+    var narrOffered = false;
+    var museumStarted = false;
+
+    function narrEl(id) { return document.getElementById(id); }
+
+    // „mm:ss” (órás sávnál „h:mm:ss”)
+    function narrTime(sec) {
+      sec = Math.max(0, Math.floor(sec || 0));
+      var h = Math.floor(sec / 3600), m = Math.floor(sec % 3600 / 60), s = sec % 60;
+      var mm = (h && m < 10 ? '0' : '') + m;
+      return (h ? h + ':' : '') + mm + ':' + (s < 10 ? '0' : '') + s;
+    }
+
+    // „00:01:02.500” / „01:02,5” → másodperc. Cue-beállításokat (line:90%) eldobjuk.
+    function narrVttTime(str) {
+      var p = String(str).trim().split(/\s+/)[0].split(':');
+      if (!p.length || p.length > 3) return null;
+      var sec = 0;
+      for (var i = 0; i < p.length; i++) {
+        var v = parseFloat(p[i].replace(',', '.'));
+        if (isNaN(v)) return null;
+        sec = sec * 60 + v;
+      }
+      return sec;
+    }
+
+    // WebVTT/SRT → cue-lista. Ha nincs benne „-->”, sima átiratnak tekintjük (null).
+    function narrParseVtt(txt) {
+      if (!txt || String(txt).indexOf('-->') < 0) return null;
+      var lines = String(txt).replace(/\r/g, '').split('\n'), cues = [], i = 0;
+      while (i < lines.length) {
+        var line = lines[i++];
+        if (line.indexOf('-->') < 0) continue;
+        var parts = line.split('-->');
+        var s = narrVttTime(parts[0]), e = narrVttTime(parts[1]);
+        if (s == null || e == null) continue;
+        var buf = [];
+        while (i < lines.length && lines[i].trim() !== '') buf.push(lines[i++]);
+        // a <v Beszélő> / <i> jelöléseket kiszedjük, a szöveget textContent-ként írjuk ki
+        var text = buf.join('\n').replace(/<[^>]*>/g, '').trim();
+        if (text) cues.push({ s: s, e: e, text: text });
+      }
+      cues.sort(function (a, b) { return a.s - b.s; });
+      return cues.length ? cues : null;
+    }
+
+    // Átirat a panelbe: időzített sávnál a cue-k szövege, egyébként a nyers mező.
+    function narrTranscript(track) {
+      var cues = narrParseVtt(track.captions);
+      if (!cues) return String(track.captions || '').trim();
+      var out = [];
+      for (var i = 0; i < cues.length; i++) out.push(cues[i].text);
+      return out.join('\n');
+    }
+
+    // A jelenlegi nyelv sávjai. Egy slug = egy sáv; ha nincs meg az adott
+    // nyelven, ne tűnjön el — essünk vissza magyarra, majd bármelyikre.
+    function narrTracks() {
+      // applyStaticI18n a modul lefutása ELŐTT is hívhat minket (a nyelvváltó bekötésekor)
+      if (!NARR_ALL || !NARR_ALL.length) return [];
+      var bySlug = {}, order = [], i;
+      for (i = 0; i < NARR_ALL.length; i++) {
+        var r = NARR_ALL[i];
+        if (!bySlug[r.slug]) { bySlug[r.slug] = {}; order.push(r.slug); }
+        bySlug[r.slug][r.lang] = r;
+      }
+      var out = [];
+      for (i = 0; i < order.length; i++) {
+        var g = bySlug[order[i]];
+        var pick = g[LANG] || g.hu || g.en || g.it;
+        if (pick) out.push(pick);
+      }
+      out.sort(function (a, b) {
+        if (a.is_intro !== b.is_intro) return a.is_intro ? -1 : 1;
+        if (a.floor !== b.floor) return (a.floor || 0) - (b.floor || 0);
+        if (a.sort_order !== b.sort_order) return (a.sort_order || 0) - (b.sort_order || 0);
+        return String(a.title).localeCompare(String(b.title));
+      });
+      return out;
+    }
+
+    var NARR_WING_KEY = { lobby: 'sLobby', north: 'sNorth', east: 'sEast', south: 'sSouth', west: 'sWest' };
+
+    function narrRender() {
+      var list = narrEl('narr-list');
+      if (!list) return;
+      var tracks = narrTracks();
+      list.textContent = '';
+      if (!tracks.length) {
+        var em = document.createElement('div');
+        em.id = 'narr-empty';
+        em.textContent = t('narrEmpty');
+        list.appendChild(em);
+        return;
+      }
+      for (var i = 0; i < tracks.length; i++) (function (tr) {
+        var row = document.createElement('button');
+        row.type = 'button';
+        row.className = 'narr-track' + (narrCur && narrCur.slug === tr.slug ? ' active' : '');
+        var playing = narrCur && narrCur.slug === tr.slug && narrAudio && !narrAudio.paused;
+
+        var ic = document.createElement('span');
+        ic.className = 'ic';
+        ic.textContent = playing ? '❚❚' : '▶';
+        row.appendChild(ic);
+
+        var tx = document.createElement('span');
+        tx.className = 'tx';
+        var nm = document.createElement('span');
+        nm.className = 'nm';
+        nm.textContent = tr.title;
+        tx.appendChild(nm);
+
+        var bits = [];
+        if (tr.is_intro) bits.push(t('narrIntro'));
+        bits.push(t('mmF' + (tr.floor || 0)));
+        if (tr.wing && NARR_WING_KEY[tr.wing]) bits.push(t(NARR_WING_KEY[tr.wing]));
+        if (tr.duration_sec) bits.push(narrTime(tr.duration_sec));
+
+        var mt = document.createElement('span');
+        mt.className = 'mt';
+        var b = document.createElement('b');
+        b.textContent = bits.join(' · ');
+        mt.appendChild(b);
+        if (tr.subtitle) {
+          mt.appendChild(document.createElement('br'));
+          mt.appendChild(document.createTextNode(tr.subtitle));
+        }
+        tx.appendChild(mt);
+        row.appendChild(tx);
+
+        row.addEventListener('click', function () {
+          if (narrCur && narrCur.slug === tr.slug) narrToggle();
+          else narrLoad(tr, true);
+        });
+        list.appendChild(row);
+      })(tracks[i]);
+    }
+
+    function narrEnsureAudio() {
+      if (narrAudio) return narrAudio;
+      narrAudio = new Audio();
+      narrAudio.preload = 'metadata';
+      narrAudio.addEventListener('timeupdate', narrTick);
+      narrAudio.addEventListener('durationchange', narrTick);
+      // Sávváltáskor a currentTime még az ELŐZŐ sáv állását mutatja, amíg a betöltés
+      // le nem fut — e nélkül a felirat üresen maradna az új sáv elején.
+      narrAudio.addEventListener('loadedmetadata', narrTick);
+      narrAudio.addEventListener('seeked', narrTick);
+      narrAudio.addEventListener('play', narrSyncUi);
+      narrAudio.addEventListener('pause', narrSyncUi);
+      narrAudio.addEventListener('ended', function () { narrSetCaption(''); narrSyncUi(); });
+      narrAudio.addEventListener('error', function () {
+        var er = narrEl('narr-err');
+        if (er) { er.textContent = t('narrErr'); er.hidden = false; }
+        narrSyncUi();
+      });
+      return narrAudio;
+    }
+
+    // Egy sáv betöltése. autoplay csak felhasználói gesztusból hívódik.
+    function narrLoad(track, autoplay) {
+      var a = narrEnsureAudio();
+      narrCur = track;
+      narrCues = narrParseVtt(track.captions);
+      narrCueIdx = -1;
+      narrSetCaption('');
+      var er = narrEl('narr-err'); if (er) { er.hidden = true; er.textContent = ''; }
+
+      a.pause();
+      a.src = track.audio_url;
+      a.muted = !!isMuted;
+      a.load();
+      // Ha a két sáv URL-je történetesen azonos, a böngésző folytathatja a régi
+      // lejátszást — ezért a sáv elejére állunk vissza kifejezetten is.
+      try { a.currentTime = 0; } catch (e) {}
+
+      var now = narrEl('narr-now'); if (now) now.hidden = false;
+      var ti = narrEl('narr-now-title'); if (ti) ti.textContent = track.title;
+
+      var body = narrTranscript(track);
+      var det = narrEl('narr-tr');
+      if (det) {
+        det.hidden = !body;
+        det.open = false;
+        narrEl('narr-tr-sum').textContent = t('narrTranscript');
+        narrEl('narr-tr-body').textContent = body;
+      }
+      if (autoplay) narrPlay();
+      narrSyncUi();
+      narrTick();
+    }
+
+    function narrPlay() {
+      var a = narrEnsureAudio();
+      if (!narrCur) { var tr = narrTracks(); if (!tr.length) return; narrLoad(tr[0], false); a = narrAudio; }
+      var p = a.play();
+      if (p && p.catch) p.catch(function () { narrSyncUi(); });
+    }
+    function narrPause() { if (narrAudio) narrAudio.pause(); }
+    function narrToggle() { if (narrAudio && !narrAudio.paused) narrPause(); else narrPlay(); }
+
+    function narrSetCaption(text) {
+      var cc = narrEl('narr-cc');
+      if (!cc) return;
+      if (!text || !narrCcOn) { cc.classList.remove('show'); cc.textContent = ''; return; }
+      cc.textContent = text;
+      cc.classList.add('show');
+    }
+
+    function narrTick() {
+      var a = narrAudio;
+      if (!a) return;
+      var dur = isFinite(a.duration) && a.duration > 0 ? a.duration
+        : (narrCur && narrCur.duration_sec ? Number(narrCur.duration_sec) : 0);
+      var seek = narrEl('narr-seek');
+      if (seek && !narrSeekDrag) {
+        seek.max = dur || 100;
+        seek.value = Math.min(a.currentTime, dur || a.currentTime);
+        seek.disabled = !dur;
+      }
+      var tc = narrEl('narr-t-cur'); if (tc) tc.textContent = narrTime(a.currentTime);
+      var td = narrEl('narr-t-dur'); if (td) td.textContent = dur ? narrTime(dur) : '–:––';
+
+      if (!narrCues) { if (narrCueIdx !== -1) { narrCueIdx = -1; narrSetCaption(''); } return; }
+      var now = a.currentTime, idx = -1;
+      for (var i = 0; i < narrCues.length; i++) {
+        if (now >= narrCues[i].s && now < narrCues[i].e) { idx = i; break; }
+        if (narrCues[i].s > now) break;
+      }
+      if (idx !== narrCueIdx) {
+        narrCueIdx = idx;
+        narrSetCaption(idx < 0 ? '' : narrCues[idx].text);
+      }
+    }
+
+    function narrSyncUi() {
+      var playing = !!(narrAudio && !narrAudio.paused && !narrAudio.ended);
+      var pb = narrEl('narr-play');
+      if (pb) { pb.textContent = playing ? '❚❚' : '▶'; pb.setAttribute('aria-label', t(playing ? 'narrPause' : 'narrPlay')); }
+      var btn = narrEl('narr-btn'); if (btn) btn.classList.toggle('on', playing);
+      // Szünetben is maradjon kint a felirat — a látogató épp azt olvassa.
+      // Csak a sáv végén, sávváltáskor vagy CC-kikapcsolásnál tűnik el.
+      narrCueIdx = -1;
+      narrTick();
+      // a listában is látsszon, melyik sáv szól épp
+      var rows = document.querySelectorAll('#narr-list .narr-track .ic');
+      var tracks = narrTracks();
+      for (var i = 0; i < rows.length && i < tracks.length; i++) {
+        var mine = narrCur && tracks[i].slug === narrCur.slug;
+        rows[i].textContent = (mine && playing) ? '❚❚' : '▶';
+        rows[i].parentNode.classList.toggle('active', !!mine);
+      }
+    }
+
+    function narrPanelOpen(open) {
+      var p = narrEl('narr-panel'), b = narrEl('narr-btn');
+      if (!p) return;
+      p.classList.toggle('show', open);
+      document.body.classList.toggle('narr-open', open);
+      if (b) b.setAttribute('aria-expanded', open ? 'true' : 'false');
+      if (open) { narrRender(); narrSyncUi(); return; }
+      // a fókusz ne ragadjon a becsukott panelen (különben a WASD néma marad)
+      var a = document.activeElement;
+      while (a && a !== document) { if (a === p) { a.blur && a.blur(); if (b) b.focus(); break; } a = a.parentNode; }
+    }
+
+    function narrUpdateButton() {
+      var b = narrEl('narr-btn');
+      if (!b) return;
+      b.style.display = (museumStarted && NARR_ALL.length) ? 'block' : 'none';
+    }
+
+    // Belépéskor EGYSZER felajánljuk a bevezető sávot — de nem indítjuk el magától.
+    function narrMaybeOffer() {
+      if (narrOffered || !museumStarted || !NARR_ALL.length) return;
+      try { if (localStorage.getItem('museumNarrOffer') === 'seen') { narrOffered = true; return; } } catch (e) {}
+      var tracks = narrTracks();
+      var intro = null;
+      for (var i = 0; i < tracks.length; i++) if (tracks[i].is_intro) { intro = tracks[i]; break; }
+      if (!intro) intro = tracks[0];
+      if (!intro) return;
+      narrOffered = true;
+      var box = narrEl('narr-offer');
+      if (!box) return;
+      narrEl('narr-offer-txt').textContent = t('narrOffer');
+      var yes = narrEl('narr-offer-yes'), no = narrEl('narr-offer-no');
+      yes.textContent = t('narrOfferYes');
+      no.textContent = t('narrOfferNo');
+      box.hidden = false;
+      var close = function () {
+        box.hidden = true;
+        try { localStorage.setItem('museumNarrOffer', 'seen'); } catch (e) {}
+      };
+      yes.onclick = function () { close(); narrPanelOpen(true); narrLoad(intro, true); };
+      no.onclick = close;
+      setTimeout(function () { if (!box.hidden) close(); }, 15000);
+    }
+
+    (function narrWire() {
+      var btn = narrEl('narr-btn');
+      if (!btn) return;
+      var toggle = function (e) {
+        if (e) e.stopPropagation();
+        narrPanelOpen(!narrEl('narr-panel').classList.contains('show'));
+      };
+      btn.addEventListener('click', toggle);
+      btn.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(e); } });
+      narrEl('narr-x').addEventListener('click', function () { narrPanelOpen(false); });
+
+      var seek = narrEl('narr-seek');
+      var startDrag = function () { narrSeekDrag = true; };
+      var endDrag = function () {
+        if (narrAudio && isFinite(Number(seek.value))) {
+          narrAudio.currentTime = Number(seek.value);
+          narrCueIdx = -1;
+        }
+        narrSeekDrag = false;
+        narrTick();
+      };
+      seek.addEventListener('mousedown', startDrag);
+      seek.addEventListener('touchstart', startDrag, { passive: true });
+      seek.addEventListener('input', function () {
+        narrSeekDrag = true;
+        var tc = narrEl('narr-t-cur'); if (tc) tc.textContent = narrTime(Number(seek.value));
+      });
+      seek.addEventListener('change', endDrag);
+
+      narrEl('narr-ctl').addEventListener('click', function (e) {
+        var b = e.target;
+        while (b && b !== this && !(b.getAttribute && b.getAttribute('data-narr'))) b = b.parentNode;
+        if (!b || b === this) return;
+        var act = b.getAttribute('data-narr');
+        if (act === 'play') narrToggle();
+        else if (act === 'back' && narrAudio) { narrAudio.currentTime = Math.max(0, narrAudio.currentTime - 15); narrCueIdx = -1; narrTick(); }
+        else if (act === 'fwd' && narrAudio) {
+          var d = isFinite(narrAudio.duration) ? narrAudio.duration : narrAudio.currentTime + 15;
+          narrAudio.currentTime = Math.min(d, narrAudio.currentTime + 15);
+          narrCueIdx = -1; narrTick();
+        } else if (act === 'cc') {
+          narrCcOn = !narrCcOn;
+          b.setAttribute('aria-pressed', narrCcOn ? 'true' : 'false');
+          try { localStorage.setItem('museumNarrCc', narrCcOn ? '1' : '0'); } catch (err) {}
+          if (!narrCcOn) narrSetCaption('');
+          else { narrCueIdx = -1; narrTick(); }
+        }
+      });
+
+      try { if (localStorage.getItem('museumNarrCc') === '0') narrCcOn = false; } catch (e) {}
+      narrEl('narr-cc-btn').setAttribute('aria-pressed', narrCcOn ? 'true' : 'false');
+      narrApplyI18n();
+    })();
+
+    function narrApplyI18n() {
+      var h = narrEl('narr-h'); if (h) h.textContent = t('narrTitle');
+      var n = narrEl('narr-note'); if (n) n.textContent = t('narrManual');
+      var b = narrEl('narr-btn'); if (b) { b.title = t('narrTitle'); b.setAttribute('aria-label', t('narrTitle')); }
+      var x = narrEl('narr-x'); if (x) x.setAttribute('aria-label', t('narrClose'));
+      var s = narrEl('narr-seek'); if (s) s.setAttribute('aria-label', t('narrSeek'));
+      var ctl = narrEl('narr-ctl');
+      if (ctl) {
+        var map = { back: 'narrBack', play: 'narrPlay', fwd: 'narrFwd', cc: 'narrCc' };
+        var bs = ctl.querySelectorAll('[data-narr]');
+        for (var i = 0; i < bs.length; i++) bs[i].setAttribute('aria-label', t(map[bs[i].getAttribute('data-narr')]));
+      }
+      var sum = narrEl('narr-tr-sum'); if (sum) sum.textContent = t('narrTranscript');
+      if (narrEl('narr-list') && narrEl('narr-list').childNodes.length) narrRender();
+      // nyelvváltáskor ugyanaz a sáv, a választott nyelven — elölről
+      if (narrCur) {
+        var tracks = narrTracks(), match = null;
+        for (var j = 0; j < tracks.length; j++) if (tracks[j].slug === narrCur.slug) { match = tracks[j]; break; }
+        if (match && match.lang !== narrCur.lang) {
+          var wasPlaying = narrAudio && !narrAudio.paused;
+          narrLoad(match, wasPlaying);
+        } else if (match) {
+          var ti = narrEl('narr-now-title'); if (ti) ti.textContent = match.title;
+        }
+      }
+      narrSyncUi();
+    }
+
+    // A publikált sávokat a múzeum indulásától függetlenül töltjük.
+    fetch(SB_URL + '/rest/v1/narrations'
+      + '?select=slug,lang,title,subtitle,audio_url,duration_sec,captions,floor,wing,is_intro,sort_order'
+      + '&is_published=eq.true&audio_url=not.is.null'
+      + '&order=is_intro.desc,floor.asc,sort_order.asc', { headers: { apikey: SB_KEY } })
+      .then(function (res) { return res.ok ? res.json() : Promise.reject('HTTP ' + res.status); })
+      .then(function (rows) {
+        NARR_ALL = rows || [];
+        narrUpdateButton();
+        if (NARR_ALL.length) { narrRender(); narrMaybeOffer(); }
+      })
+      .catch(function (e) { console.warn('Narráció nem tölthető be (a múzeum enélkül is működik).', e); });
 
     var viewer = document.getElementById('art-viewer');
     function startDrag(e) { if (!activeSculpture) return; viewerDragging = true; vDragX = (e.touches ? e.touches[0].clientX : e.clientX); }
@@ -3047,8 +3654,10 @@
     var muteBtn = document.getElementById('mute-btn');
     if (muteBtn) {
       var toggleMute = function () {
-        if (!actx || !pGain || !ambGain) return;
+        // a némítás a narrációra akkor is vonatkozzon, ha a WebAudio még nem indult el
+        if (!actx || !pGain || !ambGain) { isMuted = !isMuted; if (narrAudio) narrAudio.muted = isMuted; muteBtn.innerHTML = isMuted ? '🔇' : '🔊'; return; }
         isMuted = !isMuted;
+        if (narrAudio) narrAudio.muted = isMuted;
         if (isMuted) {
           pGain.gain.value = 0;
           ambGain.gain.value = 0;

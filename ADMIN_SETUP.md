@@ -107,13 +107,64 @@ pedig a falhelyek kiosztásának sorrendjét. A feltöltött anyag **elsőbbség
 demó festményekkel szemben — sorban elfoglalja a falhelyeket az adott szinten.
 Az angol/olasz fordítások nem kötelezők; ha üresen maradnak, a magyar szöveg jelenik meg.
 
+### „Narráció” — hangos tárlatvezetés felirattal
+
+A látogató a múzeumban a 🎧 gombbal nyitja meg a sávok listáját, és **kézzel választ**.
+Ez szándékos: a felvétel **nem** vált magától attól, hol áll a térben. Az emelet és a szárny
+csak **címke** a listában, hogy könnyebb legyen megtalálni a megfelelő sávot.
+
+**Egy sáv felvétele:**
+
+1. **Új sáv** → add meg a címet (ebből lesz az azonosító), az emeletet, és ha akarod, a szárnyat.
+2. Válaszd ki a **hangfájlt** (MP3 ajánlott).
+3. Illeszd be a **feliratot**. Ha időbélyeges (WebVTT), a szöveg a hanggal együtt fut a kép alján;
+   ha csak sima szöveg, álló **átiratként** jelenik meg a lejátszó alatt.
+4. Pipáld ki, hogy *megjelenjen a múzeumban*, és mentsd.
+
+**Nyelvek.** Minden sávnak van HU / EN / IT pirulája. Zöld pipa = van hozzá hang, sárga = még
+nincs publikálva, „+” = ez a nyelv még hiányzik (kattints rá a felvételhez). Ha egy nyelv
+hiányzik, a látogató a magyar változatot kapja — a sáv nem tűnik el a listából.
+
+> **Hangfájl nélkül a sáv nem jelenik meg** a múzeumban, akkor sem, ha publikáltra állítod.
+> A lejátszóhoz hang kell; a felirat önmagában nem elég.
+
+**A bevezető sáv.** Amelyik sávnál bepipálod, hogy *bevezető*, az kerül a lista élére, és a
+látogató **egyszer** kap rá egy felajánlást belépéskor („Meghallgatom” / „Most nem”).
+Magától semmi nem szólal meg.
+
+**Ajánlott hangformátum**
+
+| | Ajánlás |
+|---|---|
+| Formátum | **MP3** (minden böngésző lejátssza, iOS-en is) |
+| Csatorna / bitráta | mono, 96–128 kbps — beszédhez bőven elég |
+| Méret | kb. **1 MB percenként** (10 perces sáv kb. 10 MB) |
+| Hossz | sávonként 2–4 perc; hosszú anyagot bontsatok több sávra |
+| Egyéb elfogadott | M4A/AAC, OGG, WAV, FLAC — a WAV sokszorosa a méretnek, kerüljétek |
+
+**Felirat (WebVTT) formátum**
+
+```
+WEBVTT
+
+00:00:00.000 --> 00:00:04.500
+Üdvözöljük a látogatóközpontban.
+
+00:00:04.500 --> 00:00:09.000
+A beruházás 2024 tavaszán indult.
+```
+
+A szerkesztő alatt látszik, hány feliratot ismert fel. Ha ott „egyetlen időbélyeg sem
+értelmezhető” áll, elgépelés van az időpontokban (a helyes alak `óra:perc:mp.ezredmp`).
+A látogató a **CC** gombbal ki-be kapcsolhatja a feliratot; a választását megjegyezzük.
+
 ## Korlátok
 
 | | Határ |
 |---|---|
 | Drive-ról automatikus átmásolás | **100 MB** / fájl (efölött közvetlen feltöltés) |
 | Közvetlen feltöltés | **500 MB** / fájl |
-| Támogatott formátum | JPEG, PNG, WebP, GIF, AVIF · MP4, WebM, MOV · **GLB, glTF** |
+| Támogatott formátum | JPEG, PNG, WebP, GIF, AVIF · MP4, WebM, MOV · **GLB, glTF** · MP3, M4A, OGG, WAV, FLAC |
 
 ### 3D: az FBX és az OBJ automatikusan GLB lesz
 
