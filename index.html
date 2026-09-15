@@ -305,6 +305,7 @@
       z-index: 1
     }
 
+    #minimap { cursor: pointer; }
     #minimap {
       position: fixed;
       top: 8px;
@@ -618,17 +619,45 @@
       object-fit: contain;
       background: #0d0b07;
       box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9), 0 0 0 6px #886622, 0 0 0 10px #1a1005;
-      transform: scale(0.9);
-      transition: transform 0.5s;
     }
-    #art-viewer.show #art-media-img, #art-viewer.show #art-video { transform: scale(1); }
+
+    #art-goto {
+      display: none; margin: .9em auto 0; padding: .55em 1.1em; cursor: pointer;
+      font-family: 'VT323', monospace; font-size: 19px; letter-spacing: 1px;
+      color: #ffe; background: rgba(0,0,0,.55); border: 1px solid #8a7240; border-radius: 6px;
+      transition: border-color .15s, color .15s;
+    }
+    #art-goto:hover { border-color: #e0c070; color: #ffeec4; }
+
+    /* Nagyítható színpad: a részletek (pontfelhők!) csak így vizsgálhatók meg */
+    #zoom-stage {
+      position: relative; display: grid; place-items: center; max-width: 100%;
+      overflow: hidden; touch-action: none;
+      transform: scale(0.9); transition: transform 0.5s;
+    }
+    #art-viewer.show #zoom-stage { transform: scale(1); }
+    #zoom-stage.zoomed { cursor: grab; }
+    #zoom-stage.zoomed.panning { cursor: grabbing; }
+    #zoom-stage > canvas, #zoom-stage > img { transform-origin: 0 0; will-change: transform; }
+    #zoom-ui {
+      position: absolute; right: 10px; bottom: 10px; display: none;
+      align-items: center; gap: 2px; padding: 3px 5px; border-radius: 8px;
+      background: rgba(10,8,5,.72); border: 1px solid #6a5a38;
+      font-family: 'VT323', monospace; color: #ffe; backdrop-filter: blur(3px);
+    }
+    #zoom-stage.has-image #zoom-ui { display: flex; }
+    #zoom-ui button {
+      width: 28px; height: 26px; cursor: pointer; font: inherit; font-size: 19px; line-height: 1;
+      color: #ffe; background: transparent; border: none; border-radius: 5px;
+    }
+    #zoom-ui button:hover { background: rgba(224,192,112,.22); }
+    #zoom-val { font-size: 15px; min-width: 42px; text-align: center; color: #e0c070; }
+    #art-viewer.show #art-video { transform: scale(1); }
 
     #art-canvas-zoom {
       box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9), 0 0 0 6px #886622, 0 0 0 10px #1a1005;
       max-width: 100%;
       border-radius: 3px;
-      transform: scale(0.9);
-      transition: transform 0.5s;
       object-fit: contain;
       background: #fff;
     }
@@ -646,7 +675,6 @@
       transition: transform 0.5s;
     }
 
-    #art-viewer.show #art-canvas-zoom,
     #art-viewer.show #sketchfab-viewer {
       transform: scale(1)
     }
@@ -743,13 +771,22 @@
   <div id="art-viewer">
     <div id="art-close" role="button" tabindex="0" aria-label="Bezárás">X</div>
     <div id="art-canvas-container">
-      <canvas id="art-canvas-zoom"></canvas>
-      <img id="art-media-img" alt="">
+      <div id="zoom-stage">
+        <canvas id="art-canvas-zoom"></canvas>
+        <img id="art-media-img" alt="">
+        <div id="zoom-ui">
+          <button type="button" data-zoom="out" title="Kicsinyítés" aria-label="Kicsinyítés">−</button>
+          <span id="zoom-val">100%</span>
+          <button type="button" data-zoom="in" title="Nagyítás" aria-label="Nagyítás">+</button>
+          <button type="button" data-zoom="reset" title="Eredeti méret" aria-label="Eredeti méret">⤢</button>
+        </div>
+      </div>
       <video id="art-video" controls playsinline preload="metadata"></video>
       <iframe id="sketchfab-viewer" allow="autoplay; fullscreen; xr-spatial-tracking" xr-spatial-tracking
         execution-while-out-of-viewport execution-while-not-rendered web-share src=""></iframe>
       <div id="art-title"></div>
       <div id="art-desc"></div>
+      <button id="art-goto" type="button">Odamegyek a tárgyhoz</button>
     </div>
   </div>
 
@@ -798,6 +835,7 @@
         wingF1: '1. Emelet · Felső Galéria', wingF2: '2. Emelet · Fénycsarnok',
         mmF0: 'FSZT', mmF1: '1.EM', mmF2: '2.EM',
         byMaker: 'Készítette: ', byPainter: 'Festette: ',
+        gotoArt: 'Odamegyek a tárgyhoz', offMap: 'Oda nem lehet menni',
         descGlb: 'Ez a valós életből vett műtárgy 3D mása a Sketchfabról származik.',
         descSketchfab: 'Forgasd a 3D modellt az egérrel (vagy érintéssel)! A görgővel nagyíthatsz.',
         descSculpture: 'Ez a voxel újraalkotás a klasszikus szobrászat előtt tiszteleg.',
@@ -819,6 +857,7 @@
         wingF1: 'Level 1 · Upper Gallery', wingF2: 'Level 2 · Hall of Light',
         mmF0: 'GF', mmF1: 'L1', mmF2: 'L2',
         byMaker: 'Created by: ', byPainter: 'Painted by: ',
+        gotoArt: 'Walk to this piece', offMap: 'You cannot go there',
         descGlb: 'This 3D copy of a real-world artwork comes from Sketchfab.',
         descSketchfab: 'Rotate the 3D model with your mouse (or touch). Zoom with the scroll wheel.',
         descSculpture: 'This voxel recreation pays homage to classical sculpture.',
@@ -840,6 +879,7 @@
         wingF1: 'Piano 1 · Galleria Superiore', wingF2: 'Piano 2 · Sala della Luce',
         mmF0: 'PT', mmF1: 'P1', mmF2: 'P2',
         byMaker: 'Realizzato da: ', byPainter: 'Dipinto da: ',
+        gotoArt: 'Vai verso l\'opera', offMap: 'Non si può andare lì',
         descGlb: 'Questa copia 3D di un\'opera reale proviene da Sketchfab.',
         descSketchfab: 'Ruota il modello 3D con il mouse (o il tocco). Zooma con la rotellina.',
         descSculpture: 'Questa ricreazione voxel rende omaggio alla scultura classica.',
@@ -1235,7 +1275,7 @@
       addLights();
       buildLift();
 
-      addDust();
+      // addDust(): a lebegő por elhagyva — funkciótlan volt, és havazásnak látszott
       // Bust 1
       buildVoxelSculpture(0, 25, 0, "Dávid (Voxel Mása)", "Michelangelo (Pixel Demake)", "1504", [
         ["00000000", "00000000", "00011100", "00111100", "00011100", "00000000", "00000000", "00000000"],
@@ -2261,6 +2301,39 @@
     var uiCache = null;
     var _eu = new THREE.Euler(0, 0, 0, 'YXZ'), _fw = new THREE.Vector3(), _st = new THREE.Vector3();
     var frameN = 0;   // a drága, de lassan változó munkákat ritkábban végezzük el
+
+    // ── Odasiklás egy pontra (minimap-kattintás, dupla kattintás, „Odamegyek”) ──
+    // Nem ugrunk: a rövid, lassuló mozgás megtartja a térérzetet.
+    var glide = null;
+    function glideTo(x, z, toYaw) {
+      if (!inBounds(x, z)) return false;
+      glide = {
+        fx: camera.position.x, fz: camera.position.z, tx: x, tz: z,
+        fy: yaw, ty: (toYaw === undefined ? yaw : toYaw), t: 0
+      };
+      // a legrövidebb irányba forduljunk
+      while (glide.ty - glide.fy > Math.PI) glide.ty -= Math.PI * 2;
+      while (glide.ty - glide.fy < -Math.PI) glide.ty += Math.PI * 2;
+      isSitting = false;
+      var sh = document.getElementById('sit-hint'); if (sh) sh.style.display = 'none';
+      return true;
+    }
+    function updateGlide(dt) {
+      if (!glide) return;
+      glide.t = Math.min(1, glide.t + dt / 0.55);
+      var e = 1 - Math.pow(1 - glide.t, 3);   // lassuló vég
+      camera.position.x = glide.fx + (glide.tx - glide.fx) * e;
+      camera.position.z = glide.fz + (glide.tz - glide.fz) * e;
+      yaw = glide.fy + (glide.ty - glide.fy) * e;
+      if (glide.t >= 1) glide = null;
+    }
+
+    // Egy műtárgy elé állás: a tábla olvasható távolságába, szemben vele
+    function viewSpotFor(obj) {
+      var d = new THREE.Vector3(0, 0, 1).applyAxisAngle(new THREE.Vector3(0, 1, 0), obj.rotation.y);
+      var dist = obj.userData.isBench ? 2.2 : 4.2;
+      return { x: obj.position.x + d.x * dist, z: obj.position.z + d.z * dist, yaw: obj.rotation.y };
+    }
     function loop() {
       requestAnimationFrame(loop);
       frameN++;
@@ -2282,14 +2355,6 @@
       if (jActive) { dx = jVx; dz = -jVy; }
 
 
-      if (pts && frameN % 2 === 0) {
-        pts.rotation.y += 0.001;
-        var p = pts.geometry.attributes.position.array;
-        for (var i = 1; i < p.length; i += 3) {
-          p[i] -= 0.02; if (p[i] < -2.5) p[i] = 5;   // fele gyakoriság, dupla lépés
-        }
-        pts.geometry.attributes.position.needsUpdate = true;
-      }
 
       if (isSitting && (dx !== 0 || dz !== 0)) {
         isSitting = false;
@@ -2301,7 +2366,10 @@
         if (!isSitting && actx && actx.currentTime - lastStep > 0.45) { playStep(); lastStep = actx.currentTime; }
       }
 
-      if ((dx !== 0 || dz !== 0) && !isSitting) {
+      updateGlide(dt);
+      if (glide && (dx !== 0 || dz !== 0)) glide = null;   // saját mozgás megszakítja
+
+      if ((dx !== 0 || dz !== 0) && !isSitting && !glide) {
         _fw.set(0, 0, -1).applyQuaternion(camera.quaternion); _fw.y = 0; _fw.normalize();
         _st.set(1, 0, 0).applyQuaternion(camera.quaternion); _st.y = 0; _st.normalize();
         var nx = camera.position.x + (_fw.x * dz + _st.x * dx) * speed * dt;
@@ -2399,18 +2467,9 @@
       actx = new AudioContext();
       pGain = actx.createGain(); pGain.gain.value = 0.15; pGain.connect(actx.destination);
 
-      // Ambient rumble
-      var bufSize = actx.sampleRate * 2;
-      var buf = actx.createBuffer(1, bufSize, actx.sampleRate);
-      var out = buf.getChannelData(0);
-      for (var i = 0; i < bufSize; i++) out[i] = Math.random() * 2 - 1;
-      var noise = actx.createBufferSource();
-      noise.buffer = buf; noise.loop = true;
-      var filter = actx.createBiquadFilter();
-      filter.type = 'lowpass'; filter.frequency.value = 400;
-      ambGain = actx.createGain(); ambGain.gain.value = 0.05;
-      noise.connect(filter); filter.connect(ambGain); ambGain.connect(actx.destination);
-      noise.start(0);
+      // A folyamatos háttér-morajlás elhagyva (rövid távon is zavaró volt).
+      // A csatorna megmarad, hogy a lépések és a későbbi narráció hangereje szabályozható legyen.
+      ambGain = actx.createGain(); ambGain.gain.value = 0; ambGain.connect(actx.destination);
       // Az autoplay-policy miatt a friss AudioContext "suspended" lehet (főleg iOS Safari) —
       // user-gesztusból (Start gomb) hívva fel kell oldani, különben néma marad.
       if (actx.state === 'suspended' && actx.resume) actx.resume();
@@ -2597,6 +2656,116 @@
       // csak http(s), ÉS attribútum-biztosra escape-elve (nehogy az idézőjel kitörjön az href-ből)
       return /^https?:\/\//i.test(u) ? escHtml(u) : '#';
     }
+    // ══════════════════════════════════════
+    //  NAGYÍTÁS a nagy nézetben
+    // ══════════════════════════════════════
+    //  A kiállítás lényege a digitalizáció részletgazdagsága — enélkül a
+    //  pontfelhők és a tervrajzok olvashatatlanok maradnának.
+    //  Görgő / csippentés nagyít, húzás mozgat, dupla kattintás oda-vissza vált.
+    var zoomStage = null, zoomEl = null, Z = { s: 1, x: 0, y: 0 };
+    var ZMIN = 1, ZMAX = 8;
+
+    function zoomApply() {
+      if (!zoomEl) return;
+      zoomEl.style.transform = 'translate(' + Z.x + 'px,' + Z.y + 'px) scale(' + Z.s + ')';
+      var v = document.getElementById('zoom-val');
+      if (v) v.textContent = Math.round(Z.s * 100) + '%';
+      if (zoomStage) zoomStage.classList.toggle('zoomed', Z.s > 1.001);
+    }
+    function zoomClamp() {
+      // ne lehessen kicsúsztatni a képet a keretből
+      if (!zoomEl || !zoomStage) return;
+      var sw = zoomStage.clientWidth, sh = zoomStage.clientHeight;
+      var w = zoomEl.clientWidth * Z.s, h = zoomEl.clientHeight * Z.s;
+      Z.x = w <= sw ? (sw - w) / 2 : Math.min(0, Math.max(sw - w, Z.x));
+      Z.y = h <= sh ? (sh - h) / 2 : Math.min(0, Math.max(sh - h, Z.y));
+    }
+    function zoomReset(el) {
+      zoomEl = el || zoomEl;
+      Z.s = 1; Z.x = 0; Z.y = 0;
+      zoomClamp(); zoomApply();
+    }
+    // nagyítás egy adott képernyőpont körül (a kurzor alatti részlet marad helyben)
+    function zoomAt(cx, cy, factor) {
+      if (!zoomEl || !zoomStage) return;
+      var r = zoomStage.getBoundingClientRect();
+      var px = cx - r.left, py = cy - r.top;
+      var ns = Math.max(ZMIN, Math.min(ZMAX, Z.s * factor));
+      if (ns === Z.s) return;
+      Z.x = px - (px - Z.x) * (ns / Z.s);
+      Z.y = py - (py - Z.y) * (ns / Z.s);
+      Z.s = ns;
+      zoomClamp(); zoomApply();
+    }
+
+    (function initZoom() {
+      zoomStage = document.getElementById('zoom-stage');
+      if (!zoomStage) return;
+
+      zoomStage.addEventListener('wheel', function (e) {
+        if (!zoomEl || zoomEl.style.display === 'none') return;
+        e.preventDefault();
+        zoomAt(e.clientX, e.clientY, e.deltaY < 0 ? 1.18 : 1 / 1.18);
+      }, { passive: false });
+
+      zoomStage.addEventListener('dblclick', function (e) {
+        if (!zoomEl) return;
+        e.preventDefault(); e.stopPropagation();
+        if (Z.s > 1.001) zoomReset(); else zoomAt(e.clientX, e.clientY, 3);
+      });
+
+      // húzás (egér és egyujjas érintés) + csippentés
+      var pts = {}, lastMid = null, lastDist = 0;
+      zoomStage.addEventListener('pointerdown', function (e) {
+        if (!zoomEl) return;
+        pts[e.pointerId] = { x: e.clientX, y: e.clientY };
+        zoomStage.setPointerCapture(e.pointerId);
+        if (Z.s > 1.001) zoomStage.classList.add('panning');
+        e.stopPropagation();   // ne forgassa közben a szobrot
+      });
+      zoomStage.addEventListener('pointermove', function (e) {
+        if (!zoomEl || !pts[e.pointerId]) return;
+        var ids = Object.keys(pts);
+        if (ids.length === 1) {
+          if (Z.s > 1.001) {
+            Z.x += e.clientX - pts[e.pointerId].x;
+            Z.y += e.clientY - pts[e.pointerId].y;
+            zoomClamp(); zoomApply();
+          }
+        } else if (ids.length === 2) {
+          pts[e.pointerId] = { x: e.clientX, y: e.clientY };
+          var a = pts[ids[0]], b = pts[ids[1]];
+          var d = Math.hypot(a.x - b.x, a.y - b.y);
+          var mid = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+          if (lastDist) zoomAt(mid.x, mid.y, d / lastDist);
+          lastDist = d; lastMid = mid;
+          e.stopPropagation();
+          return;
+        }
+        pts[e.pointerId] = { x: e.clientX, y: e.clientY };
+        e.stopPropagation();
+      });
+      function endPtr(e) {
+        delete pts[e.pointerId];
+        if (Object.keys(pts).length < 2) lastDist = 0;
+        if (!Object.keys(pts).length) zoomStage.classList.remove('panning');
+      }
+      zoomStage.addEventListener('pointerup', endPtr);
+      zoomStage.addEventListener('pointercancel', endPtr);
+
+      var ui = document.getElementById('zoom-ui');
+      if (ui) ui.addEventListener('click', function (e) {
+        var b = e.target.closest('button[data-zoom]'); if (!b) return;
+        e.stopPropagation();
+        var r = zoomStage.getBoundingClientRect();
+        var cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+        var a = b.getAttribute('data-zoom');
+        if (a === 'in') zoomAt(cx, cy, 1.5);
+        else if (a === 'out') zoomAt(cx, cy, 1 / 1.5);
+        else zoomReset();
+      });
+    })();
+
     function openArt(obj) {
       var ud = obj.userData;
       currentArt = obj; // nyelvváltáskor újrarajzoláshoz
@@ -2618,6 +2787,9 @@
       mImg.style.display = 'none';
       mVid.style.display = 'none';
       mVid.pause();
+      var gb = document.getElementById('art-goto');
+      if (gb) { gb.style.display = 'block'; gb.textContent = t('gotoArt'); }
+      if (zoomStage) zoomStage.classList.remove('has-image');
 
       if (ud.isMedia) {
         // A cég feltöltött képe / videója nagy nézetben (a videó itt már hanggal megy)
@@ -2638,6 +2810,8 @@
           mImg.src = ud.mediaUrl;
           mImg.alt = mTitle(ud);
           mImg.style.display = 'block';
+          if (zoomStage) zoomStage.classList.add('has-image');
+          zoomReset(mImg);
         }
       } else if (ud.glbUrl) {
         document.getElementById('art-desc').innerHTML = t('byMaker') + escHtml(tName(ud.artist)) + "<p>" + t('descGlb') + "</p><p style='font-size:0.7em;color:#aaa'>" + t('dragMouse') + "</p>";
@@ -2662,6 +2836,8 @@
       } else {
         document.getElementById('art-desc').innerHTML = t('byPainter') + escHtml(tName(ud.artist)) + "<p>" + t('descPainting') + "</p>";
         zc.style.display = 'block';
+        if (zoomStage) zoomStage.classList.add('has-image');
+        zoomReset(zc);
         sfViewer.style.display = 'none';
         sfViewer.src = "";
         viewer.classList.remove('sculpture-mode');
@@ -2821,6 +2997,52 @@
       fireRaycast(e);
     });
 
+    // Dupla kattintás a padlóra: odasiklunk. (Műtárgyra a sima kattintás nyit, ezért
+    // a dupla kattintás csak a szabad padlón mozgat — nem ütközik a megnyitással.)
+    var _floorPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+    var _hit = new THREE.Vector3();
+    renderer.domElement.addEventListener('dblclick', function (e) {
+      var rect = renderer.domElement.getBoundingClientRect();
+      rayPointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      rayPointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+      raycaster.setFromCamera(rayPointer, camera);
+      if (raycaster.intersectObjects(artMeshes, true).length) return;
+      _floorPlane.constant = -curFloorY();
+      if (!raycaster.ray.intersectPlane(_floorPlane, _hit)) return;
+      glideTo(_hit.x, _hit.z);
+    });
+
+    // Minimap: kattintás a térképre → odasiklás arra a pontra
+    var mini = document.getElementById('minimap');
+    if (mini) {
+      mini.title = 'Kattints a térképre az odalépéshez';
+      mini.addEventListener('click', function (e) {
+        var rect = mini.getBoundingClientRect();
+        var fi = nearestFloorIdx(camera.position.y);
+        var sc = (fi === 0 ? rect.width / 160 : rect.width / 44);
+        var wx = (e.clientX - rect.left - rect.width / 2) / sc;
+        var wz = (e.clientY - rect.top - rect.height / 2) / sc;
+        if (!glideTo(wx, wz)) {
+          var sh = document.getElementById('sit-hint');
+          if (sh) {
+            sh.textContent = t('offMap');
+            sh.style.display = 'block';
+            setTimeout(function () { sh.style.display = 'none'; }, 1600);
+          }
+        }
+      });
+    }
+
+    // „Odamegyek a tárgyhoz”: bezárja a nagy nézetet és a tárgy elé siklik
+    var gotoBtn = document.getElementById('art-goto');
+    if (gotoBtn) {
+      gotoBtn.addEventListener('click', function () {
+        var target = currentArt;
+        closeArt();
+        if (target) { var v = viewSpotFor(target); glideTo(v.x, v.z, v.yaw); }
+      });
+    }
+
     // Mute button logic
     var muteBtn = document.getElementById('mute-btn');
     if (muteBtn) {
@@ -2833,7 +3055,7 @@
           muteBtn.innerHTML = '🔇';
         } else {
           pGain.gain.value = 0.15;
-          ambGain.gain.value = 0.05;
+          ambGain.gain.value = 0;   // nincs háttérzaj
           muteBtn.innerHTML = '🔊';
         }
       };
