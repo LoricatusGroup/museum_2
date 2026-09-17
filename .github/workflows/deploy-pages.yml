@@ -48,7 +48,8 @@ jobs:
                  tools uploads .github releases node_modules \
                  package.json package-lock.json .gitignore \
                  errors.log log.txt test_camera.js upgrade.py \
-                 museum.html museum_backup.html README.md ADMIN_SETUP.md
+                 museum.html museum_backup.html README.md ADMIN_SETUP.md \
+                 supabase
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
