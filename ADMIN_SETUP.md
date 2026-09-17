@@ -27,16 +27,57 @@ használható a szerveroldali átmásoláshoz — de kvótás és lassú, így n
 
 ---
 
-## 1. lépés — Admin felhasználó létrehozása
+## 1. lépés — Ki férhet hozzá az adminhoz?
 
-A Supabase irányítópulton: **Authentication → Users → Add user**
-(e-mail + jelszó, „Auto Confirm User" bekapcsolva).
+A hozzáférés **az adatbázisban** dől el, nem a felületen — a böngészőből érkező kérést
+a Postgres bírálja el, így a szabályt nem lehet megkerülni a felület kicselezésével.
 
-Majd **Authentication → Sign In / Providers → Email**: kapcsold **KI** az
-„Allow new users to sign up" opciót, hogy kívülről senki ne tudjon regisztrálni.
+**A szabály:** admin az, akinek a címe **`@loricatus.hu`** végű, **vagy** rajta van a
+kivétellistán — és a címét meg is erősítette.
 
-> A tábla jogosultságai ellenőrizve: bejelentkezés nélkül **csak** a publikált, kész tárgyak
-> olvashatók, írni pedig egyáltalán nem lehet.
+| | Mit lát / mit tehet |
+|---|---|
+| Bejelentkezés nélkül (múzeumlátogató) | csak a publikált, kész tárgyak és narrációk |
+| Bejelentkezve, de nem engedélyezett címmel | **ugyanannyit, mint egy látogató** — semmi adminhoz |
+| Engedélyezett cím | minden: tárgyak, narráció, Drive-beállítások, feltöltés |
+
+**Új kolléga felvétele:** Supabase → **Authentication → Users → Add user**,
+`@loricatus.hu` címmel, „Auto Confirm User" bekapcsolva. Attól kezdve admin —
+külön jogosultságot adni nem kell.
+
+**Kivétel felvétele** (külsős, vagy más domainen lévő cím) — SQL Editorban:
+
+```sql
+insert into public.admin_allowlist (email, note)
+values ('kulsos@pelda.hu', 'Miért kap hozzáférést');
+```
+
+Visszavonás: `delete from public.admin_allowlist where email = 'kulsos@pelda.hu';`
+(A cím **kisbetűsen** kerüljön be.)
+
+> A jelenlegi `pr.nemes@gmail.com` fiók a kivétellistán van, mert nem céges domainen
+> van. Ha készül hozzá `@loricatus.hu` cím, ez a sor törölhető.
+
+**Regisztráció kívülről nem lehetséges:** idegen címmel a fiók létre sem jön
+(az adatbázis visszautasítja, a felület pedig „Database error saving new user"
+üzenetet mutat). Ez a második védelmi vonal; az igazi kapu a fenti jogosultsági szabály.
+
+> **Ez egy valós lyukat zárt be.** A korábbi beállítás szerint **bárki** regisztrálhatott
+> bármilyen címmel, és a bejelentkezett felhasználók *kivétel nélkül* teljes admin jogot
+> kaptak — tehát egy idegen törölhette volna az egész kiállítást. Méréssel ellenőrizve:
+> idegen cím most 0 adminadatot lát és egyetlen írása sem megy át, a valódi admin pedig
+> változatlanul mindent elér.
+
+### Ha önkiszolgáló belépést szeretnél
+
+Ez **még nincs kész**: a belépőoldalon ma csak e-mail + jelszó van, regisztráció nincs.
+Két út van, mindkettő igényel egy kis beállítást:
+
+- **Google-fiókkal** (ajánlott): a Google Cloud projektben OAuth Client ID, majd
+  Supabase → Auth → Providers → Google. Nem megy levél, egy kattintás a belépés.
+- **E-mail + jelszó**: ehhez saját levélküldő (SMTP) kell, mert a beépített Supabase
+  küldő **óránként 2–3 levélnél elakad** (mérve: HTTP 429), és minden új kolléga
+  megerősítő levelet igényelne.
 
 ## 2. lépés — Google hozzáférés a Drive-hoz
 
