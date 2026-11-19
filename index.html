@@ -2623,8 +2623,8 @@
       if (total < 0.05 && toYaw === undefined) return true;
       glide = {
         pts: pts, lens: lens, total: total, t: 0,
-        // séta: ~8 egység/mp, de hosszú útnál is legfeljebb ~4 mp
-        dur: Math.max(0.55, Math.min(4, total / 8 + 0.3)),
+        // séta: ~10 egység/mp, de hosszú útnál is legfeljebb ~3,5 mp
+        dur: Math.max(0.55, Math.min(3.5, total / 10 + 0.3)),
         // rövid lépésnél nem forgatjuk el a nézetet, hosszabb sétán a haladás irányába nézünk
         face: total > 6, toYaw: toYaw, endYaw: toYaw, fromYaw: yaw
       };
@@ -2641,7 +2641,7 @@
       if (!glide) return;
       var g = glide;
       g.t = Math.min(1, g.t + dt / g.dur);
-      var e = g.t < 0.5 ? 4 * g.t * g.t * g.t : 1 - Math.pow(-2 * g.t + 2, 3) / 2;   // lassú indulás, lassuló vég
+      var e = g.face ? Math.sin(g.t * Math.PI / 2) : 1 - Math.pow(1 - g.t, 3);   // azonnal elindul, lassulva áll meg (hosszú sétán lágyabban)
       var s = e * g.total, k = 1;
       while (k < g.lens.length - 1 && g.lens[k] < s) k++;
       var a = g.pts[k - 1], b = g.pts[k], segL = (g.lens[k] - g.lens[k - 1]) || 1, u = Math.min(1, (s - g.lens[k - 1]) / segL);
