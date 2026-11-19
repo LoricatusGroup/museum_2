@@ -897,6 +897,117 @@
       #nav-bar > button span { display: none; }
       #nav-menu { left: auto; right: 0; transform: none; }
     }
+    /* ── Finom design-réteg: egységes, visszafogott kezelőfelület ──────────────
+       Sötét, áttetsző „üveg” panelek vékony arany hajszálvonallal, a szövegekhez
+       talpas rendszerbetű (nincs letöltés), a pixel-betű csak a címekben marad. */
+    :root {
+      --ui-glass: rgba(24, 19, 14, .62);
+      --ui-glass-strong: rgba(24, 19, 14, .82);
+      --ui-hair: rgba(214, 184, 120, .45);
+      --ui-gold: #d9bd82;
+      --ui-cream: #f4ecdd;
+      --ui-serif: 'Cormorant Garamond', 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+      --ui-radius: 10px;
+      --ui-shadow: 0 6px 24px rgba(0, 0, 0, .18);
+    }
+    #fs-btn, #mute-btn, #narr-btn, #lang-switch .lang-btn, #wing-label, #minimap, #nav-bar, #art-goto, #zoom-ui {
+      -webkit-backdrop-filter: blur(10px) saturate(1.1); backdrop-filter: blur(10px) saturate(1.1);
+    }
+    #fs-btn {
+      font-family: var(--ui-serif); font-size: 12px; letter-spacing: 2.5px; font-weight: 600;
+      background: var(--ui-glass); color: var(--ui-cream); border: 1px solid var(--ui-hair);
+      border-radius: var(--ui-radius); padding: 8px 12px; box-shadow: var(--ui-shadow);
+    }
+    #mute-btn, #narr-btn {
+      background: var(--ui-glass); border: 1px solid var(--ui-hair); border-radius: var(--ui-radius);
+      box-shadow: var(--ui-shadow); opacity: 1;
+    }
+    #fs-btn:hover, #mute-btn:hover, #narr-btn:hover { border-color: var(--ui-gold); background: var(--ui-glass-strong); }
+    #lang-switch { gap: 0; border-radius: var(--ui-radius); overflow: hidden; border: 1px solid var(--ui-hair); box-shadow: var(--ui-shadow); }
+    #lang-switch .lang-btn {
+      font-family: var(--ui-serif); font-size: 12px; font-weight: 600; letter-spacing: 1.5px;
+      background: var(--ui-glass); color: rgba(244, 236, 221, .72); border: 0; border-radius: 0; padding: 6px 10px;
+    }
+    #lang-switch .lang-btn + .lang-btn { border-left: 1px solid rgba(214, 184, 120, .25); }
+    #lang-switch .lang-btn.active { background: rgba(217, 189, 130, .9); color: #241a10; }
+    #wing-label {
+      font-family: var(--ui-serif); font-size: clamp(12px, 1.4vw, 15px); font-weight: 600; letter-spacing: 3px;
+      font-variant: small-caps; text-transform: lowercase;
+      color: var(--ui-cream); background: var(--ui-glass); border: 1px solid var(--ui-hair);
+      border-radius: 999px; padding: 6px 22px; box-shadow: var(--ui-shadow);
+    }
+    #minimap { border: 1px solid var(--ui-hair); border-radius: var(--ui-radius); box-shadow: var(--ui-shadow); }
+    #crosshair { width: 6px; height: 6px; border: 0; background: rgba(255, 255, 255, .75); box-shadow: 0 0 0 1px rgba(0, 0, 0, .25); }
+    #crosshair.active { background: var(--ui-gold); box-shadow: 0 0 10px rgba(217, 189, 130, .9); }
+    #vignette { background: radial-gradient(ellipse at center, transparent 62%, rgba(20, 12, 4, .22) 100%); }
+
+    /* Műtárgy-címke: múzeumi tábla, krémszínű kartonon */
+    #info-panel {
+      background: rgba(250, 246, 238, .96); border: 0; border-left: 3px solid #b8954a;
+      border-radius: 4px; padding: 12px 22px 12px 18px; text-align: left;
+      box-shadow: 0 8px 28px rgba(30, 20, 8, .22);
+    }
+    #info-panel .t {
+      font-family: var(--ui-serif); font-size: clamp(17px, 2.2vw, 22px); font-style: italic; font-weight: 600;
+      color: #2a1f14; line-height: 1.25; margin-bottom: 3px;
+    }
+    #info-panel .t a { color: #2a1f14 !important; }
+    #info-panel .a { font-family: var(--ui-serif); font-size: 13px; letter-spacing: 2.2px; text-transform: uppercase; color: #7a6040; }
+    #info-panel .y { font-family: var(--ui-serif); font-size: 13px; color: #9a8a74; letter-spacing: 1px; }
+
+    /* Navigációs sáv: egy közös üveg-kapszula, osztóvonalakkal */
+    #nav-bar { gap: 0; background: var(--ui-glass); border: 1px solid var(--ui-hair); border-radius: 999px; padding: 3px; box-shadow: var(--ui-shadow); }
+    #nav-bar > button {
+      font-family: var(--ui-serif); font-size: 14px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
+      background: transparent; border: 0; border-radius: 999px; color: var(--ui-cream); padding: 8px 16px; min-height: 36px;
+    }
+    #nav-bar > button + button { position: relative; }
+    #nav-bar > button + button::before { content: ''; position: absolute; left: 0; top: 25%; height: 50%; width: 1px; background: rgba(214, 184, 120, .3); }
+    #nav-bar > button b { color: var(--ui-gold); font-size: 11px; }
+    #nav-bar > button:hover, #nav-bar > button:focus-visible { background: rgba(217, 189, 130, .18); }
+    #nav-menu { background: rgba(250, 246, 238, .98); border: 1px solid rgba(184, 149, 74, .5); border-radius: 12px; padding: 6px; }
+    #nav-menu button { font-family: var(--ui-serif); font-size: 17px; font-weight: 600; color: #2a1f14; border-radius: 8px; }
+    #nav-menu button:hover, #nav-menu button:focus-visible { background: #efe4cc; }
+    @media(max-width:767px) {
+      #nav-bar > button { padding: 6px 10px; min-width: 44px; min-height: 40px; }
+      #nav-bar > button b { font-size: 14px; }
+    }
+
+    /* Kezdőképernyő */
+    #overlay { background: radial-gradient(ellipse at 50% 45%, rgba(20, 13, 6, .45), rgba(12, 8, 4, .9)); }
+    #overlay h1 { animation: none; color: #f6eedd; text-shadow: 0 2px 0 #2a1a0a, 0 0 32px rgba(230, 190, 120, .35); letter-spacing: 2px; margin-bottom: 18px; }
+    #overlay .subtitle {
+      font-family: var(--ui-serif); font-size: clamp(13px, 2vw, 17px); font-weight: 600; letter-spacing: 5px; text-transform: uppercase;
+      color: var(--ui-gold); display: flex; align-items: center; gap: 14px; margin-bottom: 34px;
+    }
+    #overlay .subtitle::before, #overlay .subtitle::after { content: ''; width: 48px; height: 1px; background: linear-gradient(90deg, transparent, var(--ui-gold)); }
+    #overlay .subtitle::after { background: linear-gradient(90deg, var(--ui-gold), transparent); }
+    .start-btn {
+      animation: none; font-family: var(--ui-serif); font-size: clamp(14px, 2vw, 16px); font-weight: 700; letter-spacing: 5px;
+      color: var(--ui-cream); background: rgba(217, 189, 130, .08); border: 1px solid var(--ui-gold); border-radius: 999px;
+      padding: 14px 44px; transition: background .25s, color .25s, box-shadow .25s;
+    }
+    .start-btn:hover, .start-btn:focus-visible, .start-btn:active { background: var(--ui-gold); color: #241a10; box-shadow: 0 0 36px rgba(217, 189, 130, .35); outline: none; }
+    .controls-info { font-family: var(--ui-serif); font-size: clamp(13px, 1.6vw, 15px); color: rgba(244, 236, 221, .6); letter-spacing: .5px; max-width: 560px; margin-top: 26px; }
+
+    /* Nagy nézet */
+    #art-title { font-family: var(--ui-serif); font-size: clamp(20px, 3vw, 32px); font-style: italic; font-weight: 600; text-shadow: none; letter-spacing: .5px; }
+    #art-desc { font-family: var(--ui-serif); font-size: clamp(14px, 1.8vw, 17px); letter-spacing: 2px; text-transform: uppercase; color: var(--ui-gold); }
+    #art-desc p { font-family: var(--ui-serif); text-transform: none; letter-spacing: 0; font-size: clamp(15px, 1.8vw, 18px); color: rgba(244, 236, 221, .78); line-height: 1.55; }
+    #art-close { font-family: var(--ui-serif); font-size: 22px; line-height: 38px; border: 1px solid var(--ui-hair); background: var(--ui-glass); color: var(--ui-cream); }
+    #art-close:hover { background: var(--ui-gold); color: #241a10; transform: none; }
+    #art-goto { font-family: var(--ui-serif); font-size: 14px; font-weight: 600; letter-spacing: 2.5px; text-transform: uppercase; border-radius: 999px; border-color: var(--ui-hair); background: var(--ui-glass); padding: .7em 1.6em; }
+    #art-canvas-zoom, #art-media-img, #art-video { box-shadow: 0 18px 50px rgba(0, 0, 0, .7), 0 0 0 8px #9a7a34, 0 0 0 9px #e0c483, 0 0 0 14px #2a1c0c; }
+
+
+    @media(max-width:767px) {
+      #wing-label { font-size: 11px; letter-spacing: 1.8px; padding: 6px 14px; white-space: nowrap; max-width: 58vw; overflow: hidden; text-overflow: ellipsis; }
+      #info-panel { top: 84px !important; bottom: auto !important; max-width: calc(100vw - 130px); padding: 8px 14px 8px 12px; }
+      #info-panel .t { font-size: 17px; }
+      #info-panel .a { font-size: 11px; letter-spacing: 1.5px; }
+      #fs-btn { font-size: 11px; letter-spacing: 1.5px; padding: 7px 10px; }
+      #overlay .subtitle::before, #overlay .subtitle::after { display: none; }
+    }
   </style>
 </head>
 
@@ -909,7 +1020,7 @@
   </div>
   <div id="overlay">
     <h1>PIXEL ART<br>MÚZEUM</h1>
-    <div class="subtitle">─ 4 Szárny · PRÉMIUM KIADÁS ─</div>
+    <div class="subtitle">4 Szárny · Prémium kiadás</div>
     <div class="start-btn" id="startBtn" role="button" tabindex="0" aria-label="Belépés a múzeumba">▶ BELÉPÉS</div>
     <div class="controls-info" id="hint"></div>
   </div>
@@ -1013,7 +1124,7 @@
     // ── i18n: HU / EN / IT ───────────────────────────────────────────────
     var I18N = {
       hu: {
-        docTitle: 'Pixel Art Múzeum', museum: 'MÚZEUM', subtitle: '─ 4 Szárny · PRÉMIUM KIADÁS ─',
+        docTitle: 'Pixel Art Múzeum', museum: 'MÚZEUM', subtitle: '4 Szárny · Prémium kiadás',
         enter: 'BELÉPÉS', ariaEnter: 'Belépés a múzeumba',
         hintDesktop: 'Kattints a padlóra: odamész · Húzd az egeret: nézel · WASD / nyilak: séta · Q / E: előző / következő mű', hintMobile: 'Koppints a padlóra: odamész · Húzd az ujjad: nézel · Bal oldal: joystick',
         navPrev: 'Előző', navNext: 'Következő', navPrevAria: 'Előző műtárgy (Q)', navNextAria: 'Következő műtárgy (E)',
@@ -1045,7 +1156,7 @@
         sEast: 'Keleti szárny', sSouth: 'Déli szárny', sWest: 'Nyugati szárny'
       },
       en: {
-        docTitle: 'Pixel Art Museum', museum: 'MUSEUM', subtitle: '─ 4 Wings · PREMIUM EDITION ─',
+        docTitle: 'Pixel Art Museum', museum: 'MUSEUM', subtitle: '4 Wings · Premium edition',
         enter: 'ENTER', ariaEnter: 'Enter the museum',
         hintDesktop: 'Click the floor: walk there · Drag the mouse: look · WASD / arrows: walk · Q / E: previous / next work', hintMobile: 'Tap the floor: walk there · Drag your finger: look · Left side: joystick',
         navPrev: 'Previous', navNext: 'Next', navPrevAria: 'Previous artwork (Q)', navNextAria: 'Next artwork (E)',
@@ -1077,7 +1188,7 @@
         sSouth: 'South wing', sWest: 'West wing'
       },
       it: {
-        docTitle: 'Museo Pixel Art', museum: 'MUSEO', subtitle: '─ 4 Ali · EDIZIONE PREMIUM ─',
+        docTitle: 'Museo Pixel Art', museum: 'MUSEO', subtitle: '4 Ali · Edizione premium',
         enter: 'ENTRA', ariaEnter: 'Entra nel museo',
         hintDesktop: 'Clicca sul pavimento: vai lì · Trascina il mouse: guarda · WASD / frecce: cammina · Q / E: opera precedente / successiva', hintMobile: 'Tocca il pavimento: vai lì · Trascina il dito: guarda · Lato sinistro: joystick',
         navPrev: 'Precedente', navNext: 'Successiva', navPrevAria: 'Opera precedente (Q)', navNextAria: 'Opera successiva (E)',
@@ -1656,6 +1767,66 @@
       }
       return c;
     }
+    // Futószőnyeg: mély bordó, két oldalt arany bordűr, középen finom rombusz-minta.
+    // A hossza mentén ismétlődik (v = méter / szélesség), a bordűr a két hosszanti szélen fut.
+    function runnerTexture() {
+      var W = 256, H = 256, c = mkCanvas(W, H), x = c.getContext('2d'), r = rng(31);
+      x.fillStyle = '#4a0d12'; x.fillRect(0, 0, W, H);
+      for (var i = 0; i < 1400; i++) { x.globalAlpha = 0.05; x.fillStyle = r() > .5 ? '#6a1820' : '#2e060a'; x.fillRect(r() * W, r() * H, 2, 2); }
+      x.globalAlpha = 1;
+      // bordűr
+      [[0, 22], [W - 22, 22]].forEach(function (b) {
+        x.fillStyle = '#2c0709'; x.fillRect(b[0], 0, b[1], H);
+      });
+      x.fillStyle = '#b8924a'; x.fillRect(8, 0, 3, H); x.fillRect(W - 11, 0, 3, H);
+      x.fillStyle = 'rgba(184,146,74,.55)'; x.fillRect(16, 0, 1, H); x.fillRect(W - 17, 0, 1, H);
+      x.fillRect(26, 0, 1, H); x.fillRect(W - 27, 0, 1, H);
+      // rombuszok a középmezőben
+      x.strokeStyle = 'rgba(184,146,74,.32)'; x.lineWidth = 1.5;
+      var cx = W / 2, s = 46;
+      for (var y = -s; y <= H + s; y += s * 2) {
+        x.beginPath(); x.moveTo(cx, y - s); x.lineTo(cx + s, y); x.lineTo(cx, y + s); x.lineTo(cx - s, y); x.closePath(); x.stroke();
+        x.fillStyle = 'rgba(184,146,74,.35)'; x.beginPath(); x.arc(cx, y, 4, 0, Math.PI * 2); x.fill();
+      }
+      x.strokeStyle = 'rgba(184,146,74,.14)';
+      for (var y2 = 0; y2 <= H + s; y2 += s * 2) { x.beginPath(); x.moveTo(cx - 74, y2); x.lineTo(cx + 74, y2); x.stroke(); }
+      return c;
+    }
+    // Négyzetes szőnyeg a csarnokba és az emeleti termekbe: körbefutó bordűr, középen medalion
+    function rugTexture() {
+      var S = mobile ? 512 : 1024, c = mkCanvas(S, S), x = c.getContext('2d'), r = rng(41), k = S / 512;
+      x.fillStyle = '#4a0d12'; x.fillRect(0, 0, S, S);
+      for (var i = 0; i < 6000; i++) { x.globalAlpha = 0.05; x.fillStyle = r() > .5 ? '#6a1820' : '#2e060a'; x.fillRect(r() * S, r() * S, 2 * k, 2 * k); }
+      x.globalAlpha = 1;
+      x.fillStyle = '#2c0709'; x.fillRect(0, 0, S, 34 * k); x.fillRect(0, S - 34 * k, S, 34 * k); x.fillRect(0, 0, 34 * k, S); x.fillRect(S - 34 * k, 0, 34 * k, S);
+      x.strokeStyle = '#b8924a'; x.lineWidth = 3 * k; x.strokeRect(12 * k, 12 * k, S - 24 * k, S - 24 * k);
+      x.strokeStyle = 'rgba(184,146,74,.55)'; x.lineWidth = 1.2 * k; x.strokeRect(24 * k, 24 * k, S - 48 * k, S - 48 * k); x.strokeRect(40 * k, 40 * k, S - 80 * k, S - 80 * k);
+      var cx = S / 2;
+      x.strokeStyle = 'rgba(184,146,74,.28)'; x.lineWidth = 1.5 * k;
+      x.beginPath(); x.arc(cx, cx, 120 * k, 0, Math.PI * 2); x.stroke();
+      x.beginPath(); x.arc(cx, cx, 96 * k, 0, Math.PI * 2); x.stroke();
+      for (var p = 0; p < 16; p++) {
+        var a = p / 16 * Math.PI * 2;
+        x.beginPath(); x.moveTo(cx + Math.cos(a) * 96 * k, cx + Math.sin(a) * 96 * k); x.lineTo(cx + Math.cos(a + .2) * 120 * k, cx + Math.sin(a + .2) * 120 * k); x.stroke();
+      }
+      x.fillStyle = 'rgba(184,146,74,.22)'; x.beginPath(); x.arc(cx, cx, 12 * k, 0, Math.PI * 2); x.fill();
+      // sarok-díszek
+      [[1, 1], [1, -1], [-1, 1], [-1, -1]].forEach(function (d) {
+        var ox = cx + d[0] * (cx - 110 * k), oy = cx + d[1] * (cx - 110 * k);
+        x.beginPath(); x.moveTo(ox, oy - 40 * k); x.lineTo(ox + 40 * k, oy); x.lineTo(ox, oy + 40 * k); x.lineTo(ox - 40 * k, oy); x.closePath(); x.stroke();
+      });
+      return c;
+    }
+    function carpetUV(geom, w, d) {
+      // a hosszanti tengely mentén méterben ismétlődik, keresztben 0..1
+      var pos = geom.attributes.position, uv = geom.attributes.uv, along = w > d;
+      for (var i = 0; i < pos.count; i++) {
+        var lx = pos.getX(i), ly = pos.getY(i);
+        if (w === d) uv.setXY(i, lx / w + 0.5, ly / d + 0.5);          // négyzetes szőnyeg: egyben
+        else if (along) uv.setXY(i, ly / d + 0.5, lx / d); else uv.setXY(i, lx / w + 0.5, ly / w);
+      }
+      uv.needsUpdate = true;
+    }
     // Fal: alul faburkolatos lábazat tábla-kerettel, párkány, fölötte vakolat; a padló és a
     // mennyezet felé enyhe sötétedés (olcsó „árnyék a sarokban”). Szürkeárnyalatos, a fal
     // színét az anyag adja → ugyanaz a textúra jó az elefántcsont és a bordó falra is.
@@ -1719,9 +1890,13 @@
       if (LOOK) return LOOK;
       var parq = texFrom(plankTexture()), marb = texFrom(marbleTexture()), wall = texFrom(wallTexture());
       LOOK = {
-        parquet: new THREE.MeshStandardMaterial({ map: parq, color: 0xffffff, roughness: 0.42, metalness: 0 }),
+        parquet: new THREE.MeshStandardMaterial({ map: parq, color: 0xc9ad8c, roughness: 0.42, metalness: 0 }),   // a szín sötétít és melegít
         marble: new THREE.MeshStandardMaterial({ map: marb, color: 0xffffff, roughness: 0.18, metalness: 0 }),
-        wallTex: wall
+        wallTex: wall,
+        runner: new THREE.MeshStandardMaterial({ map: texFrom(runnerTexture()), color: 0xffffff, roughness: 0.95 }),
+        rug: new THREE.MeshStandardMaterial({ map: texFrom(rugTexture()), color: 0xffffff, roughness: 0.95 }),
+        beam: new THREE.MeshStandardMaterial({ color: 0x9c7c3e, roughness: 0.38, metalness: 0.6 }),
+        bronze: new THREE.MeshStandardMaterial({ color: 0x6e5636, roughness: 0.4, metalness: 0.65 })
       };
       return LOOK;
     }
@@ -1785,8 +1960,9 @@
 
     function buildBench(w, d, x, z, fy) {
       var grp = new THREE.Group();
-      var seatMat = new THREE.MeshStandardMaterial({ color: 0x7a6a50, roughness: 0.6 });
-      var legMat = new THREE.MeshStandardMaterial({ color: 0x3a3a3a, roughness: 0.8 });
+      // diófa ülőlap, sötét fém lábak
+      var seatMat = buildBench.seat || (buildBench.seat = new THREE.MeshStandardMaterial({ color: 0x5c3b22, roughness: 0.72 }));
+      var legMat = buildBench.leg || (buildBench.leg = new THREE.MeshStandardMaterial({ color: 0x1f1c19, roughness: 0.35, metalness: 0.7 }));
       // Seat
       var seat = new THREE.Mesh(new THREE.BoxGeometry(w, 0.15, d), seatMat);
       seat.position.y = 0.6;
@@ -1818,6 +1994,10 @@
       var LK = lookMaterials();
       var floorMat = LK.parquet;                                                             // hajópadló (procedurális)
       var wallMat = new THREE.MeshStandardMaterial({ color: 0xeaddbe, map: LK.wallTex, roughness: 0.85 });    // meleg elefántcsont, lábazattal
+      // szárnyanként saját falszín, ahogy a nagy képtárakban: a klasszikusok mély zöld, az
+      // impresszionisták galambszürke, az ikonikus művek meleg drapp előtt lógnak
+      function wingWall(col) { return new THREE.MeshStandardMaterial({ color: col, map: LK.wallTex, roughness: 0.85 }); }
+      var wallN = wingWall(0x3e5a4c), wallE = wingWall(0x9aa6aa), wallW = wingWall(0xb9a088);
       var baseMat = new THREE.MeshStandardMaterial({ color: 0x5a4630, roughness: 0.7 });
       var accentMat = new THREE.MeshStandardMaterial({ color: 0xc7a23a, roughness: 0.35, metalness: 0.55 }); // gazdagabb arany
 
@@ -1836,7 +2016,7 @@
       addBox(0.1, 0.25, 60, baseMat, 9.7, 0.125, 40);
 
       // South ceiling beams
-      for (var z = 15; z <= 65; z += 10) { addBox(20, 0.12, 0.3, new THREE.MeshStandardMaterial({ color: 0xc8a23a }), 0, 4.93, z); }
+      for (var z = 15; z <= 65; z += 10) { addBox(20, 0.12, 0.3, LK.beam, 0, 4.93, z); }
 
       // South entrance arch
       addBox(1, 0.2, 0.3, accentMat, 0, 4.6, 10);
@@ -1845,10 +2025,10 @@
       [30, 50].forEach(function (z) { buildBench(3, 1, 0, z); });
 
       // -- Glass Dome in Central Hub --
-      var domeMat = new THREE.MeshStandardMaterial({ color: 0x88aacc, transparent: true, opacity: 0.3, metalness: 0.2, roughness: 0.1, side: THREE.DoubleSide });
+      var domeMat = new THREE.MeshStandardMaterial({ color: 0xdfe8ec, transparent: true, opacity: 0.22, metalness: 0.1, roughness: 0.05, side: THREE.DoubleSide });
       var dome = new THREE.Mesh(new THREE.SphereGeometry(8, 16, 16, 0, Math.PI * 2, 0, Math.PI / 2), domeMat);
       dome.position.set(0, 5, 0); scene.add(dome);
-      var domeFrameMat = new THREE.MeshStandardMaterial({ color: 0x334455, roughness: 0.8, metalness: 0.4 });
+      var domeFrameMat = LK.bronze;   // bronz bordák (korábban sötét kékesszürke)
       for (var i = 0; i < 8; i++) {
         var rib = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 13, 8), domeFrameMat);
         rib.rotation.z = Math.PI / 2; rib.rotation.y = i * Math.PI / 8;
@@ -1867,9 +2047,14 @@
       addCeil(60, 20, -40, 0);
 
       // ── Barokk dísz: vörös szőnyeg-futók (egy összevont mesh) + arany kupola-medál ──
-      var carpetMat = new THREE.MeshStandardMaterial({ color: 0x6e1414, roughness: 0.95 });
+      var carpetMat = LK.runner;
       var carpetGeoms = [];
-      function addCarpet(w, d, cx, cz) { var g = new THREE.PlaneGeometry(w, d); g.rotateX(-Math.PI / 2); g.translate(cx, 0.012, cz); carpetGeoms.push(g); }
+      function addCarpet(w, d, cx, cz) {
+        var g = new THREE.PlaneGeometry(w, d); carpetUV(g, w, d);
+        g.rotateX(-Math.PI / 2); g.translate(cx, 0.012, cz);
+        if (w === d) { scene.add(new THREE.Mesh(g, LK.rug)); return; }   // a csarnok négyzetes szőnyege külön, medalionnal
+        carpetGeoms.push(g);
+      }
       addCarpet(5, 58, 0, 41);    // Déli szárny
       addCarpet(5, 58, 0, -41);   // Északi szárny
       addCarpet(58, 5, 41, 0);    // Keleti szárny
@@ -1891,19 +2076,19 @@
       // Removed south wall to open South wing
 
       // North wing: left & right walls, end wall
-      addWall(0.3, 5, 60, wallMat, -10, 2.5, -40);
-      addWall(0.3, 5, 60, wallMat, 10, 2.5, -40);
-      addWall(20.3, 5, 0.3, wallMat, 0, 2.5, -70);
+      addWall(0.3, 5, 60, wallN, -10, 2.5, -40);
+      addWall(0.3, 5, 60, wallN, 10, 2.5, -40);
+      addWall(20.3, 5, 0.3, wallN, 0, 2.5, -70);
 
       // East wing: top & bottom walls, end wall
-      addWall(60, 5, 0.3, wallMat, 40, 2.5, -10);
-      addWall(60, 5, 0.3, wallMat, 40, 2.5, 10);
-      addWall(0.3, 5, 20.3, wallMat, 70, 2.5, 0);
+      addWall(60, 5, 0.3, wallE, 40, 2.5, -10);
+      addWall(60, 5, 0.3, wallE, 40, 2.5, 10);
+      addWall(0.3, 5, 20.3, wallE, 70, 2.5, 0);
 
       // West wing: top & bottom walls, end wall
-      addWall(60, 5, 0.3, wallMat, -40, 2.5, -10);
-      addWall(60, 5, 0.3, wallMat, -40, 2.5, 10);
-      addWall(0.3, 5, 20.3, wallMat, -70, 2.5, 0);
+      addWall(60, 5, 0.3, wallW, -40, 2.5, -10);
+      addWall(60, 5, 0.3, wallW, -40, 2.5, 10);
+      addWall(0.3, 5, 20.3, wallW, -70, 2.5, 0);
 
       // Baseboards - offset from walls to prevent z-fighting
       var baseMat2 = new THREE.MeshStandardMaterial({ color: 0x6a5a48 });
@@ -1920,12 +2105,12 @@
       // Removed south baseboard
 
       // Ceiling beams per wing
-      for (var z = -65; z <= -15; z += 10) { addBox(20, 0.12, 0.3, new THREE.MeshStandardMaterial({ color: 0xc8a23a }), 0, 4.93, z); }
-      for (var x = 15; x <= 65; x += 10) { addBox(0.3, 0.12, 20, new THREE.MeshStandardMaterial({ color: 0xc8a23a }), x, 4.93, 0); }
-      for (var x = -65; x <= -15; x += 10) { addBox(0.3, 0.12, 20, new THREE.MeshStandardMaterial({ color: 0xc8a23a }), x, 4.93, 0); }
+      for (var z = -65; z <= -15; z += 10) { addBox(20, 0.12, 0.3, LK.beam, 0, 4.93, z); }
+      for (var x = 15; x <= 65; x += 10) { addBox(0.3, 0.12, 20, LK.beam, x, 4.93, 0); }
+      for (var x = -65; x <= -15; x += 10) { addBox(0.3, 0.12, 20, LK.beam, x, 4.93, 0); }
 
       // Hub columns at wing entrances (decorative)
-      var colMat = new THREE.MeshStandardMaterial({ color: 0xd8d0c0, roughness: 0.5 });
+      var colMat = new THREE.MeshStandardMaterial({ color: 0xe8dfcf, roughness: 0.25 });   // csiszolt kő
       // Sarok-oszlopok a hubban (az ÉK-i sarokban a lift-akna áll, oda nem kerül oszlop)
       [[-9, 2.5, -9], [9, 2.5, 9], [-9, 2.5, 9]].forEach(function (p) {
         addBox(0.6, 5, 0.6, colMat, p[0], p[1], p[2]);
@@ -1950,8 +2135,8 @@
       var wall2Mat = new THREE.MeshStandardMaterial({ color: 0xeaddbe, map: LK.wallTex, roughness: 0.85 });   // elefántcsont (2. emelet)
       var ceilMat = new THREE.MeshStandardMaterial({ color: 0xf0e8d8 });
       var goldMat = new THREE.MeshStandardMaterial({ color: 0xc7a23a, roughness: 0.35, metalness: 0.6 });
-      var colMat = new THREE.MeshStandardMaterial({ color: 0xd8d0c0, roughness: 0.5 });
-      var carpetMat = new THREE.MeshStandardMaterial({ color: 0x6e1414, roughness: 0.95 });
+      var colMat = new THREE.MeshStandardMaterial({ color: 0xe8dfcf, roughness: 0.25 });   // csiszolt kő
+      var carpetMat = LK.rug;
       var bbMat = new THREE.MeshStandardMaterial({ color: 0x6a5a48 });
 
       // Födémek és az 1. emelet mennyezete — a lift-akna [5.8..9.2]x[-9.2..-5.8] cellája KIVÁGVA
@@ -1992,7 +2177,7 @@
         [[19.6, 0.1, 0, -9.8], [19.6, 0.1, 0, 9.8], [0.1, 19.6, -9.8, 0], [0.1, 19.6, 9.8, 0]].forEach(function (b) {
           var g = new THREE.BoxGeometry(b[0], 0.25, b[1]); g.translate(b[2], fy + 0.125, b[3]); bbG.push(g);
         });
-        var cg = new THREE.PlaneGeometry(11, 11); cg.rotateX(-Math.PI / 2); cg.translate(0, fy + 0.012, 0); cpG.push(cg);
+        var cg = new THREE.PlaneGeometry(11, 11); carpetUV(cg, 11, 11); cg.rotateX(-Math.PI / 2); cg.translate(0, fy + 0.012, 0); cpG.push(cg);
         [[-9, -9], [-9, 9], [9, 9]].forEach(function (c) {
           var g = new THREE.BoxGeometry(0.6, 5, 0.6); g.translate(c[0], fy + 2.5, c[1]); colG.push(g);
         });
@@ -2436,7 +2621,7 @@
       var frameMat = new THREE.MeshStandardMaterial({ color: 0xaa8833, roughness: 0.4, metalness: 0.5 });
       var innerMat = new THREE.MeshStandardMaterial({ color: 0x886622, roughness: 0.5, metalness: 0.4 });
       var plaqueMat = new THREE.MeshStandardMaterial({ color: 0xccaa44, roughness: 0.3, metalness: 0.6 });
-      var ropeMat = new THREE.MeshStandardMaterial({ color: 0x8a1111, roughness: 0.4, metalness: 0.2 });
+      var ropeMat = new THREE.MeshStandardMaterial({ color: 0x5a0c14, roughness: 0.85, metalness: 0 });   // bársony
       var poleMat = new THREE.MeshStandardMaterial({ color: 0xccaa44, roughness: 0.3, metalness: 0.7 });
       var poleGeoms = [], ropeGeoms = []; // kordon-elemek gyűjtése → a loop végén 1-1 mesh-be olvasztva
 
