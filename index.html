@@ -875,6 +875,28 @@
       #narr-btn { left: calc(12px + env(safe-area-inset-left)); }
       #narr-panel { padding-bottom: env(safe-area-inset-bottom); }
     }
+
+    /* Kattintható navigáció */
+    #nav-bar { position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%); z-index: 66; display: none; gap: 6px; align-items: center; }
+    #nav-bar > button { font-family: 'VT323', monospace; font-size: 20px; line-height: 1; color: #f5ecd8; background: rgba(42, 32, 24, .78); border: 1px solid #aa9060; border-radius: 6px; padding: 8px 14px; cursor: pointer; display: flex; align-items: center; gap: 8px; min-height: 40px; }
+    #nav-bar > button b { font-weight: normal; color: #e0b860; font-size: 16px; }
+    #nav-bar > button:hover, #nav-bar > button:focus-visible { background: rgba(110, 82, 40, .92); outline: none; border-color: #e0b860; }
+    #nav-menu { position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); background: rgba(255, 252, 245, .97); border: 2px solid #aa9060; border-radius: 6px; padding: 6px; display: flex; flex-direction: column; min-width: 290px; white-space: nowrap; box-shadow: 0 6px 20px rgba(0, 0, 0, .2); }
+    #nav-menu[hidden] { display: none; }
+    #nav-menu button { font-family: 'VT323', monospace; font-size: 20px; text-align: left; background: none; border: 0; border-radius: 4px; padding: 8px 12px; color: #2a2018; cursor: pointer; }
+    #nav-menu button:hover, #nav-menu button:focus-visible { background: #efe2c4; outline: none; }
+    @media(min-width:768px) { #info-panel { bottom: 76px !important; } }
+    @media(max-width:767px) {
+      #nav-bar { left: auto; right: 10px; transform: none; bottom: calc(60px + env(safe-area-inset-bottom, 0px)); gap: 4px; }
+      #nav-bar > button { padding: 6px 10px; min-height: 44px; min-width: 44px; justify-content: center; }
+      #nav-bar > button span { display: none; }
+      #nav-menu { left: auto; right: 0; transform: none; min-width: 210px; }
+    }
+    @media(max-height:500px) and (orientation:landscape) {
+      #nav-bar { left: auto; right: 10px; transform: none; bottom: 46px; }
+      #nav-bar > button span { display: none; }
+      #nav-menu { left: auto; right: 0; transform: none; }
+    }
   </style>
 </head>
 
@@ -927,6 +949,13 @@
     <div class="y" id="iY"></div>
   </div>
   <canvas id="minimap"></canvas>
+  <!-- Kattintható navigáció: előző / következő műtárgy, helyek menü -->
+  <div id="nav-bar" role="toolbar">
+    <button type="button" id="nav-prev"><b aria-hidden="true">◀</b><span></span></button>
+    <button type="button" id="nav-places" aria-haspopup="true" aria-expanded="false"><b aria-hidden="true">⌖</b><span></span></button>
+    <button type="button" id="nav-next"><span></span><b aria-hidden="true">▶</b></button>
+    <div id="nav-menu" hidden></div>
+  </div>
   <!-- Hangos tárlatvezetés: a sávot a látogató választja ki, nem a pozíciója váltja -->
   <div id="narr-btn" role="button" tabindex="0" aria-expanded="false">🎧</div>
   <aside id="narr-panel" aria-labelledby="narr-h">
@@ -986,7 +1015,9 @@
       hu: {
         docTitle: 'Pixel Art Múzeum', museum: 'MÚZEUM', subtitle: '─ 4 Szárny · PRÉMIUM KIADÁS ─',
         enter: 'BELÉPÉS', ariaEnter: 'Belépés a múzeumba',
-        hintDesktop: 'WASD / Nyilak: Mozgás · Egér húzás: Nézés', hintMobile: 'Bal: Joystick · Jobb: Húzás = nézés',
+        hintDesktop: 'Kattints a padlóra: odamész · Húzd az egeret: nézel · WASD / nyilak: séta · Q / E: előző / következő mű', hintMobile: 'Koppints a padlóra: odamész · Húzd az ujjad: nézel · Bal oldal: joystick',
+        navPrev: 'Előző', navNext: 'Következő', navPrevAria: 'Előző műtárgy (Q)', navNextAria: 'Következő műtárgy (E)',
+        navPlacesBtn: 'Helyek', navBar: 'Navigáció', navLift: 'Lift (emeletek)',
         fullscreen: 'TELJES KÉPERNYŐ', ariaFullscreen: 'Teljes képernyő váltás',
         muteLabel: 'Hang ki/be', ariaMute: 'Hang ki- és bekapcsolása',
         loading: 'Modell betöltése…', standUp: '[ Mozogj a felálláshoz ]', contextLost: 'A 3D nézet megszakadt — frissítsd az oldalt.',
@@ -1016,7 +1047,9 @@
       en: {
         docTitle: 'Pixel Art Museum', museum: 'MUSEUM', subtitle: '─ 4 Wings · PREMIUM EDITION ─',
         enter: 'ENTER', ariaEnter: 'Enter the museum',
-        hintDesktop: 'WASD / Arrows: Move · Mouse drag: Look', hintMobile: 'Left: Joystick · Right: Drag = look',
+        hintDesktop: 'Click the floor: walk there · Drag the mouse: look · WASD / arrows: walk · Q / E: previous / next work', hintMobile: 'Tap the floor: walk there · Drag your finger: look · Left side: joystick',
+        navPrev: 'Previous', navNext: 'Next', navPrevAria: 'Previous artwork (Q)', navNextAria: 'Next artwork (E)',
+        navPlacesBtn: 'Places', navBar: 'Navigation', navLift: 'Lift (upper floors)',
         fullscreen: 'FULLSCREEN', ariaFullscreen: 'Toggle fullscreen',
         muteLabel: 'Toggle sound', ariaMute: 'Toggle sound on/off',
         loading: 'Loading model…', standUp: '[ Move to stand up ]', contextLost: 'The 3D view was lost — please refresh the page.',
@@ -1046,7 +1079,9 @@
       it: {
         docTitle: 'Museo Pixel Art', museum: 'MUSEO', subtitle: '─ 4 Ali · EDIZIONE PREMIUM ─',
         enter: 'ENTRA', ariaEnter: 'Entra nel museo',
-        hintDesktop: 'WASD / Frecce: Movimento · Trascina il mouse: Guarda', hintMobile: 'Sinistra: Joystick · Destra: Trascina = guarda',
+        hintDesktop: 'Clicca sul pavimento: vai lì · Trascina il mouse: guarda · WASD / frecce: cammina · Q / E: opera precedente / successiva', hintMobile: 'Tocca il pavimento: vai lì · Trascina il dito: guarda · Lato sinistro: joystick',
+        navPrev: 'Precedente', navNext: 'Successiva', navPrevAria: 'Opera precedente (Q)', navNextAria: 'Opera successiva (E)',
+        navPlacesBtn: 'Luoghi', navBar: 'Navigazione', navLift: 'Ascensore (piani superiori)',
         fullscreen: 'SCHERMO INTERO', ariaFullscreen: 'Attiva/disattiva schermo intero',
         muteLabel: 'Attiva/disattiva audio', ariaMute: 'Attiva o disattiva l\'audio',
         loading: 'Caricamento modello…', standUp: '[ Muoviti per alzarti ]', contextLost: 'La vista 3D si è interrotta — aggiorna la pagina.',
@@ -1126,6 +1161,7 @@
       for (var i = 0; i < lbtns.length; i++) lbtns[i].classList.toggle('active', lbtns[i].getAttribute('data-lang') === LANG);
       // ha épp nyitva a műtárgy-nézegető, frissítsük a benne lévő (lefordítandó) szövegeket
       if (typeof narrApplyI18n === 'function') narrApplyI18n();
+      if (typeof navApplyI18n === 'function') navApplyI18n();
       var av = document.getElementById('art-viewer');
       if (av && av.classList.contains('show') && currentArt && typeof openArt === 'function' && !(currentArt.userData && currentArt.userData.sketchfabId)) openArt(currentArt);
     }
@@ -1374,11 +1410,13 @@
     }
     function curFloorY() { return FLOORS[nearestFloorIdx(camera.position.y)]; }
 
+    var _navIgnoreCordons = false;
     var cordons = []; // bársonykötél-akadályok (x/z téglalapok + y szint), amiken nem lehet átsétálni
     function inBounds(x, z) {
       var fy = (typeof camera !== 'undefined' && camera) ? curFloorY() : 0;
-      // Kordonok: a köteleken nem lehet átmenni (csak az adott szint kordonjai számítanak)
-      for (var ci = 0; ci < cordons.length; ci++) {
+      // Kordonok: a köteleken nem lehet átmenni (csak az adott szint kordonjai számítanak).
+      // A kattintásos navigáció rálátás-vizsgálata kikapcsolja: a kötél fölött át lehet látni.
+      if (!_navIgnoreCordons) for (var ci = 0; ci < cordons.length; ci++) {
         var c = cordons[ci];
         if ((c.y || 0) === fy && x >= c.minX && x <= c.maxX && z >= c.minZ && z <= c.maxZ) return false;
       }
@@ -2488,7 +2526,7 @@
       jZ.addEventListener('touchend', endJ, { passive: false }); jZ.addEventListener('touchcancel', endJ, { passive: false });
       lZ.addEventListener('touchstart', function (e) { e.preventDefault(); var t = e.changedTouches[0]; lTid = t.identifier; lx = t.clientX; ly = t.clientY; lookTap = true; lookX = lx; lookY = ly; lookTime = Date.now(); }, { passive: false });
       lZ.addEventListener('touchmove', function (e) { e.preventDefault(); for (var i = 0; i < e.changedTouches.length; i++) { var t = e.changedTouches[i]; if (t.identifier === lTid) { if (Math.abs(t.clientX - lookX) > 10 || Math.abs(t.clientY - lookY) > 10) lookTap = false; yaw -= (t.clientX - lx) * .005; pitch -= (t.clientY - ly) * .005; pitch = Math.max(-1, Math.min(1, pitch)); lx = t.clientX; ly = t.clientY; } } }, { passive: false });
-      function endL(e) { for (var i = 0; i < e.changedTouches.length; i++)if (e.changedTouches[i].identifier === lTid) { var _t = e.changedTouches[i]; lTid = null; if (lookTap && Date.now() - lookTime < 400 && typeof fireRaycast === 'function') fireRaycast({ clientX: _t.clientX, clientY: _t.clientY }); } }
+      function endL(e) { for (var i = 0; i < e.changedTouches.length; i++)if (e.changedTouches[i].identifier === lTid) { var _t = e.changedTouches[i]; lTid = null; if (lookTap && Date.now() - lookTime < 400 && typeof fireRaycast === 'function' && !fireRaycast({ clientX: _t.clientX, clientY: _t.clientY })) navWalkToScreen(_t.clientX, _t.clientY); } }
       lZ.addEventListener('touchend', endL, { passive: false }); lZ.addEventListener('touchcancel', endL, { passive: false });
     }
 
@@ -2497,31 +2535,281 @@
     var _eu = new THREE.Euler(0, 0, 0, 'YXZ'), _fw = new THREE.Vector3(), _st = new THREE.Vector3();
     var frameN = 0;   // a drága, de lassan változó munkákat ritkábban végezzük el
 
-    // ── Odasiklás egy pontra (minimap-kattintás, dupla kattintás, „Odamegyek”) ──
-    // Nem ugrunk: a rövid, lassuló mozgás megtartja a térérzetet.
+    // ── Kattintható navigáció ──
+    // Odasiklás egy pontra (padló-kattintás, minimap, „Odamegyek”, előző/következő tárgy, helyek menü).
+    // Nem ugrunk: rácson keresett útvonalon, falakat és kordonokat kerülve sétálunk oda,
+    // így megmarad a térérzet, és a másik szárnyba is a csarnokon át visz az út.
+    var NAV_MIN = -70, NAV_STEP = 0.5, NAV_N = 281;
+    function navWalkSeg(ax, az, bx, bz, ignoreCordons) {
+      var dx = bx - ax, dz = bz - az, len = Math.sqrt(dx * dx + dz * dz), n = Math.max(1, Math.ceil(len / 0.2));
+      _navIgnoreCordons = !!ignoreCordons;
+      try {
+        for (var i = 1; i <= n; i++) { if (!inBounds(ax + dx * i / n, az + dz * i / n)) return false; }
+        return true;
+      } finally { _navIgnoreCordons = false; }
+    }
+    function navCell(v) { return Math.round((v - NAV_MIN) / NAV_STEP); }
+    function navCoord(c) { return NAV_MIN + c * NAV_STEP; }
+    // A legközelebbi járható rácspont (max. r cella sugárban), hogy a falhoz/kordonhoz túl közeli cél is elérhető legyen.
+    function navSnap(grid, cx, cz, r) {
+      if (cx >= 0 && cz >= 0 && cx < NAV_N && cz < NAV_N && grid[cz * NAV_N + cx]) return cz * NAV_N + cx;
+      var best = -1, bd = 1e9;
+      for (var dz = -r; dz <= r; dz++) for (var dx = -r; dx <= r; dx++) {
+        var x = cx + dx, z = cz + dz;
+        if (x < 0 || z < 0 || x >= NAV_N || z >= NAV_N || !grid[z * NAV_N + x]) continue;
+        var d = dx * dx + dz * dz; if (d < bd) { bd = d; best = z * NAV_N + x; }
+      }
+      return best;
+    }
+    function navFindPath(sx, sz, tx, tz) {
+      if (navWalkSeg(sx, sz, tx, tz)) return [[sx, sz], [tx, tz]];
+      // Járhatósági rács (csak a kattintáskor épül; ~80 ezer pont, pár ms)
+      var grid = new Uint8Array(NAV_N * NAV_N), fy = curFloorY();
+      var lo = 0, hi = NAV_N - 1;
+      if (fy > 0) { lo = navCell(-9.5); hi = navCell(9.5); }   // emeleten csak a 20x20-as terem
+      for (var z = lo; z <= hi; z++) for (var x = lo; x <= hi; x++) grid[z * NAV_N + x] = inBounds(navCoord(x), navCoord(z)) ? 1 : 0;
+      var s = navSnap(grid, navCell(sx), navCell(sz), 3), g = navSnap(grid, navCell(tx), navCell(tz), 4);
+      if (s < 0 || g < 0) return null;
+      // A* 8 iránnyal (átlósan csak akkor, ha a két szomszéd is szabad — ne vágjunk falsarkot)
+      var gx = g % NAV_N, gz = (g / NAV_N) | 0;
+      var cost = new Float32Array(NAV_N * NAV_N).fill(Infinity), from = new Int32Array(NAV_N * NAV_N).fill(-1);
+      var heap = [], closed = new Uint8Array(NAV_N * NAV_N);
+      function h(i) { var ddx = Math.abs(i % NAV_N - gx), ddz = Math.abs(((i / NAV_N) | 0) - gz); return Math.max(ddx, ddz) + 0.414 * Math.min(ddx, ddz); }
+      function push(i, f) { heap.push([f, i]); var k = heap.length - 1; while (k > 0) { var p = (k - 1) >> 1; if (heap[p][0] <= heap[k][0]) break; var tmp = heap[p]; heap[p] = heap[k]; heap[k] = tmp; k = p; } }
+      function pop() { var top = heap[0], last = heap.pop(); if (heap.length) { heap[0] = last; var k = 0; for (;;) { var l = 2 * k + 1, r = l + 1, m = k; if (l < heap.length && heap[l][0] < heap[m][0]) m = l; if (r < heap.length && heap[r][0] < heap[m][0]) m = r; if (m === k) break; var tmp = heap[m]; heap[m] = heap[k]; heap[k] = tmp; k = m; } } return top; }
+      cost[s] = 0; push(s, h(s));
+      var found = false, guard = 0;
+      while (heap.length && guard++ < 200000) {
+        var cur = pop()[1];
+        if (closed[cur]) continue; closed[cur] = 1;
+        if (cur === g) { found = true; break; }
+        var cx = cur % NAV_N, cz = (cur / NAV_N) | 0;
+        for (var oz = -1; oz <= 1; oz++) for (var ox = -1; ox <= 1; ox++) {
+          if (!ox && !oz) continue;
+          var nx = cx + ox, nz = cz + oz;
+          if (nx < 0 || nz < 0 || nx >= NAV_N || nz >= NAV_N) continue;
+          var ni = nz * NAV_N + nx;
+          if (!grid[ni] || closed[ni]) continue;
+          if (ox && oz && (!grid[cz * NAV_N + nx] || !grid[nz * NAV_N + cx])) continue;
+          var nc = cost[cur] + (ox && oz ? 1.414 : 1);
+          if (nc < cost[ni]) { cost[ni] = nc; from[ni] = cur; push(ni, nc + h(ni)); }
+        }
+      }
+      if (!found) return null;
+      var cells = []; for (var c = g; c !== -1; c = from[c]) cells.push(c);
+      cells.reverse();
+      var pts = [[sx, sz]];
+      for (var i = 0; i < cells.length; i++) pts.push([navCoord(cells[i] % NAV_N), navCoord((cells[i] / NAV_N) | 0)]);
+      if (navWalkSeg(pts[pts.length - 1][0], pts[pts.length - 1][1], tx, tz)) pts.push([tx, tz]);
+      // Útsimítás: mindig a legtávolabbi, egyenesen elérhető pontra lépünk tovább
+      var out = [pts[0]], a = 0;
+      while (a < pts.length - 1) {
+        var b = pts.length - 1;
+        while (b > a + 1 && !navWalkSeg(pts[a][0], pts[a][1], pts[b][0], pts[b][1])) b--;
+        out.push(pts[b]); a = b;
+      }
+      return out;
+    }
+    function angWrap(a) { while (a > Math.PI) a -= Math.PI * 2; while (a < -Math.PI) a += Math.PI * 2; return a; }
+    function headingYaw(dx, dz) { return Math.atan2(-dx, -dz); }   // előre = (-sin yaw, -cos yaw)
+
     var glide = null;
     function glideTo(x, z, toYaw) {
-      if (!inBounds(x, z)) return false;
+      if (typeof camera === 'undefined' || !camera) return false;
+      var pts = navFindPath(camera.position.x, camera.position.z, x, z);
+      if (!pts) return false;
+      var lens = [0], total = 0;
+      for (var i = 1; i < pts.length; i++) { total += Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]); lens.push(total); }
+      if (total < 0.05 && toYaw === undefined) return true;
       glide = {
-        fx: camera.position.x, fz: camera.position.z, tx: x, tz: z,
-        fy: yaw, ty: (toYaw === undefined ? yaw : toYaw), t: 0
+        pts: pts, lens: lens, total: total, t: 0,
+        // séta: ~8 egység/mp, de hosszú útnál is legfeljebb ~4 mp
+        dur: Math.max(0.55, Math.min(4, total / 8 + 0.3)),
+        // rövid lépésnél nem forgatjuk el a nézetet, hosszabb sétán a haladás irányába nézünk
+        face: total > 6, toYaw: toYaw, endYaw: toYaw, fromYaw: yaw
       };
-      // a legrövidebb irányba forduljunk
-      while (glide.ty - glide.fy > Math.PI) glide.ty -= Math.PI * 2;
-      while (glide.ty - glide.fy < -Math.PI) glide.ty += Math.PI * 2;
+      if (glide.endYaw === undefined && glide.face) {
+        var lp = pts[pts.length - 1], pp = pts[pts.length - 2];
+        glide.endYaw = headingYaw(lp[0] - pp[0], lp[1] - pp[1]);
+      }
       isSitting = false;
       var sh = document.getElementById('sit-hint'); if (sh) sh.style.display = 'none';
+      navMarkerAt(pts[pts.length - 1][0], pts[pts.length - 1][1], true);
       return true;
     }
     function updateGlide(dt) {
       if (!glide) return;
-      glide.t = Math.min(1, glide.t + dt / 0.55);
-      var e = 1 - Math.pow(1 - glide.t, 3);   // lassuló vég
-      camera.position.x = glide.fx + (glide.tx - glide.fx) * e;
-      camera.position.z = glide.fz + (glide.tz - glide.fz) * e;
-      yaw = glide.fy + (glide.ty - glide.fy) * e;
-      if (glide.t >= 1) glide = null;
+      var g = glide;
+      g.t = Math.min(1, g.t + dt / g.dur);
+      var e = g.t < 0.5 ? 4 * g.t * g.t * g.t : 1 - Math.pow(-2 * g.t + 2, 3) / 2;   // lassú indulás, lassuló vég
+      var s = e * g.total, k = 1;
+      while (k < g.lens.length - 1 && g.lens[k] < s) k++;
+      var a = g.pts[k - 1], b = g.pts[k], segL = (g.lens[k] - g.lens[k - 1]) || 1, u = Math.min(1, (s - g.lens[k - 1]) / segL);
+      camera.position.x = a[0] + (b[0] - a[0]) * u;
+      camera.position.z = a[1] + (b[1] - a[1]) * u;
+      if (g.face) {
+        // séta közben a szakasz irányába, az utolsó métereken a célirányba fordulunk
+        var want = (g.total - s < 2.5 && g.endYaw !== undefined) ? g.endYaw : headingYaw(b[0] - a[0], b[1] - a[1]);
+        yaw += angWrap(want - yaw) * Math.min(1, dt * 6);
+        pitch += (0 - pitch) * Math.min(1, dt * 3);
+      } else if (g.toYaw !== undefined) {
+        yaw = g.fromYaw + angWrap(g.toYaw - g.fromYaw) * e;
+      }
+      if (actx && !isMuted && actx.currentTime - lastStep > 0.42 && g.t < 0.95) { playStep(); lastStep = actx.currentTime; }
+      if (g.t >= 1) {
+        if (g.endYaw !== undefined) yaw = g.fromYaw + angWrap(g.endYaw - g.fromYaw);
+        glide = null; navMarkerHide();
+      }
     }
+
+    // Célkarika a padlón: egérrel mutatja, hová lehet kattintani; sétáláskor a célt jelöli.
+    var navMarker = null, navMarkerFixed = false, navMarkerT = 0;
+    function navMarkerEnsure() {
+      if (navMarker || typeof scene === 'undefined' || !scene) return navMarker;
+      var g = new THREE.RingGeometry(0.32, 0.46, 40); g.rotateX(-Math.PI / 2);
+      var d = new THREE.CircleGeometry(0.09, 20); d.rotateX(-Math.PI / 2);
+      var m = new THREE.MeshBasicMaterial({ color: 0xc89a3a, transparent: true, opacity: 0.85, depthWrite: false });
+      navMarker = new THREE.Group();
+      navMarker.add(new THREE.Mesh(g, m)); navMarker.add(new THREE.Mesh(d, m));
+      navMarker.renderOrder = 5; navMarker.visible = false;
+      scene.add(navMarker);
+      return navMarker;
+    }
+    function navMarkerAt(x, z, fixed) {
+      if (!navMarkerEnsure()) return;
+      navMarker.position.set(x, curFloorY() + 0.03, z);
+      navMarker.visible = true; navMarkerFixed = !!fixed;
+    }
+    function navMarkerHide() { if (navMarker) navMarker.visible = false; navMarkerFixed = false; }
+    function navMarkerTick(dt) {
+      if (!navMarker || !navMarker.visible) return;
+      navMarkerT += dt;
+      var sc = navMarkerFixed ? 1 + 0.18 * Math.sin(navMarkerT * 7) : 1;
+      navMarker.scale.set(sc, 1, sc);
+    }
+
+    // Padlópont a képernyő-koordinátánál — csak ha a padló tényleg látszik (nincs előtte fal),
+    // és oda lehet menni. A kordon fölött át lehet látni, ezért a rálátásnál nem számít.
+    var _navPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), _navHit = new THREE.Vector3(), _navPtr = new THREE.Vector2();
+    function navFloorPoint(clientX, clientY) {
+      var rect = renderer.domElement.getBoundingClientRect();
+      _navPtr.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+      _navPtr.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+      raycaster.setFromCamera(_navPtr, camera);
+      var ah = raycaster.intersectObjects(artMeshes, true);
+      if (ah.length && ah[0].distance < 12) return { art: true };
+      _navPlane.constant = -curFloorY();
+      if (!raycaster.ray.intersectPlane(_navPlane, _navHit)) return null;
+      if (_navHit.distanceTo(camera.position) > 60) return null;
+      if (!navWalkSeg(camera.position.x, camera.position.z, _navHit.x, _navHit.z, true)) return null;
+      if (!inBounds(_navHit.x, _navHit.z)) {
+        // a kordon mögé/falhoz kattintásnál a legközelebbi szabad pontra menjünk (pl. a kötél elé)
+        var bx = camera.position.x, bz = camera.position.z, dx = _navHit.x - bx, dz = _navHit.z - bz, ok = false;
+        for (var i = 20; i >= 1; i--) { var px = bx + dx * i / 20, pz = bz + dz * i / 20; if (inBounds(px, pz)) { _navHit.x = px; _navHit.z = pz; ok = true; break; } }
+        if (!ok) return null;
+      }
+      return { x: _navHit.x, z: _navHit.z };
+    }
+    function navWalkToScreen(clientX, clientY) {
+      var p = navFloorPoint(clientX, clientY);
+      if (!p || p.art) return false;
+      return glideTo(p.x, p.z);
+    }
+
+    // Műtárgyak bejárási sorrendje (szintenként): csarnok, majd É → K → D → Ny szárny, a csarnoktól kifelé.
+    function navExhibits() {
+      var fy = curFloorY(), list = [];
+      for (var i = 0; i < artMeshes.length; i++) {
+        var a = artMeshes[i], ud = a.userData;
+        if (ud.isBench || ud.name === undefined) continue;
+        if ((ud.fy || 0) !== fy) continue;
+        var x = a.position.x, z = a.position.z, key;
+        if (fy > 0 || (Math.abs(x) <= 10 && Math.abs(z) <= 10)) key = (Math.atan2(x, -z) + Math.PI) * 10;
+        else if (z < -10) key = 1000 - z;
+        else if (x > 10) key = 2000 + x;
+        else if (z > 10) key = 3000 + z;
+        else key = 4000 - x;
+        list.push({ obj: a, key: key });
+      }
+      list.sort(function (p, q) { return p.key - q.key; });
+      return list.map(function (p) { return p.obj; });
+    }
+    var navLastArt = null;
+    function navStep(dir) {
+      var list = navExhibits(); if (!list.length) return;
+      var cx = camera.position.x, cz = camera.position.z, idx = list.indexOf(navLastArt), near = false;
+      if (idx >= 0) { var v0 = viewSpotFor(list[idx]); near = Math.hypot(v0.x - cx, v0.z - cz) < 2.5; }
+      if (!near) {
+        // nem a legutóbb meglátogatott tárgy előtt állunk: a legközelebbihez viszonyítunk
+        var bd = 1e9; idx = -1;
+        for (var i = 0; i < list.length; i++) { var d = Math.hypot(list[i].position.x - cx, list[i].position.z - cz); if (d < bd) { bd = d; idx = i; } }
+        if (bd > 6) { navGoArt(list[idx]); return; }   // messze vagyunk mindentől: előbb a legközelebbihez
+      }
+      navGoArt(list[(idx + dir + list.length) % list.length]);
+    }
+    function navGoArt(obj) {
+      var v = viewSpotFor(obj);
+      if (glideTo(v.x, v.z, v.yaw)) { navLastArt = obj; pitch = 0; }
+    }
+
+    // Helyek menü: szárnyak bejárata, csarnok, lift
+    function navPlaces() {
+      var fi = nearestFloorIdx(camera.position.y);
+      if (fi > 0) return [
+        { k: fi === 1 ? 'wingF1' : 'wingF2', x: 0, z: 3, yaw: 0 },
+        { k: 'navLift', x: 4.4, z: -7.5, yaw: -Math.PI / 2 }
+      ];
+      return [
+        { k: 'wingHub', x: 0, z: 4, yaw: 0 },
+        { k: 'wingNorth', x: 0, z: -14, yaw: 0 },
+        { k: 'wingEast', x: 14, z: 0, yaw: -Math.PI / 2 },
+        { k: 'wingSouth', x: 0, z: 14, yaw: Math.PI },
+        { k: 'wingWest', x: -14, z: 0, yaw: Math.PI / 2 },
+        { k: 'navLift', x: 4.4, z: -7.5, yaw: -Math.PI / 2 }
+      ];
+    }
+    function navMenuOpen(open) {
+      var m = document.getElementById('nav-menu'), b = document.getElementById('nav-places');
+      if (!m || !b) return;
+      if (open) {
+        m.innerHTML = '';
+        navPlaces().forEach(function (p) {
+          var it = document.createElement('button'); it.type = 'button'; it.textContent = t(p.k);
+          it.addEventListener('click', function () { navMenuOpen(false); pitch = 0; navLastArt = null; glideTo(p.x, p.z, p.yaw); });
+          m.appendChild(it);
+        });
+      }
+      m.hidden = !open; b.setAttribute('aria-expanded', open ? 'true' : 'false');
+      if (open && m.firstChild) m.firstChild.focus();
+    }
+    function navApplyI18n() {
+      var p = document.getElementById('nav-prev'), n = document.getElementById('nav-next'), pl = document.getElementById('nav-places');
+      if (p) { p.querySelector('span').textContent = t('navPrev'); p.setAttribute('aria-label', t('navPrevAria')); p.title = t('navPrevAria'); }
+      if (n) { n.querySelector('span').textContent = t('navNext'); n.setAttribute('aria-label', t('navNextAria')); n.title = t('navNextAria'); }
+      if (pl) { pl.querySelector('span').textContent = t('navPlacesBtn'); pl.setAttribute('aria-label', t('navPlacesBtn')); }
+      var bar = document.getElementById('nav-bar'); if (bar) bar.setAttribute('aria-label', t('navBar'));
+      var m = document.getElementById('nav-menu'); if (m && !m.hidden) navMenuOpen(true);
+    }
+    (function navWire() {
+      var p = document.getElementById('nav-prev'), n = document.getElementById('nav-next'), pl = document.getElementById('nav-places');
+      if (!p || !n || !pl) return;
+      p.addEventListener('click', function () { navMenuOpen(false); navStep(-1); });
+      n.addEventListener('click', function () { navMenuOpen(false); navStep(1); });
+      pl.addEventListener('click', function () { navMenuOpen(document.getElementById('nav-menu').hidden); });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') navMenuOpen(false);
+        var tg = e.target && e.target.tagName;
+        if (tg === 'INPUT' || tg === 'TEXTAREA' || !museumStarted) return;
+        if (document.getElementById('art-viewer').classList.contains('show')) return;
+        if (e.code === 'KeyE' || e.code === 'PageDown') { e.preventDefault(); navStep(1); }
+        if (e.code === 'KeyQ' || e.code === 'PageUp') { e.preventDefault(); navStep(-1); }
+      });
+      document.addEventListener('click', function (e) {
+        var bar = document.getElementById('nav-bar');
+        if (bar && !bar.contains(e.target)) navMenuOpen(false);
+      });
+      navApplyI18n();
+    })();
 
     // Egy műtárgy elé állás: a tábla olvasható távolságába, szemben vele
     function viewSpotFor(obj) {
@@ -2562,7 +2850,9 @@
       }
 
       updateGlide(dt);
-      if (glide && (dx !== 0 || dz !== 0)) glide = null;   // saját mozgás megszakítja
+      if (glide && (dx !== 0 || dz !== 0)) { glide = null; navMarkerHide(); }   // saját mozgás megszakítja
+      if (frameN % 2 === 0 && window.navHoverTick) window.navHoverTick();
+      navMarkerTick(dt);
 
       if ((dx !== 0 || dz !== 0) && !isSitting && !glide) {
         _fw.set(0, 0, -1).applyQuaternion(camera.quaternion); _fw.y = 0; _fw.normalize();
@@ -2788,6 +3078,7 @@
       document.getElementById('mute-btn').style.display = 'block';
       initAudio();
       document.getElementById('minimap').style.display = 'block';
+      document.getElementById('nav-bar').style.display = 'flex';
       if (fsSupported) document.getElementById('fs-btn').style.display = 'block';
       museumStarted = true;
       narrUpdateButton();
@@ -3558,14 +3849,14 @@
         var lhits = raycaster.intersectObjects(liftClickables, true);
         if (lhits.length && lhits[0].distance < 5) {
           var lo = lhits[0].object;
-          if (lo.userData.liftCall !== undefined) { callLift(lo.userData.liftCall); return; }
-          if (lo.userData.liftGo !== undefined) { goLift(lo.userData.liftGo); return; }
-          return; // a kabin testére / ajtóra kattintás ne "essen át" mögöttes műtárgyra
+          if (lo.userData.liftCall !== undefined) { callLift(lo.userData.liftCall); return true; }
+          if (lo.userData.liftGo !== undefined) { goLift(lo.userData.liftGo); return true; }
+          return true; // a kabin testére / ajtóra kattintás ne "essen át" mögöttes műtárgyra
         }
       }
       var intersects = raycaster.intersectObjects(artMeshes, true);
       if (intersects.length > 0) {
-        if (intersects[0].distance > 12) return; // túl távoli (pl. födémen átnyúló) találat nem kattintható
+        if (intersects[0].distance > 12) return false; // túl távoli (pl. födémen átnyúló) találat nem kattintható
         var obj = intersects[0].object;
         while (obj.parent && (obj.userData.isBench === undefined && obj.userData.name === undefined)) {
           obj = obj.parent;
@@ -3573,19 +3864,21 @@
         }
 
         if (obj.userData.isBench) {
-          if (isSitting) return;
+          if (isSitting) return true;
           var pos = new THREE.Vector3();
           obj.getWorldPosition(pos);
           camera.position.set(pos.x, pos.y + 0.8, pos.z);
           isSitting = true;
           var sh1 = document.getElementById('sit-hint'); if (sh1) { sh1.textContent = t('standUp'); sh1.style.display = 'block'; }
-          return;
+          return true;
         }
 
         if (obj.userData.name) {
           openArt(obj);
+          return true;
         }
       }
+      return false;
     }
 
     // FONTOS: a renderer/camera csak a setup()-ban jön létre (a fetch().then-ből hívva),
@@ -3601,23 +3894,21 @@
     }, false);
     renderer.domElement.addEventListener('click', function (e) {
       if (dragMoved) { dragMoved = false; return; } // néző-húzás vége ne számítson kattintásnak
-      fireRaycast(e);
+      // műtárgy / pad / lift-gomb az első; ha egyik sem, a padlóra kattintás odavisz
+      if (!fireRaycast(e)) navWalkToScreen(e.clientX, e.clientY);
     });
 
-    // Dupla kattintás a padlóra: odasiklunk. (Műtárgyra a sima kattintás nyit, ezért
-    // a dupla kattintás csak a szabad padlón mozgat — nem ütközik a megnyitással.)
-    var _floorPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
-    var _hit = new THREE.Vector3();
-    renderer.domElement.addEventListener('dblclick', function (e) {
-      var rect = renderer.domElement.getBoundingClientRect();
-      rayPointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-      rayPointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-      raycaster.setFromCamera(rayPointer, camera);
-      if (raycaster.intersectObjects(artMeshes, true).length) return;
-      _floorPlane.constant = -curFloorY();
-      if (!raycaster.ray.intersectPlane(_floorPlane, _hit)) return;
-      glideTo(_hit.x, _hit.z);
-    });
+    // Egérmutató: a padlón célkarika mutatja, hová visz a kattintás; műtárgy fölött „kéz” kurzor
+    var navHoverXY = null;
+    renderer.domElement.addEventListener('mousemove', function (e) { navHoverXY = [e.clientX, e.clientY]; });
+    renderer.domElement.addEventListener('mouseleave', function () { navHoverXY = null; if (!navMarkerFixed) navMarkerHide(); });
+    window.navHoverTick = function () {
+      if (mobile || !navHoverXY || dragging) return;
+      var cv = renderer.domElement, p = navFloorPoint(navHoverXY[0], navHoverXY[1]);
+      cv.style.cursor = (p && p.art) ? 'pointer' : 'grab';
+      if (navMarkerFixed) return;
+      if (p && !p.art) navMarkerAt(p.x, p.z, false); else navMarkerHide();
+    };
 
     // Minimap: kattintás a térképre → odasiklás arra a pontra
     var mini = document.getElementById('minimap');
