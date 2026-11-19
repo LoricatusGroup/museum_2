@@ -1520,6 +1520,7 @@
       return bi;
     }
     function curFloorY() { return FLOORS[nearestFloorIdx(camera.position.y)]; }
+    function liftInCab(x, z) { return x > 6.4 && x < 8.6 && z > -8.55 && z < -6.45; }
 
     var _navIgnoreCordons = false;
     var cordons = []; // bársonykötél-akadályok (x/z téglalapok + y szint), amiken nem lehet átsétálni
@@ -1533,12 +1534,13 @@
       }
       // Lift-akna cellája: csak akkor járható, ha a kabin ezen a szinten áll nyitott ajtóval,
       // és akkor is csak a kabin belseje + az ajtónyílás (a keretfalakon nem lehet átmenni).
-      if (x > 5.8 && x < 9.2 && z > -9.2 && z < -5.8) {
+      // Az akna körül 0,4 m ráhagyás, hogy a kamera ne lógjon bele a héjba; az ajtó előtti
+      // sáv mindig járható (ott lehet várni a liftre).
+      if (x > 5.4 && x < 9.6 && z > -9.6 && z < -5.4) {
+        if (x <= 5.8) return z > -8.15 && z < -6.85;
         var openHere = lift.cab && lift.atFloor === FLOORS.indexOf(fy) && lift.state !== 'moving' && lift.doorT > 0.35;
         if (!openHere) return false;
-        var inCab = x > 6.4 && x < 8.6 && z > -8.55 && z < -6.45;
-        var inDoor = x <= 6.4 && z > -8.15 && z < -6.85;
-        return inCab || inDoor;
+        return liftInCab(x, z) || (x <= 6.4 && z > -8.15 && z < -6.85);
       }
       if (fy > 0) {
         // Emeleti terem: 20x20 a központi csarnok fölött
@@ -2280,6 +2282,7 @@
         L.position.set(LX - 1.55, FLOORS[f] + 1.275, LZ - 0.36);
         R.position.set(LX - 1.55, FLOORS[f] + 1.275, LZ + 0.36);
         scene.add(L); scene.add(R);
+        L.userData.liftDoor = f; R.userData.liftDoor = f;
         lift.doors.push({ L: L, R: R, f: f });
         liftClickables.push(L, R); // az ajtóra kattintás ne "essen át" mögöttes műtárgyra
         // Jelzőlámpák (F/1/2) az ajtó fölött
@@ -2332,9 +2335,29 @@
       liftClickables.push(cab);
     }
 
+    // Biztonsági háló: ha a játékos valahogy nem járható ponton áll (pl. bezárult körülötte
+    // egy terület), a legközelebbi járható pontra tesszük — ne ragadhasson be sehol.
+    function unstickPlayer() {
+      if (isSitting || lift.riding || playerInLiftCab()) return;
+      var x = camera.position.x, z = camera.position.z;
+      if (inBounds(x, z)) return;
+      for (var r = 0.2; r <= 3; r += 0.2) for (var a = 0; a < 16; a++) {
+        var px = x + Math.cos(a * Math.PI / 8) * r, pz = z + Math.sin(a * Math.PI / 8) * r;
+        if (inBounds(px, pz)) { if (glide) { glide = null; navMarkerHide(); } camera.position.x = px; camera.position.z = pz; return; }
+      }
+    }
     function playerInLiftCab() {
-      return Math.abs(camera.position.x - lift.x) < 1.15 && Math.abs(camera.position.z - lift.z) < 1.15
-        && Math.abs(camera.position.y - 2.5 - lift.y) < 2;
+      return liftInCab(camera.position.x, camera.position.z) && Math.abs(camera.position.y - 2.5 - lift.y) < 2;
+    }
+    // Aki az ajtónyílásban áll, amikor az ajtó záródik, azt kiléptetjük az ajtó elé
+    // (különben az akna cellája bezárul körülötte, és beragad).
+    function liftEvictDoorway() {
+      var x = camera.position.x, z = camera.position.z;
+      if (x > 5.8 && x < 9.6 && z > -9.6 && z < -5.4 && !playerInLiftCab()) {
+        if (glide) { glide = null; navMarkerHide(); }
+        camera.position.x = 5.6;
+        camera.position.z = Math.max(-8.0, Math.min(-7.0, z));
+      }
     }
     function callLift(f) {
       if (lift.state !== 'open' || lift.atFloor === f) return;
@@ -2350,6 +2373,7 @@
       var DOOR_T = 0.7, SPEED = 3.5;
       if (lift.state === 'closing') {
         lift.doorT -= dt / DOOR_T;
+        if (lift.doorT <= 0.4) liftEvictDoorway();
         if (lift.doorT <= 0) {
           lift.doorT = 0;
           lift.riding = playerInLiftCab(); // aki bent áll, az utazik
@@ -3264,6 +3288,7 @@
         else if (inBounds(nx, camera.position.z)) { camera.position.x = nx; }
         else if (inBounds(camera.position.x, nz)) { camera.position.z = nz; }
       }
+      if (frameN % 10 === 0) unstickPlayer();
       // Szemmagasság az aktuális emelet padlójához igazítva — kivéve liftezés közben,
       // amikor az updateLift() viszi a kamerát a kabinnal együtt.
       if (!isSitting && !(lift.riding && lift.state === 'moving')) camera.position.y = curFloorY() + 2.5;
@@ -4252,7 +4277,12 @@
           var lo = lhits[0].object;
           if (lo.userData.liftCall !== undefined) { callLift(lo.userData.liftCall); return true; }
           if (lo.userData.liftGo !== undefined) { goLift(lo.userData.liftGo); return true; }
-          return true; // a kabin testére / ajtóra kattintás ne "essen át" mögöttes műtárgyra
+          // Csukott ajtóra kattintás = hívás erre a szintre; egyébként (kabin padlója/fala,
+          // nyitott ajtó) a padló-kattintás viszi tovább, így a kabinba be- és onnan ki lehet sétálni.
+          if (lo.userData.liftDoor !== undefined && !(lift.atFloor === lo.userData.liftDoor && lift.doorT > 0.35)) {
+            callLift(lo.userData.liftDoor); return true;
+          }
+          return false;
         }
       }
       var intersects = raycaster.intersectObjects(artMeshes, true);
