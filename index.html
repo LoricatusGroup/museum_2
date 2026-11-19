@@ -1488,13 +1488,15 @@
       renderer.setPixelRatio(Math.min(devicePixelRatio, mobile ? 1.5 : 2));
       renderer.shadowMap.enabled = !mobile;
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = 1.6;
+      renderer.outputEncoding = THREE.sRGBEncoding;   // valódi színkezelés (lásd cmMaterial)
+      renderer.toneMappingExposure = 0.9;
       renderer.domElement.id = 'c';
       document.body.insertBefore(renderer.domElement, document.body.firstChild);
       clock = new THREE.Clock();
       buildMuseum();
       buildUpperFloors();   // az emeleti padok/makett az artMeshes-be kerülnek → az addLights előtt kell
       placeAllArt();
+      addPictureLights();
       addLights();
       buildLift();
 
@@ -1530,6 +1532,11 @@
         ["00000000", "01111110", "11111111", "11111111", "11111111", "00111100", "00000000", "00000000"]
       ], 1.5);
 
+      // színkezelés + környezeti tükröződés (minden statikus anyag megépült addigra)
+      cmTree(scene);
+      scene.fog.color.convertSRGBToLinear();
+      try { scene.environment = buildEnvironment(); } catch (e) { console.warn('env map', e); }
+
       setupInput();
       addEventListener('resize', function () {
         camera.aspect = innerWidth / innerHeight;
@@ -1551,6 +1558,215 @@
       loop();
     }
 
+    // ── LÁTVÁNY: színkezelés, környezeti tükröződés, procedurális anyagok, képvilágítás ──
+    // Minden textúra kódból készül (canvas), így nincs új letöltendő fájl.
+
+    // sRGB-színkezelés: a kódban megadott hex színek sRGB-ben értendők, a renderer lineárisan
+    // számol, és a kimenetet kódolja vissza. Enélkül minden kifakult és túlexponált volt.
+    function cmMaterial(m) {
+      if (!m || m.userData.cm) return;
+      m.userData.cm = true;
+      if (m.color && !m.userData.linearColor) m.color.convertSRGBToLinear();
+      if (m.emissive) m.emissive.convertSRGBToLinear();
+      ['map', 'emissiveMap'].forEach(function (k) { if (m[k] && m[k].encoding !== THREE.sRGBEncoding) { m[k].encoding = THREE.sRGBEncoding; m[k].needsUpdate = true; } });
+      m.needsUpdate = true;
+    }
+    function cmTree(root) {
+      root.traverse(function (o) {
+        if (!o.material) return;
+        if (Array.isArray(o.material)) o.material.forEach(cmMaterial); else cmMaterial(o.material);
+      });
+    }
+
+    // Környezeti tükröződés: egy kis, fénypanelekkel teli „szoba” előszűrt képe (PMREM).
+    // Az arany keretek, a márvány és a parketta ettől kap valódi csillanást.
+    function buildEnvironment() {
+      var env = new THREE.Scene();
+      var room = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicMaterial({ color: 0x8a7a64, side: THREE.BackSide }));
+      room.scale.set(30, 12, 30); room.position.y = 5; env.add(room);
+      var floorM = new THREE.MeshBasicMaterial({ color: 0x5a4632 });
+      var fl = new THREE.Mesh(new THREE.PlaneGeometry(30, 30), floorM); fl.rotation.x = -Math.PI / 2; fl.position.y = -0.9; env.add(fl);
+      function panel(w, h, x, y, z, ry, rx, inten, col) {
+        var m = new THREE.MeshBasicMaterial({ color: new THREE.Color(col || 0xfff2dc).multiplyScalar(inten) });
+        var p = new THREE.Mesh(new THREE.PlaneGeometry(w, h), m);
+        p.position.set(x, y, z); p.rotation.set(rx || 0, ry || 0, 0); env.add(p);
+      }
+      // mennyezeti lámpasorok + oldalsó, gyengébb derítők
+      for (var i = -2; i <= 2; i++) panel(2.2, 10, i * 5, 10.9, 0, 0, Math.PI / 2, 3.2);
+      panel(10, 3, 0, 5, -14.9, 0, 0, 1.4);
+      panel(10, 3, 0, 5, 14.9, Math.PI, 0, 1.1, 0xffe8c8);
+      panel(10, 3, -14.9, 5, 0, Math.PI / 2, 0, 0.9);
+      panel(10, 3, 14.9, 5, 0, -Math.PI / 2, 0, 0.9);
+      var pm = new THREE.PMREMGenerator(renderer);
+      var rt = pm.fromScene(env, 0.035);
+      pm.dispose();
+      env.traverse(function (o) { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); });
+      return rt.texture;
+    }
+
+    function mkCanvas(w, h) { var c = document.createElement('canvas'); c.width = w; c.height = h; return c; }
+    // determinisztikus álvéletlen (minden betöltésnél ugyanaz a minta)
+    function rng(seed) { var s = seed >>> 0; return function () { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; }; }
+    function texFrom(c, rx, ry) {
+      var t = new THREE.CanvasTexture(c);
+      t.wrapS = t.wrapT = THREE.RepeatWrapping; t.encoding = THREE.sRGBEncoding;
+      t.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+      if (rx) t.repeat.set(rx, ry || rx);
+      return t;
+    }
+
+    // Hajópadló: eltolt illesztésű lécek, lécenként kicsit más tónussal (4×4 m-es csempe)
+    function plankTexture() {
+      var S = mobile ? 512 : 1024, c = mkCanvas(S, S), x = c.getContext('2d'), r = rng(11);
+      var rows = 16, H = S / rows;
+      for (var i = 0; i < rows; i++) {
+        var off = (i % 2) * S / 3 + r() * S / 6, len = S / 2;
+        for (var k = -1; k < 3; k++) {
+          var tone = 0.8 + r() * 0.32, base = [138, 98, 60].map(function (v) { return Math.min(255, Math.round(v * tone)); });
+          var px = (off + k * len) % S;
+          x.fillStyle = 'rgb(' + base.join(',') + ')';
+          x.fillRect(px, i * H, len, H); if (px + len > S) x.fillRect(px - S, i * H, len, H);
+          x.globalAlpha = 0.15; x.strokeStyle = '#3e2614';
+          for (var g = 0; g < 5; g++) { var yy = i * H + r() * H; x.beginPath(); x.moveTo(px, yy); x.lineTo(px + len, yy + (r() - .5) * 3); x.stroke(); }
+          x.globalAlpha = 0.55; x.strokeStyle = '#2e1c0e'; x.lineWidth = 2;
+          x.beginPath(); x.moveTo(px, i * H); x.lineTo(px, (i + 1) * H); x.stroke();
+          x.globalAlpha = 1;
+        }
+        x.fillStyle = 'rgba(40,24,12,.6)'; x.fillRect(0, i * H, S, 2);
+      }
+      return c;
+    }
+    // Márvány sakktábla a csarnokba (4×4 m-es csempe, 1 m-es lapok)
+    function marbleTexture() {
+      var S = mobile ? 512 : 1024, c = mkCanvas(S, S), x = c.getContext('2d'), r = rng(23), T = S / 4;
+      for (var i = 0; i < 4; i++) for (var j = 0; j < 4; j++) {
+        var dark = (i + j) % 2 === 1;
+        x.fillStyle = dark ? '#3c3a36' : '#ece4d4'; x.fillRect(i * T, j * T, T, T);
+        // erek
+        x.save(); x.beginPath(); x.rect(i * T, j * T, T, T); x.clip();
+        for (var v = 0; v < 7; v++) {
+          x.globalAlpha = 0.08 + r() * 0.18; x.strokeStyle = dark ? '#a89a84' : '#9a8e7c'; x.lineWidth = 0.6 + r() * 1.8;
+          var sx = i * T + r() * T, sy = j * T, cx = sx;
+          x.beginPath(); x.moveTo(sx, sy);
+          for (var s = 1; s <= 8; s++) { cx += (r() - 0.5) * T * 0.35; x.lineTo(cx, sy + s * T / 8); }
+          x.stroke();
+        }
+        x.restore(); x.globalAlpha = 1;
+        x.strokeStyle = 'rgba(60,50,40,.45)'; x.lineWidth = 2; x.strokeRect(i * T + 1, j * T + 1, T - 2, T - 2);
+      }
+      return c;
+    }
+    // Fal: alul faburkolatos lábazat tábla-kerettel, párkány, fölötte vakolat; a padló és a
+    // mennyezet felé enyhe sötétedés (olcsó „árnyék a sarokban”). Szürkeárnyalatos, a fal
+    // színét az anyag adja → ugyanaz a textúra jó az elefántcsont és a bordó falra is.
+    function wallTexture() {
+      var W = mobile ? 256 : 512, H = mobile ? 512 : 1024, c = mkCanvas(W, H), x = c.getContext('2d'), r = rng(5);
+      x.fillStyle = '#f4f0ea'; x.fillRect(0, 0, W, H);
+      // vakolat-foltosság
+      for (var i = 0; i < 900; i++) {
+        x.globalAlpha = 0.025 + r() * 0.03; x.fillStyle = r() > 0.5 ? '#ffffff' : '#c8c0b4';
+        var rr = 6 + r() * 40; x.beginPath(); x.arc(r() * W, r() * H, rr, 0, Math.PI * 2); x.fill();
+      }
+      x.globalAlpha = 1;
+      var wy = H * (1 - 0.19);          // a lábazat teteje (~95 cm)
+      // lábazat (alsó 19%)
+      x.fillStyle = '#d6cdbf'; x.fillRect(0, wy, W, H - wy);
+      var pw = W / 2;                   // 2 tábla / 5 m
+      for (var p = 0; p < 2; p++) {
+        var px = p * pw + pw * 0.08, py = wy + (H - wy) * 0.2, ww = pw * 0.84, hh = (H - wy) * 0.6;
+        x.fillStyle = 'rgba(255,255,255,.35)'; x.fillRect(px, py, ww, 3); x.fillRect(px, py, 3, hh);
+        x.fillStyle = 'rgba(70,55,40,.28)'; x.fillRect(px, py + hh - 3, ww, 3); x.fillRect(px + ww - 3, py, 3, hh);
+      }
+      // párkány (székvédő léc)
+      x.fillStyle = '#b8ad9e'; x.fillRect(0, wy - 10, W, 12);
+      x.fillStyle = 'rgba(255,255,255,.55)'; x.fillRect(0, wy - 10, W, 3);
+      x.fillStyle = 'rgba(60,45,30,.35)'; x.fillRect(0, wy + 2, W, 3);
+      // felső díszléc
+      x.fillStyle = '#ddd5c8'; x.fillRect(0, 0, W, H * 0.035);
+      x.fillStyle = 'rgba(60,45,30,.25)'; x.fillRect(0, H * 0.035, W, 3);
+      // sötétedés a padló és a mennyezet felé
+      var g = x.createLinearGradient(0, 0, 0, H);
+      g.addColorStop(0, 'rgba(40,30,20,.22)'); g.addColorStop(0.12, 'rgba(40,30,20,0)');
+      g.addColorStop(0.86, 'rgba(40,30,20,0)'); g.addColorStop(1, 'rgba(30,20,12,.38)');
+      x.fillStyle = g; x.fillRect(0, 0, W, H);
+      return c;
+    }
+    // A fal-dobozok UV-ját világkoordinátából számoljuk (5 m-enként ismétlődik), így a hosszú
+    // falon sem nyúlik meg a minta, és a lábazat mindig a padlónál van.
+    function wallUV(geom, wx, wz, h) {
+      var pos = geom.attributes.position, nor = geom.attributes.normal, uv = geom.attributes.uv;
+      for (var i = 0; i < pos.count; i++) {
+        var px = pos.getX(i) + wx, py = pos.getY(i) + h / 2, pz = pos.getZ(i) + wz, nx = Math.abs(nor.getX(i)), nz = Math.abs(nor.getZ(i));
+        var u = nx > 0.5 ? pz / 5 : nz > 0.5 ? px / 5 : px / 5;
+        uv.setXY(i, u, py / 5);
+      }
+      uv.needsUpdate = true;
+    }
+    function addWall(w, h, d, mat, x, y, z) {
+      var m = addBox(w, h, d, mat, x, y, z);
+      wallUV(m.geometry, x, z, h);
+      return m;
+    }
+    // Padló-UV világkoordinátából (tile méter / ismétlés)
+    function floorUV(geom, wx, wz, tile) {
+      var pos = geom.attributes.position, uv = geom.attributes.uv;
+      for (var i = 0; i < pos.count; i++) uv.setXY(i, (pos.getX(i) + wx) / tile, (pos.getY(i) - wz) / tile);
+      uv.needsUpdate = true;
+    }
+
+    var LOOK = null;   // közös anyagok (a buildMuseum és a buildUpperFloors használja)
+    function lookMaterials() {
+      if (LOOK) return LOOK;
+      var parq = texFrom(plankTexture()), marb = texFrom(marbleTexture()), wall = texFrom(wallTexture());
+      LOOK = {
+        parquet: new THREE.MeshStandardMaterial({ map: parq, color: 0xffffff, roughness: 0.42, metalness: 0 }),
+        marble: new THREE.MeshStandardMaterial({ map: marb, color: 0xffffff, roughness: 0.18, metalness: 0 }),
+        wallTex: wall
+      };
+      return LOOK;
+    }
+
+    // Képvilágítás: sárgaréz képlámpa minden kép fölé, és meleg fényfolt a falon a kép körül
+    // (additív sík, nem valódi fényforrás → nem terheli a fény-poolt, mobilon is olcsó).
+    function glowTexture() {
+      var c = mkCanvas(256, 256), x = c.getContext('2d');
+      var g = x.createRadialGradient(128, 40, 4, 128, 110, 150);
+      g.addColorStop(0, 'rgba(255,230,180,1)'); g.addColorStop(0.35, 'rgba(255,215,160,.55)');
+      g.addColorStop(0.75, 'rgba(255,200,140,.12)'); g.addColorStop(1, 'rgba(255,200,140,0)');
+      x.fillStyle = g; x.fillRect(0, 0, 256, 256);
+      var t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding; return t;
+    }
+    function addPictureLights() {
+      var glowG = [], lampG = [], bulbG = [], m4 = new THREE.Matrix4(), tmpM = new THREE.Matrix4();
+      for (var i = 0; i < artMeshes.length; i++) {
+        var a = artMeshes[i], ud = a.userData;
+        if (ud.isBench || ud.isSculpture || ud.name === undefined) continue;
+        if (Math.abs(a.position.y - (2.6 + (ud.fy || 0))) > 0.05) continue;   // csak a falra akasztott képek / médiák
+        a.updateMatrixWorld(true);
+        m4.copy(a.matrixWorld);
+        // fényfolt: a kép mögött, a fal síkján (a kép 0.15 m-re van a faltól)
+        var g = new THREE.PlaneGeometry(4.6, 4.2); g.translate(0, 0.45, -0.135); g.applyMatrix4(m4); glowG.push(g);
+        // lámpa: két tartókar + henger-búra a keret fölött
+        var bar = new THREE.CylinderGeometry(0.06, 0.06, 1.5, 12); bar.rotateZ(Math.PI / 2); bar.translate(0, 1.62, 0.32);
+        // a falon ülő talptól ferdén felfelé futó karok tartják a búrát
+        var armL = Math.hypot(0.44, 0.17), armA = Math.atan2(0.17, 0.44);
+        var arm1 = new THREE.BoxGeometry(0.035, 0.035, armL); arm1.rotateX(-armA); arm1.translate(-0.45, 1.535, 0.1);
+        var arm2 = new THREE.BoxGeometry(0.035, 0.035, armL); arm2.rotateX(-armA); arm2.translate(0.45, 1.535, 0.1);
+        var base = new THREE.BoxGeometry(1.0, 0.08, 0.04); base.translate(0, 1.45, -0.12);
+        [bar, arm1, arm2, base].forEach(function (q) { q.applyMatrix4(m4); lampG.push(q); });
+        var bulb = new THREE.PlaneGeometry(1.36, 0.05); bulb.rotateX(Math.PI / 2); bulb.translate(0, 1.555, 0.32); bulb.applyMatrix4(m4); bulbG.push(bulb);
+      }
+      if (!glowG.length) return;
+      var glowMat = new THREE.MeshBasicMaterial({ map: glowTexture(), color: 0xffffff, transparent: true, opacity: mobile ? 0.3 : 0.38, blending: THREE.AdditiveBlending, depthWrite: false, fog: true });
+      glowMat.userData.linearColor = true;
+      var glow = new THREE.Mesh(mergeGeoms(glowG), glowMat); glow.renderOrder = 2; scene.add(glow);
+      var brass = new THREE.MeshStandardMaterial({ color: 0xb8902e, roughness: 0.28, metalness: 0.85 });
+      scene.add(new THREE.Mesh(mergeGeoms(lampG), brass));
+      var bulbMat = new THREE.MeshBasicMaterial({ color: 0xfff1cc, side: THREE.DoubleSide });
+      scene.add(new THREE.Mesh(mergeGeoms(bulbG), bulbMat));
+      [glowG, lampG, bulbG].forEach(function (arr) { arr.forEach(function (q) { q.dispose(); }); });
+    }
+
     function addBox(w, h, d, mat, x, y, z) {
       var m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
       m.position.set(x, y, z); scene.add(m); return m;
@@ -1558,6 +1774,7 @@
 
     function addFloor(w, d, x, z, mat) {
       var m = new THREE.Mesh(new THREE.PlaneGeometry(w, d), mat);
+      floorUV(m.geometry, x, z, 4);
       m.rotation.x = -Math.PI / 2; m.position.set(x, 0, z); m.receiveShadow = true; scene.add(m);
     }
 
@@ -1598,8 +1815,9 @@
     }
 
     function buildMuseum() {
-      var floorMat = new THREE.MeshStandardMaterial({ color: 0x8a6b46, roughness: 0.65 }); // melegebb parketta
-      var wallMat = new THREE.MeshStandardMaterial({ color: 0xeaddbe, roughness: 0.8 });    // meleg elefántcsont
+      var LK = lookMaterials();
+      var floorMat = LK.parquet;                                                             // hajópadló (procedurális)
+      var wallMat = new THREE.MeshStandardMaterial({ color: 0xeaddbe, map: LK.wallTex, roughness: 0.85 });    // meleg elefántcsont, lábazattal
       var baseMat = new THREE.MeshStandardMaterial({ color: 0x5a4630, roughness: 0.7 });
       var accentMat = new THREE.MeshStandardMaterial({ color: 0xc7a23a, roughness: 0.35, metalness: 0.55 }); // gazdagabb arany
 
@@ -1609,9 +1827,9 @@
       addCeil(20, 60, 0, 40);
 
       // South wing: left & right walls, end wall
-      addBox(0.3, 5, 60, wallMat, -10, 2.5, 40);
-      addBox(0.3, 5, 60, wallMat, 10, 2.5, 40);
-      addBox(20.3, 5, 0.3, wallMat, 0, 2.5, 70);
+      addWall(0.3, 5, 60, wallMat, -10, 2.5, 40);
+      addWall(0.3, 5, 60, wallMat, 10, 2.5, 40);
+      addWall(20.3, 5, 0.3, wallMat, 0, 2.5, 70);
 
       // South baseboards
       addBox(0.1, 0.25, 60, baseMat, -9.7, 0.125, 40);
@@ -1639,7 +1857,7 @@
 
       // Remove the flat ceiling of the hub replacing it with dome implicitly by opening a hole (we didn't cut a hole, so let's hide the hub flat ceiling slightly by layering... actually, the easiest tweak is just to have the dome poke through the ceiling or let's just make the hub ceiling a frame). Let's patch addCeil(20,20,0,0);
 
-      addFloor(20, 20, 0, 0, floorMat);        // Hub
+      addFloor(20, 20, 0, 0, LK.marble);       // Hub: márvány sakktábla
       addFloor(20, 60, 0, -40, floorMat);       // North
       addFloor(60, 20, 40, 0, floorMat);        // East
       addFloor(60, 20, -40, 0, floorMat);       // West
@@ -1666,37 +1884,26 @@
       var medal2 = new THREE.Mesh(new THREE.TorusGeometry(2, 0.1, 8, 28), medalMat);
       medal2.rotation.x = Math.PI / 2; medal2.position.set(0, 4.9, 0); scene.add(medal2);
 
-      // Floor planks (subtle lines) - EGY összevont mesh-be (~67 sík helyett) → kevesebb draw call.
-      var lineMat = new THREE.MeshStandardMaterial({ color: 0x7a6a58 });
-      var lineGeoms = [];
-      for (var z = -70; z <= 10; z += 1.2) {
-        var lg = new THREE.PlaneGeometry(160, 0.03);
-        lg.rotateX(-Math.PI / 2); lg.translate(0, 0.005, z);
-        lineGeoms.push(lg);
-      }
-      if (lineGeoms.length) {
-        scene.add(new THREE.Mesh(mergeGeoms(lineGeoms), lineMat));
-        for (var lgi = 0; lgi < lineGeoms.length; lgi++) lineGeoms[lgi].dispose();
-      }
+      // (a régi padló-csíkok helyett a parketta-textúra adja a léceket)
 
       // ── WALLS ──
       // South wall (back of hub)
       // Removed south wall to open South wing
 
       // North wing: left & right walls, end wall
-      addBox(0.3, 5, 60, wallMat, -10, 2.5, -40);
-      addBox(0.3, 5, 60, wallMat, 10, 2.5, -40);
-      addBox(20.3, 5, 0.3, wallMat, 0, 2.5, -70);
+      addWall(0.3, 5, 60, wallMat, -10, 2.5, -40);
+      addWall(0.3, 5, 60, wallMat, 10, 2.5, -40);
+      addWall(20.3, 5, 0.3, wallMat, 0, 2.5, -70);
 
       // East wing: top & bottom walls, end wall
-      addBox(60, 5, 0.3, wallMat, 40, 2.5, -10);
-      addBox(60, 5, 0.3, wallMat, 40, 2.5, 10);
-      addBox(0.3, 5, 20.3, wallMat, 70, 2.5, 0);
+      addWall(60, 5, 0.3, wallMat, 40, 2.5, -10);
+      addWall(60, 5, 0.3, wallMat, 40, 2.5, 10);
+      addWall(0.3, 5, 20.3, wallMat, 70, 2.5, 0);
 
       // West wing: top & bottom walls, end wall
-      addBox(60, 5, 0.3, wallMat, -40, 2.5, -10);
-      addBox(60, 5, 0.3, wallMat, -40, 2.5, 10);
-      addBox(0.3, 5, 20.3, wallMat, -70, 2.5, 0);
+      addWall(60, 5, 0.3, wallMat, -40, 2.5, -10);
+      addWall(60, 5, 0.3, wallMat, -40, 2.5, 10);
+      addWall(0.3, 5, 20.3, wallMat, -70, 2.5, 0);
 
       // Baseboards - offset from walls to prevent z-fighting
       var baseMat2 = new THREE.MeshStandardMaterial({ color: 0x6a5a48 });
@@ -1737,9 +1944,10 @@
 
     // ── EMELETEK (a központi csarnok fölötti torony: 1. emelet 14 m, 2. emelet 21 m) ──
     function buildUpperFloors() {
-      var floorMat = new THREE.MeshStandardMaterial({ color: 0x8a6b46, roughness: 0.65 });
-      var wall1Mat = new THREE.MeshStandardMaterial({ color: 0x571818, roughness: 0.85 });  // bordó szalon (1. emelet) — sötétebb alap, mert az ACES tone-mapping + ambient kivilágosítja
-      var wall2Mat = new THREE.MeshStandardMaterial({ color: 0xeaddbe, roughness: 0.8 });   // elefántcsont (2. emelet)
+      var LK = lookMaterials();
+      var floorMat = LK.parquet;
+      var wall1Mat = new THREE.MeshStandardMaterial({ color: 0x571818, map: LK.wallTex, roughness: 0.85 });  // bordó szalon (1. emelet) — sötétebb alap, mert az ACES tone-mapping + ambient kivilágosítja
+      var wall2Mat = new THREE.MeshStandardMaterial({ color: 0xeaddbe, map: LK.wallTex, roughness: 0.85 });   // elefántcsont (2. emelet)
       var ceilMat = new THREE.MeshStandardMaterial({ color: 0xf0e8d8 });
       var goldMat = new THREE.MeshStandardMaterial({ color: 0xc7a23a, roughness: 0.35, metalness: 0.6 });
       var colMat = new THREE.MeshStandardMaterial({ color: 0xd8d0c0, roughness: 0.5 });
@@ -1760,16 +1968,22 @@
       holePieces.forEach(function (p) {
         var g = new THREE.BoxGeometry(p[0], 0.1, p[1]); g.translate(p[2], 19.05, p[3]); ceilG.push(g);
       });
-      scene.add(new THREE.Mesh(mergeGeoms(slabG), floorMat)); for (var gi = 0; gi < slabG.length; gi++) slabG[gi].dispose();
+      var slabMerged = mergeGeoms(slabG);
+      (function () { // a födém tetején világ-koordinátás UV, hogy a lécek ne nyúljanak meg
+        var pos = slabMerged.attributes.position, nor = slabMerged.attributes.normal, uv = slabMerged.attributes.uv;
+        for (var i = 0; i < pos.count; i++) if (Math.abs(nor.getY(i)) > 0.5) uv.setXY(i, pos.getX(i) / 4, -pos.getZ(i) / 4);
+        uv.needsUpdate = true;
+      })();
+      scene.add(new THREE.Mesh(slabMerged, floorMat)); for (var gi = 0; gi < slabG.length; gi++) slabG[gi].dispose();
       scene.add(new THREE.Mesh(mergeGeoms(ceilG), ceilMat)); for (var gi = 0; gi < ceilG.length; gi++) ceilG[gi].dispose();
 
       // Falak (szintenként 4)
       [[14, wall1Mat], [21, wall2Mat]].forEach(function (fw) {
         var fy = fw[0], m = fw[1];
-        addBox(20.3, 5, 0.3, m, 0, fy + 2.5, -10);
-        addBox(20.3, 5, 0.3, m, 0, fy + 2.5, 10);
-        addBox(0.3, 5, 20.3, m, -10, fy + 2.5, 0);
-        addBox(0.3, 5, 20.3, m, 10, fy + 2.5, 0);
+        addWall(20.3, 5, 0.3, m, 0, fy + 2.5, -10);
+        addWall(20.3, 5, 0.3, m, 0, fy + 2.5, 10);
+        addWall(0.3, 5, 20.3, m, -10, fy + 2.5, 0);
+        addWall(0.3, 5, 20.3, m, 10, fy + 2.5, 0);
       });
 
       // Lábazatok + szőnyegek + sarok-oszlopok (az ÉK-i sarokban a lift áll)
@@ -2153,7 +2367,7 @@
         });
         vd.src = item.public_url;
         var vt = new THREE.VideoTexture(vd);
-        vt.minFilter = THREE.LinearFilter; vt.magFilter = THREE.LinearFilter;
+        vt.minFilter = THREE.LinearFilter; vt.magFilter = THREE.LinearFilter; vt.encoding = THREE.sRGBEncoding;
         pt.material = new THREE.MeshBasicMaterial({ map: vt }); // a videó adja a saját fényét
         videoScreens.push({ el: vd, group: group, started: false });
       } else {
@@ -2382,8 +2596,10 @@
         // A túl nagy fotót lekicsinyítjük, mielőtt a GPU-ra kerülne
         var small = shrinkImage(im);
         if (small !== im) tx.image = small;
+        tx.encoding = THREE.sRGBEncoding;
         tx.needsUpdate = true;
         f.plane.material = new THREE.MeshStandardMaterial({ map: tx, roughness: 0.85 });
+        f.plane.material.userData.cm = true;
         f.loaded = true; f.loading = false;
       }, undefined, function () {
         console.warn('Kép betöltése sikertelen:', f.url);
@@ -2420,7 +2636,7 @@
     function addLights() {
       if (mobile) {
         // Mobile: minimal lights to stay within GPU uniform limits (~7 total)
-        scene.add(new THREE.AmbientLight(0xfff0d8, 1.4));
+        scene.add(new THREE.AmbientLight(0xfff0d8, 0.7));
         var dir = new THREE.DirectionalLight(0xffffff, 0.6);
         dir.position.set(5, 10, 5); scene.add(dir);
         var wingCenters = [[0, 4.8, 0], [0, 4.8, -40], [40, 4.8, 0], [-40, 4.8, 0], [0, 4.8, 40]];
@@ -2432,7 +2648,7 @@
         return;
       }
 
-      scene.add(new THREE.AmbientLight(0xfff0d8, 0.95));
+      scene.add(new THREE.AmbientLight(0xfff0d8, 0.35));   // a szórt fény nagyobb részét a környezeti térkép adja
 
       // Fény-pool: a ~88 statikus pontfény + per-műtárgy spot helyett anchor-pozíciókat tárolunk,
       // és csak egy fix kis poolt (a kamerához legközelebbi fények) renderelünk — a forward renderer
